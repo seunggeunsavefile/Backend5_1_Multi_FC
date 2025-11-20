@@ -43,7 +43,7 @@
     </nav>
 </header>
 
-<main class="search-main">
+<main class="schedule-search-main">
     <div class="search-container">
         <h1 class="search-title">📅 경기일정 검색</h1>
 
@@ -63,16 +63,14 @@
             <button id="search-btn">검색</button>
         </div>
 
-        <div class="match-list-container" id="match-list-container"></div>
-        <p id="no-results-message"
-           style="color: #666; text-align: center; margin-top: 30px; display: none;">
-            검색 결과가 없습니다.
-        </p>
+        <div class="match-list-container" id="match-list-container">
+        </div>
+        <p id="no-results-message" style="color: #666; text-align: center; margin-top: 30px; display: none;">검색 결과가 없습니다.</p>
     </div>
 </main>
 
 <script>
-    // ===================== 공통 메뉴 / 로그인 처리 =====================
+    // --- (★공통★) 메뉴 토글 로직 (유지) ---
     const menuToggle = document.getElementById('menu-toggle');
     const mainMenu = document.getElementById('main-menu');
     const profileMenuToggle = document.getElementById('profile-menu-toggle');
@@ -128,194 +126,196 @@
             window.location.href = '/login';
         });
     }
+    // --- (★공통★) 메뉴 토글 로직 끝 ---
 
-    // ===================== 경기 목록 렌더링 =====================
 
-    // localStorage.match_schedules 에서 경기 목록 가져오기
-    function loadMatches() {
-        try {
-            const raw = localStorage.getItem('match_schedules');
-            if (!raw) return [];
-            const arr = JSON.parse(raw);
+    const badge = document.getElementById('notification-badge');
+    let hasReviewNotif = false;
+    let hasScheduleNotif = false;
 
-            // 기본 구조 정리 (필요한 값이 없을 때 대비)
-            return arr.map(m => ({
-                id: m.id,
-                date: m.date || '',
-                startTime: m.startTime || (m.time ? m.time.split('~')[0].trim() : ''),
-                endTime: m.endTime || (m.time && m.time.includes('~') ? m.time.split('~')[1].trim() : ''),
-                location: m.location || '',
-                status: m.status || 'open',       // open / closed
-                // host 닉네임: nickname > host.nickname > 알 수 없음
-                hostNickname: m.nickname ||
-                    (m.host && m.host.nickname) ||
-                    '알 수 없음',
-                region: m.region || ''            // 지역 필터용(없으면 빈 문자열)
-            }));
-        } catch (e) {
-            console.error('match_schedules 파싱 오류:', e);
-            return [];
+    function updateGlobalBadge() {
+        if (hasReviewNotif || hasScheduleNotif) {
+            if (badge) badge.style.display = 'block';
+        } else {
+            if (badge) badge.style.display = 'none';
         }
     }
-
-    // 카드 렌더링
-    function renderMatches(matches) {
-        const container = document.getElementById('match-list-container');
-        const noResultsMsg = document.getElementById('no-results-message');
-
-        container.innerHTML = '';
-
-        if (!matches.length) {
-            noResultsMsg.style.display = 'block';
+    async function checkPendingReviews() {
+        if (localStorage.getItem('hasReadReviews') === 'true') {
+            hasReviewNotif = false;
             return;
-        } else {
-            noResultsMsg.style.display = 'none';
         }
+        try {
+            await new Promise(r => setTimeout(r, 200));
+            const mockReviews = { "count": 1 };
+            if (mockReviews.count > 0) {
+                hasReviewNotif = true;
+            }
+        } catch (error) { console.error("후기 알림 요청 중 오류:", error); }
+    }
+    async function checkUpcomingSchedules() {
+        if (localStorage.getItem('hasReadSchedules') === 'true') {
+            hasScheduleNotif = false;
+            return;
+        }
+        try {
+            await new Promise(r => setTimeout(r, 500));
+            const mockSchedules = [ { id: 1, date: "2025-11-01" } ];
+            if (mockSchedules.length > 0) {
+                hasScheduleNotif = true;
+            }
+        } catch (error) { console.error("일정 요청 중 오류 발생:", error); }
+    }
+
+    // --- JS 데이터 구조 정의 ---
+    const METRO_CITIES = [
+        { value: '서울특별시', text: '서울특별시' },
+        { value: '부산광역시', text: '부산광역시' },
+        { value: '대구광역시', text: '대구광역시' },
+        { value: '인천광역시', text: '인천광역시' },
+        { value: '광주광역시', text: '광주광역시' },
+        { value: '대전광역시', text: '대전광역시' },
+        { value: '울산광역시', text: '울산광역시' }
+    ];
+
+    // ⭐⭐ ERD 반영: 더미 매치 데이터 (특별시/광역시 위치로 재정의) ⭐⭐
+    const MOCK_MATCHES = [
+        { id: 1, date: "2025-11-01 (토) 19:00", location: "서울특별시 강남 풋살장", creator: "캡틴손", current: 8, max: 10, status: "open", type: "팀 매칭", skill: "중급", amenities: ["샤워 가능", "주차 가능"] },
+        { id: 2, date: "2025-11-03 (월) 20:00", location: "부산광역시 서면 풋살장", creator: "운영진", current: 12, max: 12, status: "closed", type: "개인 매칭", skill: "고급", amenities: ["주차 가능"] },
+        { id: 3, date: "2025-11-05 (수) 21:00", location: "인천광역시 연수구 풋살파크", creator: "구원투수", current: 5, max: 12, status: "open", type: "팀 매칭", skill: "초급", amenities: ["샤워 가능"] },
+        { id: 4, date: "2025-11-10 (월) 19:00", location: "대전광역시 유성구 풋살장", creator: "테스터", current: 8, max: 10, status: "open", type: "팀 매칭", skill: "중급", amenities: ["샤워 가능", "주차 가능"] },
+    ];
+
+
+    // ⭐⭐ 매치 목록 렌더링 함수 ⭐⭐
+    function renderMatchList(matches) {
+        const listContainer = document.getElementById('match-list-container');
+        const noResults = document.getElementById('no-results-message');
+        listContainer.innerHTML = '';
+
+        if (matches.length === 0) {
+            noResults.style.display = 'block';
+            return;
+        }
+        noResults.style.display = 'none';
 
         matches.forEach(match => {
             const card = document.createElement('div');
-            card.classList.add('match-item-card');
-            if (match.status === 'closed') {
-                card.classList.add('closed');
-            }
+            const statusClass = match.status === 'closed' ? 'closed' : 'open';
+            const buttonDisabled = match.status === 'closed' ? 'disabled' : '';
 
-            const statusText = match.status === 'closed' ? '모집완료' : '모집중';
+            card.className = `match-item-card ${statusClass}`;
+            card.dataset.matchId = match.id;
 
-            const dateTimeText = match.date
-                ? (match.startTime ? `${match.date} ${match.startTime}` : match.date)
-                : (match.startTime || '');
-
+            // ⭐⭐ 유형/실력/편의 시설 문구 제거 ⭐⭐
             card.innerHTML = `
                 <div class="match-item-header">
-                    <div class="date">${dateTimeText}</div>
+                    <span class="date">${match.date}</span>
                 </div>
                 <div class="match-item-body">
-                    <p class="status">
-                        <i class="fas fa-crown"></i>
-                        <span>주최자: ${match.hostNickname}</span>
+                    <p style="font-size: 14px; color: #6c5ce7; font-weight: 600; margin-bottom: 12px;">
+                        <i class="fas fa-crown" style="margin-right: 5px;"></i> 생성자: ${match.creator}
                     </p>
                     <p class="location">
                         <i class="fas fa-map-marker-alt"></i>
-                        <span>${match.location || '장소 미정'}</span>
+                        ${match.location}
                     </p>
+
                     <p class="status">
                         <i class="fas fa-users"></i>
-                        <span class="status-badge ${match.status === 'closed' ? 'closed' : 'open'}">
-                            ${statusText}
-                        </span>
+                        <span class="status-badge ${statusClass}">${match.status === 'open' ? '모집중' : '모집완료'}</span> ( ${match.current} / ${match.max}명 )
                     </p>
-                    <a class="details-button" href="/schedule/detail/${match.id}">
-                        상세보기
+                    <a href="/schedule/detail/${match.id}" class="details-button ${buttonDisabled}" ${buttonDisabled ? 'onclick="return false;"' : ''}>
+                        ${match.status === 'closed' ? '마감 (상세보기)' : '상세보기'}
                     </a>
                 </div>
             `;
-
-            container.appendChild(card);
+            listContainer.appendChild(card);
         });
     }
 
-    // 필터 적용
-    function applyFilters(allMatches) {
-        const dateInput = document.getElementById('filter-date');
-        const regionSelect = document.getElementById('filter-region');
-        const statusSelect = document.getElementById('filter-status');
+    // ⭐⭐ 수정: 검색 실행 함수 (단일 지역/상태 필터링) ⭐⭐
+    function performSearch() {
+        const date = document.getElementById('filter-date').value;
+        const region = document.getElementById('filter-region').value; // 특별시/광역시 값
+        const status = document.getElementById('filter-status').value; // 상태 값
 
-        const selectedDate = dateInput.value;          // YYYY-MM-DD
-        const selectedRegion = regionSelect.value;     // "전체지역" or region
-        const selectedStatus = statusSelect.value;     // "" / "open" / "closed"
+        let filtered = MOCK_MATCHES;
 
-        let filtered = allMatches.slice();
-
-        if (selectedDate) {
-            filtered = filtered.filter(m => m.date === selectedDate);
+        // 1. 날짜 필터
+        if (date) {
+            filtered = filtered.filter(match => match.date.includes(date));
         }
 
-        if (selectedRegion && selectedRegion !== '전체지역') {
-            filtered = filtered.filter(m => m.region === selectedRegion);
+        // 2. 지역 (특별시/광역시) 필터
+        if (region && region !== '전체지역') {
+            // location이 '서울특별시' 등으로 시작하는지 확인
+            filtered = filtered.filter(match => match.location.startsWith(region));
         }
 
-        if (selectedStatus) {
-            filtered = filtered.filter(m => (m.status || 'open') === selectedStatus);
+        // 3. 상태 필터
+        if (status) {
+            filtered = filtered.filter(match => match.status === status);
         }
 
-        renderMatches(filtered);
+        renderMatchList(filtered);
     }
 
-    // 지역 select 옵션 채우기 (match_schedules 안에 region 값이 있는 경우)
-    function fillRegionOptions(allMatches) {
-        const regionSelect = document.getElementById('filter-region');
-        // 기존 "전체지역" 제외하고 모두 제거
-        while (regionSelect.options.length > 1) {
-            regionSelect.remove(1);
-        }
 
-        const regions = Array.from(
-            new Set(
-                allMatches
-                    .map(m => m.region)
-                    .filter(r => r && r.trim().length > 0)
-            )
-        );
-
-        regions.forEach(region => {
-            const opt = document.createElement('option');
-            opt.value = region;
-            opt.textContent = region;
-            regionSelect.appendChild(opt);
-        });
-    }
-
-    document.addEventListener('DOMContentLoaded', () => {
+    // --- (★페이지별★) 로직 실행 ---
+    document.addEventListener('DOMContentLoaded', async () => {
         const accessToken = localStorage.getItem('accessToken');
+        const currentPath = window.location.pathname;
 
-        // 로그인 상태에 따른 메뉴 표시
+        // ⭐⭐ 회원 전용 페이지 접근 차단 로직 ⭐⭐
+        if (!accessToken) {
+            alert("❌ 회원 전용 페이지입니다.\n로그인 후에 이용하실 수 있습니다.");
+            localStorage.setItem('redirectAfterLogin', currentPath);
+            window.location.href = '/login';
+            return;
+        }
+
         if (accessToken) {
-            document.getElementById('profile-menu-toggle').style.display = 'block';
+            if (profileMenuToggle) profileMenuToggle.style.display = 'block';
+
+            // 로그인/로그아웃 메뉴 상태 설정
             if (navLoginLink) navLoginLink.parentElement.style.display = 'none';
             if (navLogoutLink) navLogoutLink.parentElement.style.display = 'list-item';
+
+            await checkPendingReviews();
+            await checkUpcomingSchedules();
+            updateGlobalBadge();
         } else {
+            // 비회원 상태일 경우 메뉴 설정
             if (navLoginLink) navLoginLink.parentElement.style.display = 'list-item';
             if (navLogoutLink) navLogoutLink.parentElement.style.display = 'none';
         }
 
-        // 채팅 메뉴: 비회원 접근 막기
-        if (navChatLinkElement) {
-            const chatLinkAnchor = navChatLinkElement.querySelector('a');
-            if (chatLinkAnchor && !accessToken) {
-                chatLinkAnchor.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    alert("❌ 실시간 채팅은 회원만 이용할 수 있습니다.");
-                    window.location.href = '/login';
-                });
-            }
+        // 검색 필터 초기화 및 이벤트 바인딩
+        const dateFilter = document.getElementById('filter-date');
+        if (dateFilter) {
+            dateFilter.valueAsDate = new Date();
         }
 
-        // 날짜 입력 기본값: 오늘로 설정 (필요 없으면 주석 처리)
-        const dateInput = document.getElementById('filter-date');
-        if (dateInput && !dateInput.value) {
-            const today = new Date();
-            const yyyy = today.getFullYear();
-            const mm = String(today.getMonth() + 1).padStart(2, '0');
-            const dd = String(today.getDate()).padStart(2, '0');
-            dateInput.value = `${yyyy}-${mm}-${dd}`;
-        }
-
-        const allMatches = loadMatches();
-        fillRegionOptions(allMatches);
-
-        // 초기에도 한 번 필터 적용해서 카드 렌더링
-        applyFilters(allMatches);
-
-        // 검색 버튼 클릭 시 필터 적용
         const searchBtn = document.getElementById('search-btn');
         if (searchBtn) {
-            searchBtn.addEventListener('click', () => {
-                applyFilters(allMatches);
-            });
+            searchBtn.addEventListener('click', performSearch);
         }
+
+        const regionFilter = document.getElementById('filter-region');
+
+        // 1. 지역 옵션을 채웁니다. (중복 방지)
+        // HTML에 '전체지역' 옵션이 이미 있으므로, JS는 METRO_CITIES만 추가합니다.
+        METRO_CITIES.forEach(city => {
+            const option = document.createElement('option');
+            option.value = city.value;
+            option.textContent = city.text;
+            regionFilter.appendChild(option);
+        });
+
+        // 초기 로드 시 전체 목록 표시
+        renderMatchList(MOCK_MATCHES);
     });
 </script>
-
 </body>
 </html>
-
