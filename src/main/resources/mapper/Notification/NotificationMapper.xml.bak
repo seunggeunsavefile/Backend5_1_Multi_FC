@@ -2,12 +2,23 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
-<mapper namespace="com.multi.backend5_1_multi_fc.Notification.dao.NotificationDao">
+<mapper namespace="com.multi.backend5_1_multi_fc.notification.dao.NotificationDao">
+
+    <resultMap id="NotificationResult" type="NotificationDto">
+        <id property="notificationId" column="notification_id"/>
+        <result property="userId" column="user_id"/>
+        <result property="content" column="content"/>
+        <result property="type" column="type"/>
+        <result property="referenceId" column="reference_id"/>
+        <result property="isRead" column="is_read"/>
+        <result property="createdAt" column="created_at"/>
+    </resultMap>
+
     <insert id="insert" parameterType="NotificationDto" useGeneratedKeys="true" keyProperty="notificationId">
         INSERT INTO Notification (
-            user_id, content, type, is_read, created_at, redirect_url, related_id
+            user_id, content, type, reference_id, is_read, created_at
             ) values (
-                      #{userId}, #{content}, #{type}, #{isRead}, NOW(), #{redirectUrl}, #{relatedId}
+                      #{userId}, #{content}, #{type},#{referenceId}, #{isRead}, NOW()
             )
     </insert>
 
@@ -24,6 +35,20 @@
         where user_id = #{userId} and is_read = false
         order by created_at desc
     </select>
+
+    <select id="findUnreadChatNotification" resultType="NotificationDto">
+        select *
+        from Notification
+        where user_id = #{userId} and reference_id = #{referenceId} and type ='채팅' and is_read = false
+        order by created_at desc
+        limit 1
+    </select>
+
+    <update id="updateContent">
+        update Notification
+        set content = #{content}
+        where notification_id = #{notificationId}
+    </update>
 
     <select id="countUnreadByUserId" parameterType="long" resultType="int">
         select count(*)

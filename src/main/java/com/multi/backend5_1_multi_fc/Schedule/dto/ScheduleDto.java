@@ -14,6 +14,9 @@ public class ScheduleDto {
         private String scheduleType;   // 개인, 경기
         private LocalDate scheduleDate;
         private LocalTime scheduleTime;
+        //추가
+        private String content; // 일정 내용
+        private Long matchId; // 매칭방 match_room_id)
     }
 
     @Data

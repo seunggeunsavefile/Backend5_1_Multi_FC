@@ -96,7 +96,7 @@ public class NotificationService {
 
     //읽지 않은 알림 조회
     public List<NotificationDto> getUnreadNotifications(Long userId){
-        return notificationDao.findByUserId(userId);
+        return notificationDao.findUnreadByUserId(userId);
     }
 
     //읽지 않은 알림 개수

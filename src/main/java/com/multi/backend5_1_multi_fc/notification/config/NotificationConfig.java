@@ -1,6 +1,9 @@
 package com.multi.backend5_1_multi_fc.notification.config;
 
+import com.multi.backend5_1_multi_fc.security.JwtChannelInterceptor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.messaging.simp.config.ChannelRegistration;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;
 import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBroker;
 import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
@@ -8,7 +11,10 @@ import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerCo
 
 @Configuration
 @EnableWebSocketMessageBroker
+@RequiredArgsConstructor
 public class NotificationConfig implements WebSocketMessageBrokerConfigurer {
+    private final JwtChannelInterceptor jwtChannelInterceptor;
+
     @Override
     public void configureMessageBroker(MessageBrokerRegistry registry) {
         registry.enableSimpleBroker("/topic","/queue"); // topic 방법과 queue 방법의 prefix
@@ -21,5 +27,10 @@ public class NotificationConfig implements WebSocketMessageBrokerConfigurer {
         registry.addEndpoint("/notification")       //WebSocket의 연결 기본 경로 (ex: ws://localhost:8080/notification )
                 .setAllowedOriginPatterns("*")             //CORS 정책
                 .withSockJS();
+    }
+
+    @Override
+    public void configureClientInboundChannel(ChannelRegistration registration) {
+        registration.interceptors(jwtChannelInterceptor);
     }
 }
