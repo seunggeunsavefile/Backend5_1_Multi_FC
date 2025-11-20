@@ -242,7 +242,7 @@ body, html {
     font-size: 1.1em;
     display: block;
     margin-bottom: 5px;
-    color: #2c3e50;
+    color: #fff;
 }
 .user-menu .user-info p {
     font-size: 0.9em;
@@ -892,7 +892,7 @@ body, html {
     width: 100%;
     height: 100%;
     /* ⭐⭐⭐ 텍스트 가독성을 위한 진한 오버레이 (0.6) 적용 ⭐⭐⭐ */
-    background: rgba(0, 0, 0, 0.6);
+    background: rgba(0, 0, 0, 0.2);
     z-index: -1;
 }
 
