@@ -3,6 +3,7 @@ package com.multi.backend5_1_multi_fc.security;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -39,6 +40,10 @@ public class SecurityConfig {
                         .requestMatchers("/api/users/login", "/api/users/signup").permitAll()
                         .requestMatchers("/api/users/check-username", "/api/users/check-email", "/api/users/check-nickname").permitAll()
                         .requestMatchers("/api/users/find-id", "/api/users/reset-password/**").permitAll()
+                        .requestMatchers(HttpMethod.GET,
+                                "/api/community/posts",
+                                "/api/community/posts/**"
+                        ).permitAll()
 
                         // (2) ★★★ 정적 리소스: 인증 없이 허용 ★★★
                         .requestMatchers("/css/**", "/images/**", "/js/**").permitAll()
@@ -57,7 +62,6 @@ public class SecurityConfig {
                         // (4) 그 외 모든 요청 (주로 API)은 인증 필요
                         .anyRequest().authenticated()
                 )
-
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();

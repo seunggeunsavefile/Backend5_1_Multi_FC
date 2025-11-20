@@ -2,10 +2,12 @@ package com.multi.backend5_1_multi_fc.user.dto;
 
 import lombok.Data;
 import java.sql.Timestamp;
+import java.io.Serializable;
 
 @Data
-public class UserDto {
-    // --- [수정] snake_case -> camelCase ---
+public class UserDto implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     private Long userId;          // PK (user_id -> userId)
     private String username;

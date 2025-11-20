@@ -33,8 +33,8 @@ public class UserController {
             @ModelAttribute UserDto userDto,
             @RequestParam(value = "profile_image_file", required = false) MultipartFile profileImageFile
     ) {
-        System.out.println("[요청 도착] DTO: " + userDto);
-        System.out.println("[요청 도착] 파일: " + (profileImageFile != null ? profileImageFile.getOriginalFilename() : "없음"));
+        System.out.println("👉 [요청 도착] DTO: " + userDto);
+        System.out.println("👉 [요청 도착] 파일: " + (profileImageFile != null ? profileImageFile.getOriginalFilename() : "없음"));
 
         try {
             userService.signup(userDto, profileImageFile);
@@ -47,23 +47,16 @@ public class UserController {
         }
     }
 
-    // --- [로그인 기능 수정] ---
+    // --- [로그인 기능 추가] ---
+    // login.html의 스크립트가 호출하는 API
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody Map<String, String> payload) {
-        System.out.println("🔥🔥🔥 /api/users/login 요청 도착! 🔥🔥🔥");
-        System.out.println("payload: " + payload);
-
         String username = payload.get("username");
         String rawPassword = payload.get("password");
-
-        System.out.println("username: " + username);
-        System.out.println("password: " + rawPassword);
 
         try {
             // 1. 서비스로 아이디/비번을 보내 인증 요청
             UserDto user = userService.login(username, rawPassword);
-
-            System.out.println("userService.login() 결과: " + (user != null ? "성공" : "실패"));
 
             if (user != null) {
                 // 2. 로그인 성공
@@ -73,11 +66,11 @@ public class UserController {
 
                 String realToken = jwtUtil.generateToken(user.getUsername());
 
+                // 3. 프론트엔드로 토큰과 사용자 정보 반환
                 Map<String, Object> response = new HashMap<>();
                 response.put("accessToken", realToken);
                 response.put("user", user);
 
-                System.out.println("✅ 로그인 성공 응답 반환");
                 return ResponseEntity.ok(response);
 
             } else {
@@ -85,11 +78,12 @@ public class UserController {
                 return new ResponseEntity<>("아이디 또는 비밀번호가 올바르지 않습니다.", HttpStatus.UNAUTHORIZED);
             }
         } catch (Exception e) {
-            System.err.println("❌ 로그인 중 예외 발생:");
             e.printStackTrace();
             return new ResponseEntity<>("로그인 중 서버 오류가 발생했습니다.", HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
+    // --- [기존] 중복 확인 API ---
 
     // 아이디 중복 확인 API
     @GetMapping("/check-username")

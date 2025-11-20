@@ -64,7 +64,7 @@ public class UserService implements UserDetailsService {
 
     @Transactional
     public void signup(UserDto userDto, MultipartFile profileImage) throws IOException {
-        // 1. 중복 체크 (기존 코드 유지)
+        // 1. 중복 체크 (signup 자체 로직)
         if (userDao.countByUsername(userDto.getUsername()) > 0) {
             throw new IllegalStateException("이미 존재하는 아이디입니다.");
         }

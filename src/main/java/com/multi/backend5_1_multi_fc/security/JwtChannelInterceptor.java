@@ -29,10 +29,12 @@ public class JwtChannelInterceptor implements ChannelInterceptor {
     public Message<?> preSend(Message<?> message, MessageChannel channel) {
         StompHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
 
-        log.info("WebSocket Message: Command = {}", accessor.getCommand());
+        // 프레임 진입 확인
+        System.out.println("[INTERCEPTOR] preSend called, Command = " + accessor.getCommand());
 
         if(StompCommand.CONNECT.equals(accessor.getCommand())){
             log.info("WebSocket CONNECT 요청 - JWT 검증 시작");
+            System.out.println("WebSocket CONNECT 요청 - JWT 검증 시작");
             String authHeader = accessor.getFirstNativeHeader("Authorization");
 
             if( authHeader != null && authHeader.startsWith("Bearer ") ){
@@ -42,8 +44,10 @@ public class JwtChannelInterceptor implements ChannelInterceptor {
                 try {
                     String username = jwtUtil.extractUsername(token);
                     log.info("토큰에서 추출한 사용자: {}", username);
+                    System.out.println("username = " + username + " ");
                     if(jwtUtil.validateToken(token, username)){
                         log.info("JWT 검증 성공 - 사용자: {}", username);
+                        System.out.println("username = " + username + " ");
                         Authentication authentication = new UsernamePasswordAuthenticationToken(
                                 username,
                                 null,
@@ -52,8 +56,10 @@ public class JwtChannelInterceptor implements ChannelInterceptor {
 
                         accessor.setUser(authentication);
                         log.info("WebSocket 세션에 인증 정보 설정 완료: {}", username);
+                        System.out.println("세션 인증 정보 설정 완료" + username + " ");
                     } else {
                         log.error("JWT 토큰 검증 실패 - 만료되었거나 유효하지 않음");
+                        System.out.println("JWT 토큰 검증 실패 - 만료되었거나 유효하지 않음");
                         throw new IllegalArgumentException("Invalid or expired JWT token");
                     }
                 } catch (Exception e){
@@ -62,6 +68,7 @@ public class JwtChannelInterceptor implements ChannelInterceptor {
                 }
             } else {
                 log.error("Authorization 헤더가 없거나 형식이 잘못됨");
+                System.out.println("Authorization 헤더가 없거나 형식이 잘못됨");
                 throw new IllegalArgumentException("Missing or invalid Authorization header");
             }
         }
@@ -92,4 +99,3 @@ public class JwtChannelInterceptor implements ChannelInterceptor {
         }
     }
 }
-
