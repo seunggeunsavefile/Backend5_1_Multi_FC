@@ -18,6 +18,13 @@
         order by cr.updated_at desc
     </select>
 
+    <select id="findChatRoomsByUserId" resultType="com.multi.backend5_1_multi_fc.chat.dto.ChatRoomDto">
+        select cr.*
+        from Chat_Room join Chat_Participant cp on cr.chat_room_id = cp.chat_room_id
+        where cp.user_id = #{userId}
+        order by cr.chat_room_id desc
+    </select>
+
     <select id="findOneToOneChatRoom" resultMap="ChatRoomResultMap">
         select cr.chat_room_id, cr.room_type, cr.room_name, cr.creator_id, cr.member_count, cr.max_participants
         from Chat_Room cr

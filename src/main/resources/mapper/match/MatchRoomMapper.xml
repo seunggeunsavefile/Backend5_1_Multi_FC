@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.multi.backend5_1_multi_fc.match.mapper.MatchRoomMapper">
+
+    <resultMap id="roomMap" type="com.multi.backend5_1_multi_fc.match.dto.MatchRoomDto">
+        <id property="roomId" column="room_id"/>
+        <result property="stadiumId" column="stadium_id"/>
+        <result property="hostId" column="host_id"/>
+        <result property="matchDate" column="match_date"/>
+        <result property="matchTime" column="match_time"/>
+        <result property="maxPlayers" column="max_players"/>
+        <result property="level" column="level"/>
+        <result property="status" column="status"/>
+    </resultMap>
+
+    <insert id="insert"
+            parameterType="com.multi.backend5_1_multi_fc.match.dto.MatchRoomCreateReq"
+            useGeneratedKeys="true"
+            keyProperty="roomId">
+
+        INSERT INTO Match_Room
+        (stadium_id, host_id, match_date, match_time, max_players, level, status)
+        VALUES
+            (#{stadiumId}, #{hostId}, #{matchDate}, #{matchTime}, #{maxPlayers}, #{level}, '모집중')
+    </insert>
+
+    <select id="findById" resultMap="roomMap">
+        SELECT *
+        FROM Match_Room
+        WHERE room_id = #{roomId}
+    </select>
+
+    <select id="findByStadium" resultMap="roomMap">
+        SELECT *
+        FROM Match_Room
+        WHERE stadium_id = #{stadiumId}
+    </select>
+
+    <update id="updateStatus">
+        UPDATE Match_Room
+        SET status = #{status}
+        WHERE room_id = #{roomId}
+    </update>
+
+</mapper>

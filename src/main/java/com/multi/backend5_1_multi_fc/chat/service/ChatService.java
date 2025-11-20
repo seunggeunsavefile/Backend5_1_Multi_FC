@@ -243,6 +243,28 @@ public class ChatService {
         );
     }
 
+    //unread 반환 둘 중 하나
+    public List<ChatRoomDto> getChatRoomsWithUnreadCount(Long userId){
+        List<ChatRoomDto> chatRooms = chatRoomDao.findChatRoomsByUserId(userId);
+        for(ChatRoomDto room : chatRooms){
+            int unread = chatMessageDao.countUnreadMessages(room.getRoomId(), userId);
+            room.setUnreadCount(unread);
+        }
+        return chatRooms;
+    }
+
+    public int getUnreadMessageCount(Long roomId, Long userId) {
+        return chatMessageDao.countUnreadMessages(roomId, userId);
+    }
+
+    public void markRoomAsRead(Long roomId, Long userId){
+        Long latestMessageId = chatMessageDao.getLatestMessageId(roomId);
+        System.out.println("Before latestMessageId = " + latestMessageId);
+        chatParticipantDao.updateLastReadMessageId(roomId, userId, latestMessageId);
+        System.out.println("After latestMessageId = " + latestMessageId);
+    }
+
+
     //채팅방 강퇴기능 ( 실현 시킬지는 미지수 )
     public void removeParticipant(Long roomId, Long chatPartId){
         chatParticipantDao.deleteParticipant(roomId,chatPartId);

@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.multi.backend5_1_multi_fc.review.mapper.ReviewMapper">
+
+    <resultMap id="ReviewDtoMap" type="com.multi.backend5_1_multi_fc.review.dto.ReviewDto">
+        <id property="reviewId" column="review_id"/>
+        <result property="stadiumId" column="stadium_id"/>
+        <result property="userId" column="user_id"/>
+        <result property="rating" column="rating"/>
+        <result property="content" column="content"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="nickname" column="nickname"/>
+    </resultMap>
+
+    <insert id="insert"
+            parameterType="com.multi.backend5_1_multi_fc.review.dto.ReviewCreateReq"
+            useGeneratedKeys="true"
+            keyProperty="reviewId">
+        INSERT INTO Review (stadium_id, user_id, rating, content)
+        VALUES (#{stadiumId}, #{userId}, #{rating}, #{content})
+    </insert>
+
+    <select id="findByStadiumId" resultMap="ReviewDtoMap">
+        SELECT
+            r.review_id,
+            r.stadium_id,
+            r.user_id,
+            r.rating,
+            r.content,
+            u.nickname,  DATE_FORMAT(r.created_at, '%Y-%m-%d') AS created_at
+        FROM
+            Review r
+                JOIN
+            User u ON r.user_id = u.user_id WHERE
+            r.stadium_id = #{stadiumId}
+        ORDER BY
+            r.created_at DESC
+    </select>
+
+    <select id="checkUserCompletedMatch" resultType="boolean">
+        SELECT EXISTS (
+            SELECT 1
+            FROM Match_Room mr
+            WHERE mr.stadium_id = #{stadiumId}
+              AND mr.status = 'CLOSED'
+              AND (
+                mr.host_id = #{userId}
+                    OR mr.room_id IN (
+                    SELECT mp.room_id FROM Match_Participant mp
+                    WHERE mp.user_id = #{userId} AND mp.status = '확정'
+                )
+                )
+        )
+    </select>
+
+    <select id="hasUserAlreadyReviewed" resultType="boolean">
+        SELECT EXISTS (
+            SELECT 1
+            FROM Review
+            WHERE user_id = #{userId} AND stadium_id = #{stadiumId}
+        )
+    </select>
+
+    <select id="findPendingReviewStadiumIds" resultType="long">
+        SELECT DISTINCT mr.stadium_id
+        FROM Match_Room mr
+        WHERE mr.status = 'CLOSED'
+          AND (
+            mr.host_id = #{userId}
+                OR mr.room_id IN (
+                SELECT mp.room_id FROM Match_Participant mp
+                WHERE mp.user_id = #{userId} AND mp.status = '확정'
+            )
+            )
+          -- 아직 후기를 작성하지 않은 구장만 포함
+          AND mr.stadium_id NOT IN (
+            SELECT r.stadium_id FROM Review r WHERE r.user_id = #{userId}
+        )
+    </select>
+
+    <update id="update">
+        UPDATE Review
+        SET
+            rating = #{rating},
+            content = #{content},
+            updated_at = CURRENT_TIMESTAMP  WHERE
+            review_id = #{reviewId} AND user_id = #{userId}
+    </update>
+
+    <delete id="delete">
+        DELETE FROM Review
+        WHERE review_id = #{reviewId} AND user_id = #{userId}
+    </delete>
+
+</mapper>

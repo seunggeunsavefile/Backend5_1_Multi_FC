@@ -20,4 +20,5 @@ public class ChatParticipantDto {
     private String nickname;
     private String profileImg;
     private LocalDateTime joinedAt;
+    private Long lastReadMessageId;
 }

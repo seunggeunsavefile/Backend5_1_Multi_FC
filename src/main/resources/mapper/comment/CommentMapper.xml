@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.multi.backend5_1_multi_fc.community.mapper.CommentMapper">
+
+    <resultMap id="CommentMap"
+               type="com.multi.backend5_1_multi_fc.community.dto.CommunityDto$CommentResponse">
+        <id     property="commentId"             column="comment_id"/>
+        <result property="postId"                column="post_id"/>
+        <result property="parentCommentId"       column="parent_comment"/>
+        <result property="commentWriterNickname" column="writer_nickname"/>
+        <result property="content"               column="content"/>
+        <result property="createdAt"             column="created_at"/>
+        <result property="updatedAt"             column="updated_at"/>
+    </resultMap>
+
+
+    <!-- 댓글 / 대댓글 등록 -->
+    <insert id="insertComment">
+        INSERT INTO Comment (
+            post_id,
+            user_id,
+            parent_comment,
+            content,
+            created_at,
+            updated_at
+        )
+        VALUES (
+                   #{postId},
+                   #{userId},
+                   #{req.parentCommentId},
+                   #{req.content},
+                   NOW(),
+                   NOW()
+               )
+    </insert>
+
+    <!-- 특정 게시글의 전체 댓글 조회 -->
+    <select id="findCommentByPostId"
+            resultMap="CommentMap">
+        SELECT
+            c.comment_id,
+            c.post_id,
+            c.parent_comment,
+            c.content,
+            c.created_at,
+            c.updated_at,
+            u.nickname AS writer_nickname
+        FROM Comment c
+                 JOIN User u ON c.user_id = u.user_id
+        WHERE c.post_id = #{postId}
+        ORDER BY c.created_at ASC
+    </select>
+
+
+    <!-- 댓글 수정 -->
+    <update id="updateCommentByWriter">
+        UPDATE Comment
+        SET content    = #{req.content},
+            updated_at = NOW()
+        WHERE comment_id = #{commentId} AND user_id = #{userId}
+    </update>
+
+    <!-- 댓글 삭제 -->
+    <delete id="deleteCommentByWriter">
+        DELETE FROM Comment
+        WHERE comment_id = #{commentId} AND user_id = #{userId}
+    </delete>
+
+</mapper>

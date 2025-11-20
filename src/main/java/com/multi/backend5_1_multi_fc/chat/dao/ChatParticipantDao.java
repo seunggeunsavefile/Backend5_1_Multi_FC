@@ -13,4 +13,5 @@ public interface ChatParticipantDao {
     void insertParticipant(ChatParticipantDto participant);
     void deleteParticipant(Long roomId, Long userId); //참가자 강퇴
     void deleteByUserIdAndRoomId(@Param("userId") Long userId, @Param("roomId") Long roomId); // userId와 roomId로 참가자 삭제
+    void updateLastReadMessageId(@Param("roomId") Long roomId, @Param("userId") Long userId, @Param("lastReadMessageId") Long lastReadMessageId);
 }

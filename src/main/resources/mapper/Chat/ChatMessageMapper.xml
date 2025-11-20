@@ -23,6 +23,22 @@
         values (#{roomId}, #{senderId}, #{content}, now())
     </insert>
 
+    <select id="countUnreadMessages" resultType="int">
+        select count(*)
+        from Chat_Message
+        where chat_room_id = #{roomId} and message_id > (
+            select coalesce(last_read_message_id, 0)
+            from Chat_Participant
+            where chat_room_id = #{roomId} and user_id = #{userId}
+        )
+    </select>
+
+    <select id="getLatestMessageId" resultType="long">
+        select coalesce(max(message_id),0)
+        from Chat_Message
+        where chat_room_id = #{roomId}
+    </select>
+
     <delete id="deleteMessage" parameterType="long">
         delete from Chat_Message
         where message_id = #{messageId}

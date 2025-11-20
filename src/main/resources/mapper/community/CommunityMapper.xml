@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.multi.backend5_1_multi_fc.community.mapper.CommunityMapper">
+
+    <!-- 게시글 목록용 매핑 -->
+    <resultMap id="PostListMap"
+               type="com.multi.backend5_1_multi_fc.community.dto.CommunityDto$PostListResponse">
+        <id     property="postId"        column="post_id"/>
+        <result property="category"      column="category"/>
+        <result property="title"         column="title"/>
+        <result property="commentCount"  column="comment_count"/>
+        <result property="writerNickname" column="writer_nickname"/>
+        <result property="createdAt"     column="created_at"/>
+        <result property="viewCount"     column="view_count"/>
+    </resultMap>
+
+    <!-- 게시글 상세용 매핑 -->
+    <resultMap id="PostDetailMap"
+               type="com.multi.backend5_1_multi_fc.community.dto.CommunityDto$PostDetailResponse">
+        <id     property="postId"         column="post_id"/>
+        <result property="category"       column="category"/>
+        <result property="title"          column="title"/>
+        <result property="content"        column="content"/>
+        <result property="writerNickname" column="writer_nickname"/>
+        <result property="createdAt"      column="created_at"/>
+        <result property="updatedAt"      column="updated_at"/>
+        <result property="viewCount"      column="view_count"/>
+        <result property="commentCount"   column="comment_count"/>
+        <result property="imageUrl"       column="image_url"/>
+    </resultMap>
+
+    <!-- 글 작성 -->
+    <insert id="insertPost">
+        INSERT INTO Post (
+
+            user_id,
+            category,
+            title,
+            content,
+            image_url,
+            created_at,
+            updated_at,
+            view_count,
+            last_checked_comment_id,
+            current_comment_id
+        )
+        VALUES (
+                   #{userId},
+                   #{req.category},
+                   #{req.title},
+                   #{req.content},
+                   #{imageUrl},
+                   NOW(),
+                   NOW(),
+                   0,
+                   0,
+                   0
+               )
+    </insert>
+
+    <!-- 카테고리별 게시글 목록 -->
+    <select id="findPostByCategory"
+            resultMap="PostListMap">
+        SELECT
+            p.post_id,
+            p.category,
+            p.title,
+            u.nickname           AS writer_nickname,
+            p.created_at,
+            p.view_count         AS view_count,
+            IFNULL(c.cnt, 0)     AS comment_count
+        FROM Post p
+                 JOIN User u ON p.user_id = u.user_id
+                 LEFT JOIN (
+            SELECT post_id, COUNT(*) AS cnt
+            FROM Comment
+            GROUP BY post_id
+        ) c ON p.post_id = c.post_id
+        WHERE p.category = #{category}
+        ORDER BY p.created_at DESC
+    </select>
+
+    <!-- 게시글 상세 -->
+    <select id="findPostDetail"
+            resultMap="PostDetailMap">
+        SELECT
+            p.post_id,
+            p.category,
+            p.title,
+            p.content,
+            p.image_url,
+            p.created_at,
+            p.updated_at,
+            p.view_count         AS view_count,
+            u.nickname           AS writer_nickname,
+            IFNULL(c.cnt, 0)     AS comment_count
+        FROM Post p
+                 JOIN User u ON p.user_id = u.user_id
+                 LEFT JOIN (
+            SELECT post_id, COUNT(*) AS cnt
+            FROM Comment
+            GROUP BY post_id
+        ) c ON p.post_id = c.post_id
+        WHERE p.post_id = #{postId}
+    </select>
+
+    <!-- 게시글 수정 -->
+    <update id="updatePostByWriter">
+        UPDATE Post
+        SET title      = #{req.title},
+            content    = #{req.content},
+            updated_at = NOW()
+        WHERE post_id  = #{postId} AND user_id = #{userId}
+    </update>
+
+    <!-- 게시글 삭제 -->
+    <delete id="deletePostByWriter">
+        DELETE FROM Post
+        WHERE post_id = #{postId} AND user_id = #{userId}
+    </delete>
+
+    <!-- 조회수 증가 -->
+    <update id="increaseViewCount">
+        UPDATE Post
+        SET view_count = view_count + 1
+        WHERE post_id = #{postId}
+    </update>
+
+    <!-- username으로 userId 조회 -->
+    <select id="findUserIdByUsername" resultType="long">
+        SELECT user_id
+        FROM User
+        WHERE username = #{username}
+    </select>
+
+</mapper>

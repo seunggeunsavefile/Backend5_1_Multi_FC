@@ -15,5 +15,6 @@ public class ChatRoomDto {
     private String roomName;
     private Long creatorId;
     private int memberCount;
+    private int unreadCount;
     private Integer maxParticipants;
 }

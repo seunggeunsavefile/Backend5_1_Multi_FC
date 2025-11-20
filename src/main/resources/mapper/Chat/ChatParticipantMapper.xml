@@ -10,6 +10,7 @@
         <result property="nickname" column="nickname"/>
         <result property="profileImg" column="profile_img"/>
         <result property="joinedAt" column="joined_at"/>
+        <result property="lastReadMessageId" column="last_read_message_id"/>
     </resultMap>
 
     <select id="findParticipantsByRoomId" parameterType="long" resultMap="ChatParticipantResultMap">
@@ -29,6 +30,11 @@
         insert into Chat_Participant (chat_room_id, user_id, role, joined_at)
         values (#{roomId}, #{userId}, #{role}, now())
     </insert>
+    <update id="updateLastReadMessageId">
+        update Chat_Participant
+        set last_read_message_id = #{lastReadMessageId}
+        where chat_room_id = #{roomId} and user_id = #{userId}
+    </update>
 
     <delete id="deleteByUserIdAndRoomId">
         delete from Chat_Participant

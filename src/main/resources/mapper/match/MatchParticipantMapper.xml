@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.multi.backend5_1_multi_fc.match.mapper.MatchParticipantMapper">
+
+    <insert id="insert">
+        INSERT INTO Match_Participant (room_id, user_id, status)
+        VALUES (#{roomId}, #{userId}, '대기')
+    </insert>
+
+    <select id="existsByRoomAndUser" resultType="int">
+        SELECT COUNT(*) FROM Match_Participant
+        WHERE room_id = #{roomId} AND user_id = #{userId}
+    </select>
+
+    <select id="findUserIdsByRoom" resultType="long">
+        SELECT user_id FROM Match_Participant
+        WHERE room_id = #{roomId} ORDER BY participant_id ASC
+    </select>
+
+    <delete id="delete">
+        DELETE FROM Match_Participant
+        WHERE room_id = #{roomId} AND user_id = #{userId}
+    </delete>
+
+    <select id="countByRoom" resultType="int">
+        SELECT COUNT(*) FROM Match_Participant WHERE room_id = #{roomId}
+    </select>
+
+    <select id="findHostInfo" resultType="com.multi.backend5_1_multi_fc.match.dto.ParticipantDto">
+        SELECT
+            u.user_id   AS userId,
+            u.nickname  AS nickname,
+            '미정'       AS position,
+            'Host'      AS role,
+            '확정'       AS status  FROM Match_Room mr
+            JOIN User u ON mr.host_id = u.user_id
+        WHERE mr.room_id = #{roomId}
+    </select>
+
+    <select id="findParticipantsInfo" resultType="com.multi.backend5_1_multi_fc.match.dto.ParticipantDto">
+        SELECT
+            u.user_id   AS userId,
+            u.nickname  AS nickname,
+            '미정'       AS position,
+            'Player'    AS role,
+            mp.status   AS status   FROM Match_Participant mp
+            JOIN User u ON mp.user_id = u.user_id
+        WHERE mp.room_id = #{roomId}
+        ORDER BY mp.joined_at ASC
+    </select>
+
+    <update id="updateStatus">
+        UPDATE Match_Participant
+        SET status = #{status}
+        WHERE room_id = #{roomId} AND user_id = #{userId}
+    </update>
+</mapper>
