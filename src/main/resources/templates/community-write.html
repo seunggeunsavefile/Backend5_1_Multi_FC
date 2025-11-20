@@ -51,6 +51,7 @@
 <main class="community-main">
     <div class="board-container">
 
+        <!-- ✅ 작성/수정 폼 -->
         <p id="post-success-message" class="info-message" style="display:none;"></p>
         <p id="post-error-message" class="error-message" style="display:none;"></p>
 
@@ -66,16 +67,22 @@
             <div class="write-form">
                 <div class="input-group">
                     <label for="category">카테고리 선택</label>
+                    <!-- [수정] DB ENUM(공지 / 자유게시판)에 맞추기 위해 value를 한글로 변경 -->
                     <select id="category" name="category" required>
-                        <option value="notice">공지</option>
-                        <option value="free">자유</option>
-                        <option value="team">팀원 모집</option>
+                        <option value="공지">공지사항</option>
+                        <option value="자유게시판">자유게시판</option>
                     </select>
                 </div>
 
                 <div class="input-group">
                     <label for="title">제목</label>
                     <input type="text" id="title" name="title" placeholder="제목을 입력하세요" required>
+                </div>
+
+                <!-- [수정] 이미지 업로드 기능 추가: 첨부 이미지가 있을 경우 백엔드에 함께 전송 -->
+                <div class="input-group">
+                    <label for="image">이미지(선택)</label>
+                    <input type="file" id="image" name="image" accept="image/*">
                 </div>
 
                 <div id="editor-container"></div>
@@ -171,65 +178,42 @@
         });
     }
 
-    // ⭐⭐⭐ [핵심 수정] 관리자 닉네임 정의 및 권한 확인 로직 ⭐⭐⭐
-    const ADMIN_NICKNAME = "AdminUser";
-    const CURRENT_USER_NICKNAME = localStorage.getItem('userNickname') || '사용자';
-    const CURRENT_USER_ROLE = (CURRENT_USER_NICKNAME === ADMIN_NICKNAME) ? 'ADMIN' : 'USER';
-    // ---
-
-    /**
-     * 게시글 ID를 받아 수정 모드로 폼을 로드합니다. (로컬스토리지 연동)
-     */
-    function loadPostForEdit(postId) {
-        let posts = [];
+    // [수정] 기존: 로컬스토리지에서 게시글을 찾아 채웠음 → 변경: 백엔드 API 호출로 실제 DB 게시글을 조회
+    async function loadPostForEdit(postId) {
         try {
-            const storedData = localStorage.getItem('community_posts');
-            if (storedData) posts = JSON.parse(storedData);
+            const res = await fetch(`/api/community/posts/${postId}`);  // [수정] 서버에서 단일 게시글 상세 조회
+            if (!res.ok) {
+                throw new Error('게시글 정보를 불러오지 못했습니다.');
+            }
+            const post = await res.json();
+
+            const headerTitle = document.querySelector('.write-header h1');
+            const submitBtn = document.querySelector('.write-btn-save');// [수정] 버튼 클래스 이름을 실제 DOM(.write-btn-save)과 일치시키기
+
+            // [수정] 수정 모드일 때 UI 텍스트를 수정용으로 변경
+            if (headerTitle) headerTitle.textContent = '게시글 수정';
+            if (submitBtn)   submitBtn.textContent   = '수정';
+
+            // [수정] 백엔드에서 내려온 category를 그대로 사용, 없을 때는 기본값 '자유게시판'
+            document.getElementById('category').value = post.category || '자유게시판';
+            document.getElementById('title').value    = post.title    || '';
+
+            // Quill 에디터 내용 채우기
+            const quillEditor = Quill.find(document.querySelector('#editor-container'));
+            if (quillEditor) {
+                quillEditor.setText(post.content || '');
+            }
+
+            // [수정] 어떤 게시글을 수정 중인지 서버에 보낼 수 있도록 form dataset에 postId 저장
+            writeForm.dataset.postId = postId;
         } catch (e) {
-            console.error("로컬스토리지 파싱 오류:", e);
-            posts = [];
-        }
-
-        const post = posts.find(p => String(p.id) === String(postId));
-
-        const headerTitle = document.querySelector('.write-header h1');
-        const submitBtn = document.querySelector('.write-btn-save');
-        const categorySelect = document.getElementById('category');
-
-        if (!post) {
-            alert("❌ 수정할 게시물 정보를 찾을 수 없습니다.");
+            console.error(e);
+            alert('❌ 수정할 게시글 정보를 불러오지 못했습니다.');
             window.location.href = '/community';
-            return;
         }
-
-        // ✅ UI 변경
-        headerTitle.textContent = `게시글 수정 (ID: ${postId})`;
-        submitBtn.textContent = '수정';
-
-        // ✅ 데이터 채우기
-        categorySelect.value = post.category;
-        document.getElementById('title').value = post.title;
-
-        // ✅ 관리자 권한 체크 (수정 모드): 일반 사용자가 공지 외 다른 글을 수정하는 경우, 공지로 변경 방지
-        if (CURRENT_USER_ROLE !== 'ADMIN') {
-            categorySelect.querySelector('option[value="notice"]').disabled = true;
-        }
-
-
-        // ✅ Quill 에디터 내용 반영
-        const quillEditor = Quill.find(document.querySelector('#editor-container'));
-        if (quillEditor && post.content) {
-            quillEditor.root.innerHTML = post.content;
-        }
-
-        // ✅ 수정 대상 ID를 form dataset에 저장
-        writeForm.dataset.postId = postId;
     }
 
-    // ------------------------------------
-
-
-    let quill; // Quill 에디터를 전역/로컬 스코프에서 사용 가능하도록 선언
+    let quill;
 
     document.addEventListener('DOMContentLoaded', async () => {
         const accessToken = localStorage.getItem('accessToken');
@@ -242,13 +226,12 @@
             return;
         }
 
-        // ⭐⭐⭐ 1. Quill Editor 초기화 - Undo/Redo 기능 연결 ⭐⭐⭐
+        // 1. Quill 초기화
         const toolbarOptions = [
             [{'header': [1, 2, false]}],
             ['bold', 'italic', 'underline', 'strike'],
             [{'list': 'ordered'}, {'list': 'bullet'}],
             ['link', 'image'],
-            ['undo', 'redo'],
             ['clean']
         ];
 
@@ -256,62 +239,32 @@
             theme: 'snow',
             placeholder: '내용을 입력하세요.',
             modules: {
-                toolbar: {
-                    container: toolbarOptions,
-                },
-                history: {
-                    delay: 100,
-                    maxStack: 50,
-                    userOnly: true
-                }
+                toolbar: { container: toolbarOptions },
+                history: { delay: 100, maxStack: 50, userOnly: true }
             }
         });
 
-        // 툴바 버튼에 Font Awesome 아이콘 바인딩 (Quill 기본 아이콘 오버라이드)
-        const toolbar = quill.getModule('toolbar');
-        if (toolbar) {
-            const undoButton = document.querySelector('.ql-undo');
-            const redoButton = document.querySelector('.ql-redo');
-
-            if (undoButton) undoButton.innerHTML = '<i class="fas fa-undo"></i>';
-            if (redoButton) redoButton.innerHTML = '<i class="fas fa-redo"></i>';
-        }
-        // -----------------------------
-
-
-        // 2. 메뉴 활성화 함수 실행
         setActiveMenuItem();
 
-        // ⭐⭐⭐ [핵심 수정] 공지사항 카테고리 제한 ⭐⭐⭐
-        const categorySelect = document.getElementById('category');
-        const noticeOption = categorySelect.querySelector('option[value="notice"]');
-
-        if (CURRENT_USER_ROLE !== 'ADMIN') {
-            // 1. 공지사항 카테고리를 비활성화
-            if (noticeOption) {
-                noticeOption.disabled = true;
-            }
-
-            // 2. 혹시 '공지'가 기본 선택되어 있다면 '자유'로 강제 변경
-            if (categorySelect.value === 'notice') {
-                categorySelect.value = 'free';
-            }
-        }
-        // ---------------------------------------------
-
-
-        // ⭐⭐ 3. 수정 모드 체크 및 데이터 로드 ⭐⭐
-        const urlParams = new URLSearchParams(window.location.search);
-        const editPostId = urlParams.get('id') || urlParams.get('edit');
+        // 2. 수정 모드인지 체크
+        // [수정] URL 쿼리파라미터 id 또는 edit가 있을 경우 수정 모드로 판단
+        const urlParams   = new URLSearchParams(window.location.search);
+        const editPostId  = urlParams.get('id') || urlParams.get('edit');
 
         if (editPostId) {
-            loadPostForEdit(editPostId);
+            // 수정 모드
+            // [수정] 수정 모드일 때 서버에서 해당 게시글을 불러오도록 변경
+            await loadPostForEdit(editPostId);
         } else {
-            // 작성 모드인 경우 기본 UI 유지
-            document.querySelector('.write-header h1').textContent = '새 게시글 작성';
-            document.querySelector('.write-btn-save').textContent = '등록';
+            // 작성 모드
+            const headerTitle = document.querySelector('.write-header h1');
+            const submitBtn   = document.querySelector('.write-btn-save');  // [수정] 버튼 선택자 수정 (.btn-save → .write-btn-save)
+
+            if (headerTitle) headerTitle.textContent = '새 게시글 작성';
+            if (submitBtn)   submitBtn.textContent   = '등록';
         }
     });
+
 
 
     // --- (★페이지별★) 게시글 작성/수정 로직 ---
@@ -321,110 +274,103 @@
     const errorMsg = document.getElementById('post-error-message');
 
     // ⭐⭐⭐ [최종 수정] 폼 제출 시 로컬 스토리지에 저장하고 이동하도록 로직 변경 ⭐⭐⭐
+    // [수정] 로컬스토리지에 저장하지 않고, 백엔드 API(POST/PUT)로 전송하도록 변경
     writeForm.addEventListener('submit', async function (e) {
         e.preventDefault();
         successMsg.style.display = 'none';
         errorMsg.style.display = 'none';
 
+        const accessToken = localStorage.getItem('accessToken');
+        // [수정] 서버 요청 전에도 토큰이 있는지 한 번 더 검증 (보안/안정성 위해 추가 체크)
+        if (!accessToken) {
+            alert('로그인 후 글을 작성할 수 있습니다.');
+            localStorage.setItem('redirectAfterLogin', window.location.pathname);
+            window.location.href = '/login';
+            return;
+        }
+
         const category = document.getElementById('category').value;
         const title = document.getElementById('title').value.trim();
         const quillEditor = Quill.find(document.querySelector('#editor-container'));
-        const contentHtml = quillEditor.root.innerHTML;
         const contentText = quillEditor.getText().trim();
+        const imageInput = document.getElementById('image'); // [수정] 이미지 파일 전송을 위해 input 참조
 
-        postContentHtmlInput.value = contentHtml; // HTML 내용을 숨겨진 필드에 저장
-
-        // ⭐ ID 생성 및 액션 정의: ID는 문자열로 저장하여 로컬스토리지에서 정렬 문제를 피합니다.
-        const postId = writeForm.dataset.postId || String(Date.now());
-        const actionName = writeForm.dataset.postId ? '수정' : '등록';
-
-        // ★ 유효성 검사
-        if (title === '' || contentText.length <= 1) {
-            errorMsg.textContent = '❌ 제목, 카테고리, 내용을 모두 입력해주세요.';
-            errorMsg.style.display = 'block';
-            return;
-        }
-        // ★★★ [수정] 관리자 권한 확인 (공지) ★★★
-        if (category === 'notice' && CURRENT_USER_ROLE !== 'ADMIN') {
-            errorMsg.textContent = '❌ 공지사항은 관리자만 작성/수정할 수 있습니다.';
+        if (!title || contentText.length === 0) {
+            errorMsg.textContent = '❌ 제목과 내용을 모두 입력해주세요.';
             errorMsg.style.display = 'block';
             return;
         }
 
+        const isEdit = !!writeForm.dataset.postId;   // 수정 모드인지 체크
+        const postId = writeForm.dataset.postId;
 
-        // ✅ 한국 시간 기준 yyyy-mm-dd hh:mm 문자열 생성
-        const today = new Date();
-        const koreaOffset = today.getTime() + (today.getTimezoneOffset() * 60000) + (9 * 60 * 60 * 1000);
-        const koreaDate = new Date(koreaOffset);
-        const formattedDate = koreaDate.toLocaleString("ko-KR", {
-            timeZone: "Asia/Seoul",
-            year: "numeric",
-            month: "2-digit",
-            day: "2-digit",
-            hour: "2-digit",
-            minute: "2-digit"
-        });
+        try {
+            let res;
 
-        // ✅ 게시글 객체 생성
-        let categoryDisplayValue = '';
-        switch (category) {
-            case 'notice':
-                categoryDisplayValue = '공지';
-                break;
-            case 'free':
-                categoryDisplayValue = '자유';
-                break;
-            case 'team':
-                categoryDisplayValue = '팀모집';
-                break;
-            default:
-                categoryDisplayValue = '기타';
-        }
+            if (isEdit) {
+                // ✅ 수정: PUT /api/community/posts/{postId}
+                // [수정] 수정 모드에서는 JSON DTO만 보내는 PUT 요청 사용
+                const updateDto = {
+                    title: title,
+                    content: contentText
+                };
 
-        const newPost = {
-            id: String(postId),
-            category: category,
-            categoryDisplay: categoryDisplayValue,
-            title: title,
-            content: contentHtml,
-            writer: CURRENT_USER_NICKNAME, // ⭐ 현재 사용자 닉네임 사용
-            date: formattedDate, // ✅ 한국 시간 기준
-            commentCount: 0,
-            viewCount: 0,
-            writerId: 999 // 더미 writerId 추가 (권한 체크 대비)
-        };
+                res = await fetch(`/api/community/posts/${postId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${accessToken}`  // [수정] JWT 인증 헤더 추가
+                    },
+                    body: JSON.stringify(updateDto)
+                });
+            } else {
+                // ✅ 등록: POST /api/community/posts (multipart/form-data)
+                // [수정] 새 글 작성 시에는 게시글 정보 + 이미지 파일을 multipart/form-data로 전송
+                const postDto = {
+                    category: category,   // 'notice' 또는 'free'
+                    title: title,
+                    content: contentText
+                };
 
-        // 공지글의 경우 작성자를 명시적으로 '관리자'로 설정 (DB 대체 시 DB 닉네임 사용)
-        if (category === 'notice') {
-            newPost.writer = '관리자';
-        }
+                const formData = new FormData();
+                formData.append(
+                    'post',
+                    new Blob([JSON.stringify(postDto)], { type: 'application/json' })
+                );
+                // [수정] 이미지가 선택된 경우에만 formData에 추가
+                if (imageInput && imageInput.files[0]) {
+                    formData.append('image', imageInput.files[0]);
+                }
 
-
-        // ✅ 로컬 스토리지에 글 목록 업데이트
-        let posts = JSON.parse(localStorage.getItem('community_posts')) || [];
-
-        if (writeForm.dataset.postId) {
-            // 수정 모드
-            const index = posts.findIndex(p => String(p.id) === postId);
-            if (index !== -1) {
-                posts[index] = {...posts[index], ...newPost};
+                res = await fetch('/api/community/posts', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${accessToken}`
+                    },
+                    body: formData
+                });
             }
-        } else {
-            // 등록 모드
-            posts.unshift(newPost);
+
+            if (res.ok) {
+                // [수정] 성공 시에는 알림 후 커뮤니티 목록으로 이동
+                alert(isEdit ? '게시글이 수정되었습니다.' : '게시글이 등록되었습니다.');
+                window.location.href = '/community';
+            } else {
+                const msg = await res.text();
+                // [수정] 실패 시 서버 응답 메시지를 함께 보여주도록 변경
+                errorMsg.textContent = (isEdit ? '수정 실패: ' : '등록 실패: ') + msg;
+                errorMsg.style.display = 'block';
+            }
+        } catch (err) {
+            console.error(err);
+            // [수정] 네트워크/서버 오류 대응 메시지 변경 (등록/수정 모드 구분)
+            errorMsg.textContent = isEdit
+                ? '수정 중 오류가 발생했습니다.'
+                : '등록 중 오류가 발생했습니다.';
+            errorMsg.style.display = 'block';
         }
-
-        localStorage.setItem('community_posts', JSON.stringify(posts));
-
-        // ✅ 성공 메시지 및 리다이렉션
-        successMsg.textContent = `✅ 게시글이 성공적으로 ${actionName}되었습니다. 커뮤니티로 이동합니다.`;
-        successMsg.style.display = 'block';
-
-        setTimeout(() => {
-            const uniqueStamp = Date.now();
-            window.location.href = `/community?refresh=${uniqueStamp}`;
-        }, 1500);
     });
+
 
 </script>
 </body>

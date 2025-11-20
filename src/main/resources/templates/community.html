@@ -45,9 +45,9 @@
     <div class="community-board-container">
         <div class="board-controls">
             <div class="board-tabs" id="community-tabs">
-                <button data-category="all" class="active">전체 목록</button>
-                <button data-category="notice">공지사항</button>
-                <button data-category="free">자유게시판</button>
+                <button data-category="전체" class="active">전체목록</button>
+                <button data-category="공지">공지사항</button>
+                <button data-category="자유게시판">자유게시판</button>
             </div>
             <a href="/community/write" class="write-button" id="write-post-btn">
                 <i class="fas fa-pencil-alt"></i> 글쓰기
@@ -152,18 +152,7 @@
     }
     updateGlobalBadge();
 
-    // ... (알림 함수 유지) ...
-
-    // (★기존 더미 데이터)
-    const initialPosts = [
-        { id: 1000, category: 'notice', categoryDisplay: '공지', title: '[필독] 공지사항 및 매너 점수 안내', writer: '관리자', date: '2025-10-25', commentCount: 3, viewCount: 1200 },
-        { id: 999, category: 'team', categoryDisplay: '자유', title: '일요 새벽 경기 인원 모집 (MF 급구)', writer: '캡틴손', date: '2025-10-31', commentCount: 12, viewCount: 150 },
-        { id: 998, category: 'free', categoryDisplay: '자유', title: '이번 주말 풋살화 추천 받아요', writer: '풋살매니아', date: '2025-10-28', commentCount: 2, viewCount: 80 },
-    ];
-
-
-    // ▼▼ [핵심 수정] 커뮤니티 페이지 로직: 로컬 저장소 통합 및 페이지네이션 구현 ▼▼
-
+    // [수정] 더미데이터를 제거하고 백엔드 API와 연동하기 위한 준비
     const postListBody = document.getElementById('post-list-body');
     const tabsContainer = document.getElementById('community-tabs');
     const writeButton = document.getElementById('write-post-btn');
@@ -171,53 +160,38 @@
     const paginationContainer = document.getElementById('community-pagination');
 
     const POSTS_PER_PAGE = 10;
+    const CATEGORY_ALL = '전체'; // [수정] '전체' 탭에서 사용할 카테고리 상수 추가
     let currentPage = 1;
     let allFilteredPosts = [];
 
-    /**
-     * ⭐ 게시글 목록을 로컬 스토리지 데이터와 통합하여 반환 ⭐
-     */
-    function getAllPosts() {
-        let localPostsRaw = [];
-        try {
-            const storedData = localStorage.getItem('community_posts');
-            if (storedData) {
-                localPostsRaw = JSON.parse(storedData);
+    // ⭐ 백엔드에서 목록 가져오기
+    async function fetchPosts(category) {
+        let url = '/api/community/posts';
+
+        // backend가 현재 category 필수면:
+        // all → free/notice 두 번 호출해서 합치기
+        // [수정] 전체가 아닌 경우에만 category 파라미터를 붙여서 단일 카테고리 목록을 조회
+        if (category && category !== CATEGORY_ALL) {
+            url += `?category=${encodeURIComponent(category)}`;
+            const res = await fetch(url);
+            if (!res.ok) throw new Error('게시글 목록을 불러오지 못했습니다.');
+            return res.json(); // PostListResponse[]
+        } else {
+            // all: notice + free 두 번 불러와서 합치기
+            // [수정] '전체' 탭일 때는 공지 + 자유게시판 두 카테고리를 각각 호출해서 합친다
+            const [noticeRes, freeRes] = await Promise.all([
+                fetch('/api/community/posts?category=공지'),
+                fetch('/api/community/posts?category=자유게시판')
+            ]);
+            if (!noticeRes.ok || !freeRes.ok) {
+                throw new Error('게시글 목록을 불러오지 못했습니다.');
             }
-        } catch (e) {
-            console.error("Local Storage data corrupted, attempting recovery. Error:", e);
-            localStorage.removeItem('community_posts');
-            localPostsRaw = [];
+            const notice = await noticeRes.json();
+            const free = await freeRes.json();
+            return [...notice, ...free];
         }
-
-        const localPosts = localPostsRaw.map(post => ({
-            ...post,
-            id: String(post.id),
-            commentCount: post.commentCount || 0,
-            viewCount: post.viewCount || 0,
-            categoryDisplay:
-                post.category === 'notice'
-                    ? '공지'
-                    : '자유'
-        }));
-
-        const combinedPosts = [...localPosts];
-
-        initialPosts.forEach(initialPost => {
-            if (!localPosts.some(p => String(p.id) === String(initialPost.id))) {
-                combinedPosts.push({ ...initialPost, id: String(initialPost.id) });
-            }
-        });
-
-        // ⭐⭐⭐ 최종 글 목록을 ID 내림차순으로 정렬 ⭐⭐⭐
-        combinedPosts.sort((a, b) => {
-            const idA = parseInt(a.id);
-            const idB = parseInt(b.id);
-            return idB - idA;
-        });
-
-        return combinedPosts;
     }
+
 
 
     /**
@@ -253,6 +227,7 @@
         paginationContainer.innerHTML += `<a href="#" data-page="${nextGroupPage}" class="${nextDisabled ? 'disabled' : ''}">&gt;</a>`;
 
         // 이벤트 리스너 재할당
+        // [수정] 페이지 버튼 클릭 시, 현재 선택된 탭/검색 조건을 유지한 채로 해당 페이지를 다시 렌더링
         paginationContainer.querySelectorAll('a').forEach(link => {
             if (!link.classList.contains('disabled')) {
                 link.addEventListener('click', (e) => {
@@ -272,84 +247,93 @@
         });
     }
 
-    /**
-     * 목록 렌더링 함수 (페이지네이션 적용)
-     */
-    function renderPostList(category, searchKeyword = '', searchType = 'title', page = 1) {
-        const allPosts = getAllPosts();
-        let filtered = allPosts;
+    // [수정] 게시글 목록을 백엔드 데이터로 렌더링하는 함수로 변경
+    async function renderPostList(category, searchKeyword = '', searchType = 'title', page = 1) {
+        try {
+            let posts = await fetchPosts(category); // [수정] 항상 백엔드에서 최신 목록을 받아옴
 
-        // 1. 카테고리 필터링
-        if (category !== 'all') {
-            filtered = filtered.filter(post => String(post.category) === String(category));
-        }
+            // 검색
+            if (searchKeyword) {
+                const keyword = searchKeyword.toLowerCase();
+                posts = posts.filter(post => {
+                    if (searchType === 'title') {
+                        return post.title.toLowerCase().includes(keyword);
+                    }
+                    if (searchType === 'writer') {
+                        return (post.writerNickname || '').toLowerCase().includes(keyword);
+                    }
+                    // 내용 검색은 서버에 따로 검색
+                    return false;
+                });
+            }
 
-        // 2. 검색 필터링
-        if (searchKeyword) {
-            const keyword = searchKeyword.toLowerCase();
-            filtered = filtered.filter(post => {
-                if (searchType === 'title' && post.title.toLowerCase().includes(keyword)) return true;
-                if (searchType === 'writer' && post.writer.toLowerCase().includes(keyword)) return true;
-                return false;
-            });
-        }
+            allFilteredPosts = posts;
+            const totalPosts = allFilteredPosts.length;
+            const startIndex = (page - 1) * POSTS_PER_PAGE;
+            const postsToDisplay = allFilteredPosts.slice(startIndex, startIndex + POSTS_PER_PAGE);
 
-        allFilteredPosts = filtered; // 현재 필터링된 전체 목록 저장
-        const totalPosts = allFilteredPosts.length;
+            postListBody.innerHTML = '';
 
-        // 3. 페이지네이션 적용
-        const startIndex = (page - 1) * POSTS_PER_PAGE;
-        const postsToDisplay = allFilteredPosts.slice(startIndex, startIndex + POSTS_PER_PAGE);
-
-
-        postListBody.innerHTML = '';
-
-        if (totalPosts === 0) {
-            postListBody.innerHTML = `
+            if (totalPosts === 0) {
+                postListBody.innerHTML = `
                 <tr>
                     <td colspan="7" style="text-align: center; color: #999; padding: 50px;">
                         게시글이 없습니다.
                     </td>
                 </tr>
             `;
-            renderPagination(0, 1);
-            return;
-        }
+                renderPagination(0, 1);
+                return;
+            }
 
-        postsToDisplay.forEach((post, index) => {
-            const row = document.createElement('tr');
-            row.dataset.postId = post.id;
+            postsToDisplay.forEach((post, index) => {
+                const row = document.createElement('tr');
+                row.dataset.postId = post.postId;
 
-            // ⭐ [순번] 현재 페이지 기준 1, 2, 3... 순으로 표시 ⭐
-            const sequentialId = startIndex + index + 1;
+                const sequentialId = startIndex + index + 1;
+                // [수정] DB ENUM 값(공지 / 자유게시판)에 맞춰 카테고리 표시
+                const categoryDisplay = post.category === '전체' ? '공지' : '자유';
 
-            row.innerHTML = `
+                row.innerHTML = `
                 <td>${sequentialId}</td>
-                <td class="col-category">${post.categoryDisplay}</td>
-                <td class="col-title" onclick="location.href='/community/detail/${post.id}'">${post.title}</td>
-                <td>${post.commentCount}</td>
-                <td>${post.writer}</td>
-                <td>${post.date}</td>
-                <td>${post.viewCount}</td>
+                <td class="col-category">${categoryDisplay}</td>
+                <td class="col-title" onclick="location.href='/community/detail/${post.postId}'">
+                    ${post.title}
+                </td>
+                <td>${post.commentCount ?? 0}</td>
+                <td>${post.writerNickname}</td>
+                <td>${post.createdAt ?? ''}</td>
+                <td>${post.viewCount ?? 0}</td>
             `;
-            postListBody.appendChild(row);
-        });
+                postListBody.appendChild(row);
+            });
 
-        // 4. 페이지네이션 렌더링
-        renderPagination(totalPosts, page);
+            renderPagination(totalPosts, page);
+        } catch (err) {
+            console.error(err);
+            postListBody.innerHTML = `
+            <tr>
+                <td colspan="7" style="text-align: center; color: #e74c3c; padding: 50px;">
+                    게시글을 불러오는 중 오류가 발생했습니다.
+                </td>
+            </tr>
+        `;
+        }
     }
 
-    // ⭐⭐ 검색 실행 함수 ⭐⭐
+
+    // [수정] 검색 실행 함수에서 '전체' 탭일 때 CATEGORY_ALL 상수를 사용하도록 변경
     if (searchExecBtn) {
         searchExecBtn.addEventListener('click', () => {
             const activeTab = document.querySelector('.board-tabs button.active');
-            const category = activeTab ? activeTab.dataset.category : 'all';
+            const category = activeTab ? activeTab.dataset.category : CATEGORY_ALL; // [수정] 기본값을 '전체' 상수로
             const keyword = document.getElementById('search-keyword').value;
             const type = document.getElementById('search-type').value;
 
-            renderPostList(category, keyword, type, 1); // 검색 시 항상 1페이지로
+            renderPostList(category, keyword, type, 1);
         });
     }
+
 
     // --- 로그인 상태 확인 ---
     document.addEventListener('DOMContentLoaded', () => {
@@ -357,44 +341,33 @@
         const profileIcon = document.getElementById('profile-menu-toggle');
         const userMenuName = document.getElementById('user-menu-username');
 
-        // ⭐⭐ 회원 전용 페이지 접근 차단 로직 ⭐⭐
-        if (!accessToken) {
-            alert("❌ 회원 전용 페이지입니다.\n로그인 후 이용 가능합니다.");
-            localStorage.setItem('redirectAfterLogin', window.location.pathname);
-            window.location.href = '/login';
-            return;
-        }
-
-        // 1. 로그인 상태에 따른 UI 및 알림 배지 처리
         if (accessToken) {
-            // ✅ 로그인 상태 설정
             if (profileIcon) profileIcon.style.display = 'flex';
-            if (userMenuName) userMenuName.textContent = localStorage.getItem('username') || '사용자';
-
-            // ✅ 알림 배지 표시
+            if (userMenuName) {
+                const nickname = localStorage.getItem('username') || '사용자';
+                userMenuName.textContent = nickname;
+            }
             updateGlobalBadge();
-
-            // ✅ 다른 탭에서 로컬스토리지 변경 시 자동 업데이트
             window.addEventListener('storage', (e) => {
                 if (e.key === 'hasNewNotification') updateGlobalBadge();
             });
         }
 
-        // ✅ 카테고리 탭 이벤트 설정
+        // [수정] 탭 클릭 시, data-category 값(전체/공지/자유게시판)을 그대로 renderPostList 에 넘기도록 변경
         const tabs = tabsContainer.querySelectorAll('button');
         tabs.forEach(tab => {
             tab.addEventListener('click', () => {
                 tabs.forEach(t => t.classList.remove('active'));
                 tab.classList.add('active');
                 document.getElementById('search-keyword').value = '';
-                renderPostList(tab.dataset.category, '', '', 1);
+                renderPostList(tab.dataset.category, '', 'title', 1);
             });
         });
 
-        // 3. (★) 초기 로드 시 "전체 목록" 표시 (로컬 스토리지 통합)
-        renderPostList('all');
+        // ✅ 초기 로드 시 "전체 목록"
+        renderPostList(CATEGORY_ALL);
 
-        // ✅ 게시글 클릭 시 상세페이지 이동
+        // ✅ 게시글 클릭 시 상세페이지 이동 (안전장치 차원에서 한 번 더)
         document.querySelectorAll('.post-table').forEach(table => {
             table.addEventListener('click', function(e) {
                 const titleCell = e.target.closest('.col-title');
@@ -406,6 +379,7 @@
         });
     });
 </script>
+
 
 </body>
 </html>
