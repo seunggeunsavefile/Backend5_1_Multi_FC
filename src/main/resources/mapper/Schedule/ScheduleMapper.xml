@@ -18,6 +18,9 @@
         <result property="scheduleType" column="schedule_type"/>
         <result property="scheduleDate" column="schedule_date"/>
         <result property="scheduleTime" column="schedule_time"/>
+        <!-- 추가 -->
+        <result property="content"      column="content"/>
+        <result property="matchId"      column="match_room_id"/>
     </resultMap>
 
     <!-- 개인 일정 추가  -->
@@ -48,7 +51,7 @@
 
     <!-- 특정 기간 전체 일정 (캘린더 월 단위) -->
     <select id="findAllBetween" parameterType="map" resultMap="DayItemMap">
-        SELECT schedule_id, title, schedule_type, schedule_date, schedule_time
+        SELECT schedule_id, title, schedule_type, schedule_date, schedule_time, content, match_room_id
         FROM Schedule
         WHERE user_id = #{userId}
           AND schedule_date BETWEEN #{startDate} AND #{endDate}
@@ -58,7 +61,7 @@
 
     <!-- 달력 한칸에 날짜별 가장 빠른 2개 -->
     <select id="findTop2ByDate" parameterType="map" resultMap="DayItemMap">
-        SELECT schedule_id, title, schedule_type, schedule_date, schedule_time
+        SELECT schedule_id, title, schedule_type, schedule_date, schedule_time, content, match_room_id
         FROM Schedule
         WHERE user_id = #{userId}
           AND schedule_date = #{date}
@@ -68,7 +71,7 @@
 
     <!-- 날짜 전체 목록 -->
     <select id="findAllByDate" parameterType="map" resultMap="DayItemMap">
-        SELECT schedule_id, title, schedule_type, schedule_date, schedule_time
+        SELECT schedule_id, title, schedule_type, schedule_date, schedule_time, content, match_room_id
         FROM Schedule
         WHERE user_id = #{userId}
           AND schedule_date = #{date}
@@ -77,29 +80,36 @@
 
     <!-- 메인 오늘 현재시각 이후 + 내일부터는 하루 전체 중 빠른 순으로 5개 -->
     <select id="findUpcoming7d" parameterType="map" resultMap="DayItemMap">
-        SELECT schedule_id, title, schedule_type, schedule_date, schedule_time
-        FROM Schedule
-        WHERE user_id = #{userId}
+        SELECT
+            s.schedule_id,
+            s.title,
+            s.schedule_type,
+            s.schedule_date,
+            s.schedule_time,
+            s.content,
+            s.match_room_id          -- 🔹 그냥 컬럼 그대로
+        FROM Schedule s
+        WHERE s.user_id = #{userId}
           AND (
-            (schedule_date = #{today} AND (schedule_time IS NULL OR schedule_time >= #{nowTime}))
-                OR
-            (schedule_date BETWEEN #{tomorrow} AND #{sixDaysLater})
+            (s.schedule_date = #{today} AND (s.schedule_time IS NULL OR s.schedule_time >= #{nowTime}))
+                OR (s.schedule_date BETWEEN #{tomorrow} AND #{sixDaysLater})
             )
-        ORDER BY schedule_date ASC, schedule_time ASC, schedule_id ASC
+        ORDER BY s.schedule_date ASC, s.schedule_time ASC, s.schedule_id ASC
             LIMIT 5
     </select>
 
     <!-- 경기 자동 연동 (승인 + 모집완료/경기완료, 중복 방지) -->
     <insert id="upsertApprovedMatches" parameterType="map">
-        INSERT INTO Schedule (user_id, title, schedule_type, schedule_date, schedule_time)
+        -- 1) 승인된 참가자 일정
+        INSERT INTO Schedule (user_id, title, schedule_type, schedule_date, schedule_time, match_room_id)
         SELECT
-            mp.user_id, st.name, '경기', mr.match_date, mr.match_time
+            mp.user_id, st.name, '경기', mr.match_date, mr.match_time, mr.room_id
         FROM Match_Participant mp
                  JOIN Match_Room mr   ON mr.room_id    = mp.room_id
                  LEFT JOIN Stadium st ON st.stadium_id = mr.stadium_id
         WHERE mp.user_id = #{userId}
           AND mp.status  = '승인'
-          AND mr.status = '모집완료'
+          AND mr.status = 'CLOSED'
           AND mr.match_date >= CURDATE()
           AND NOT EXISTS (
             SELECT 1
@@ -109,6 +119,26 @@
               AND s.schedule_date = mr.match_date
               AND s.schedule_time = mr.match_time
         )
+
+        UNION
+
+        -- 2) 매칭방 호스트 일정
+        SELECT
+            mr.host_id AS user_id, st.name, '경기', mr.match_date, mr.match_time, mr.room_id
+        FROM Match_Room mr
+                 LEFT JOIN Stadium st ON st.stadium_id = mr.stadium_id
+        WHERE mr.host_id = #{userId}
+          AND mr.status = 'CLOSED'
+          AND mr.match_date >= CURDATE()
+          AND NOT EXISTS (
+            SELECT 1
+            FROM Schedule s
+            WHERE s.user_id       = mr.host_id
+              AND s.schedule_type = '경기'
+              AND s.schedule_date = mr.match_date
+              AND s.schedule_time = mr.match_time
+        );
     </insert>
+
 
 </mapper>
