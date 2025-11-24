@@ -4,285 +4,323 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MULTI FC - 구장 검색</title>
-
     <link rel="stylesheet" th:href="@{/css/style.css}">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700;900&family=Noto+Sans+KR:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="//dapi.kakao.com/v2/maps/sdk.js?appkey=4caaf2cb0e09303d4dd13d3fb5ff15e9&libraries=services"></script>
+    <style>
+        /* 원래 CSS 복구 */
+        .field-search-main { padding: 100px 40px 40px 40px; background-color: #f7f7f7; min-height: 100vh; }
+        .search-container { max-width: 1200px; margin: 0 auto; background: white; padding: 30px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+        .search-title { font-size: 28px; font-weight: 700; color: #2c3e50; margin-bottom: 25px; border-bottom: 2px solid #6c5ce7; padding-bottom: 10px; }
+        .filter-section { display: flex; gap: 15px; margin-bottom: 25px; flex-wrap: wrap; }
+        .filter-section input { padding: 12px 15px; font-size: 15px; border: 1px solid #ddd; border-radius: 10px; background: #f9f9f9; flex-grow: 1; min-width: 200px; }
+        .filter-section button { padding: 12px 15px; background-color: #6c5ce7; color: white; font-weight: 600; cursor: pointer; border: none; border-radius: 10px; }
+        .search-content { display: flex; gap: 20px; }
+        .map-area { flex: 7; height: 500px; background-color: #eee; border-radius: 10px; }
+        .field-list-area { flex: 3; max-height: 500px; overflow-y: auto; background: #fff; padding: 15px; border-radius: 10px; }
+        #field-list { display: flex; flex-direction: column; gap: 12px; margin-top: 10px; }
+        .field-card { background: #ffffff; border-radius: 10px; padding: 10px 8px; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08); border-left: 5px solid #2ecc71; cursor: pointer; }
+        .field-card:hover { transform: translateY(-3px); box-shadow: 0 6px 18px rgba(0,0,0,0.12); }
+        .field-card h3 { font-size: 16px; color: #2c3e50; }
 
+        /* 헤더 아이콘 스타일 */
+        .header-icons { display: flex; align-items: center; gap: 15px; }
+        .user-menu { position: absolute; top: 60px; right: 20px; background: white; border: 1px solid #ddd; border-radius: 10px; padding: 15px; display: none; width: 200px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); z-index: 1000; }
+        .user-menu.show { display: block; }
+        .user-menu ul { list-style: none; padding: 0; margin-top: 10px; border-top: 1px solid #eee; }
+        .user-menu ul li { padding: 10px 0; }
+        .user-menu ul li a { color: #333; text-decoration: none; display: block; }
+        .user-menu ul li a:hover { color: #6c5ce7; }
+    </style>
 </head>
-<body class="field-search-page">
+<body>
+
 <header class="quick-menu">
     <div class="logo"><a href="/">MULTI FC</a></div>
     <div class="header-icons">
-        <button id="profile-menu-toggle" class="profile-icon" style="position: relative; display: none;"> <i class="fas fa-user-circle"></i>
-            <span id="notification-badge" class="notification-badge"></span>
+        <a href="/login" id="nav-login-btn" style="margin-right:10px; font-weight:bold; color:#333; display:block;">로그인</a>
+
+        <button id="profile-menu-toggle" class="profile-icon" style="position: relative; display: none; background:none; border:none; font-size:24px; cursor:pointer;">
+            <i class="fas fa-user-circle"></i>
         </button>
+
         <div id="profile-menu" class="user-menu">
             <div class="user-info">
-                <strong><span id="user-menu-username">사용자</span>님</strong>
+                <strong><span id="user-menu-username">회원</span>님</strong>
                 <p>환영합니다!</p>
             </div>
             <ul>
-                <li><a href="/notifications" id="nav-notifications-link"><i class="fas fa-bell"></i> 알림 목록</a></li>
-                <li><a href="/mypage"><i class="fas fa-user"></i> 마이페이지</a></li>
-                <li><a href="/profile/edit"><i class="fas fa-user-edit"></i> 프로필 수정</a></li>
                 <li><a href="#" id="logout-button"><i class="fas fa-sign-out-alt"></i> 로그아웃</a></li>
             </ul>
         </div>
-        <button id="menu-toggle" class="menu-toggle-btn"><i class="fas fa-bars"></i></button>
+
+        <button id="menu-toggle" class="menu-toggle-btn" style="background:none; border:none; font-size:20px;">
+            <i class="fas fa-bars"></i>
+        </button>
     </div>
     <nav id="main-menu" class="main-nav">
         <ul>
             <li><a href="/"><i class="fas fa-home"></i> 메인 (Home)</a></li>
             <li><a href="/fields" class="active"><i class="fas fa-search"></i> 구장검색</a></li>
             <li><a href="/community"><i class="fas fa-users"></i> 커뮤니티</a></li>
-            <li id="nav-chat-link-li"><a href="/chat" id="nav-chat-link"><i class="fas fa-comments"></i> 실시간채팅</a></li>
-            <li><a href="/login" id="nav-login-link"><i class="fas fa-sign-in-alt"></i> 로그인</a></li>
-            <li style="display:none;"><a href="#" id="nav-logout-link"><i class="fas fa-sign-out-alt"></i> 로그아웃</a></li>
+            <li><a href="/chat"><i class="fas fa-comments"></i> 실시간채팅</a></li>
         </ul>
     </nav>
 </header>
-<main class="search-main">
+
+<main class="field-search-main">
     <div class="search-container">
         <h1 class="search-title">🔎 구장 검색</h1>
-
         <div class="filter-section">
             <input type="text" id="search-keyword" placeholder="구장 이름 또는 지역 입력 (예: 강남)">
-            <input type="date" id="filter-date" title="날짜 선택">
-            <select id="filter-region">
-                <option value="">지역 전체</option>
-                <option value="seoul">서울</option>
-                <option value="gyeonggi">경기도</option>
-                <option value="incheon">전라남도</option>
-            </select>
-            <select id="filter-city">
-                <option value="">시(전체)</option>
-                <option value="incheon">인천</option>
-                <option value="suwon">수원</option>
-                <option value="pyeongtaek">평택</option>
-            </select>
             <button id="search-btn">검색</button>
         </div>
-
-        <!-- ✅ 지도 + 검색결과 영역 나란히 배치 -->
         <div class="search-content">
-            <div class="field-map-area" id="map">
-                ( KakaoMap API가 표시될 영역 )
-            </div>
-
+            <div class="map-area" id="map"></div>
             <div class="field-list-area">
-                <h2 style="font-size: 22px; margin-bottom: 15px;">검색 결과</h2>
+                <h2 style="font-size:22px;">검색 결과</h2>
                 <div id="field-list">
-                    <!-- JS 로직에 의해 구장 카드가 여기에 삽입됩니다 -->
+                    <p id="initial-message" style="color:#777; padding: 10px;">구장 목록을 로드 중...</p>
                 </div>
-                <p id="no-results-message" style="color: #666; text-align: center; margin-top: 30px; display: none;">
-                    검색 결과가 없습니다.
-                </p>
+                <p id="no-results-message" style="display:none; color:#777;">검색 결과가 없습니다.</p>
             </div>
         </div>
     </div>
-
 </main>
 
 <script>
-    // --- (★공통★) 메뉴 토글 로직 (유지) ---
-    const menuToggle = document.getElementById('menu-toggle');
-    const mainMenu = document.getElementById('main-menu');
-    const profileMenuToggle = document.getElementById('profile-menu-toggle');
-    const profileMenu = document.getElementById('profile-menu');
-    const logoutButton = document.getElementById('logout-button');
-    const navNotificationsLink = document.getElementById('nav-notifications-link');
-    const navChatLinkElement = document.getElementById('nav-chat-link'); // 추가
-    const navLoginLink = document.getElementById('nav-login-link');
-    const navLogoutLink = document.getElementById('nav-logout-link');
+    document.addEventListener("DOMContentLoaded", async () => {
+        // 1. 헤더 업데이트 (닉네임 표시)
+        const token = localStorage.getItem('accessToken');
+        const nickname = localStorage.getItem('userNickname');
 
+        const loginBtn = document.getElementById('nav-login-btn');
+        const profileIcon = document.getElementById('profile-menu-toggle');
+        const userSpan = document.getElementById('user-menu-username');
 
-    if (menuToggle) {
-        menuToggle.addEventListener('click', () => {
-            mainMenu.classList.toggle('show');
-            profileMenu.classList.remove('show');
-        });
-    }
-    if (profileMenuToggle) {
-        profileMenuToggle.addEventListener('click', () => {
-            profileMenu.classList.toggle('show');
-            mainMenu.classList.remove('show');
-        });
-    }
-    document.addEventListener('click', (event) => {
-        if (!mainMenu.contains(event.target) && !menuToggle.contains(event.target) &&
-            !profileMenu.contains(event.target) && !profileMenuToggle.contains(event.target)) {
-            mainMenu.classList.remove('show');
-            profileMenu.classList.remove('show');
+        if (token) {
+            if (loginBtn) loginBtn.style.display = 'none';
+            if (profileIcon) profileIcon.style.display = 'block';
+            if (userSpan) userSpan.textContent = nickname || '회원';
+        } else {
+            if (loginBtn) loginBtn.style.display = 'block';
+            if (profileIcon) profileIcon.style.display = 'none';
         }
-    });
-    if (logoutButton) {
-        logoutButton.addEventListener('click', (e) => {
+
+        // 2. 메뉴 이벤트
+        const profileMenu = document.getElementById('profile-menu');
+        if (profileIcon) profileIcon.addEventListener('click', () => profileMenu.classList.toggle('show'));
+
+        const menuToggle = document.getElementById('menu-toggle');
+        const mainMenu = document.getElementById('main-menu');
+        if (menuToggle) menuToggle.addEventListener('click', () => mainMenu.classList.toggle('show'));
+
+        document.getElementById('logout-button').addEventListener('click', (e) => {
             e.preventDefault();
             localStorage.removeItem('accessToken');
-            localStorage.removeItem('hasReadReviews');
-            localStorage.removeItem('hasReadSchedules');
+            localStorage.removeItem('userId');
+            localStorage.removeItem('userNickname');
             window.location.href = '/login';
         });
-    }
-    if (navNotificationsLink) {
-        navNotificationsLink.addEventListener('click', (e) => {
-            e.preventDefault();
-            localStorage.setItem('hasReadReviews', 'true');
-            localStorage.setItem('hasReadSchedules', 'true');
-            window.location.href = '/notifications';
+
+        // 3. 지도 및 초기 목록 로드
+        initMap();
+
+        // ⭐ 초기 목록 로드 및 렌더링 (마커 없이)
+        const list = await fetchStadiums("");
+        renderFieldList(list, false); // false: 초기에는 마커 안 그리기
+
+        document.getElementById("search-btn").addEventListener("click", performSearch);
+    });
+
+    let kakaoMap = null;
+    let kakaoMarkers = [];               // 생성된 마커들
+    let markerInfoById = new Map();      // stadiumId -> { marker, data }
+    let kakaoInfoWindow = null;         // 현재 열려 있는 인포윈도우
+
+    function initMap(lat = 37.5665, lng = 126.9780) {
+        // 서울 시청을 기본 중심으로 설정하여 마커 없이 지도만 초기화
+        if (!(window.kakao && window.kakao.maps)) return;
+        kakaoMap = new kakao.maps.Map(document.getElementById('map'), {
+            center: new kakao.maps.LatLng(lat, lng),
+            level: 5
         });
     }
-    // 로그아웃 링크 핸들러는 DOMContentLoaded에서 다시 바인딩 됨 (유지)
 
+    function showStadiumInfo(marker, stadium) {
+        if (!kakaoMap || !marker || !stadium) return;
 
-    const badge = document.getElementById('notification-badge');
-    let hasReviewNotif = false;
-    let hasScheduleNotif = false;
-
-    function updateGlobalBadge() {
-        if (hasReviewNotif || hasScheduleNotif) {
-            if (badge) badge.style.display = 'block';
-        } else {
-            if (badge) badge.style.display = 'none';
+        // 이전 인포윈도우 닫기
+        if (kakaoInfoWindow) {
+            kakaoInfoWindow.close();
         }
+
+        // 인포윈도우 내용 (이름 / 주소 / 상세보기 버튼)
+        const content = `
+    <div style="
+        box-sizing: border-box;
+        padding: 10px;
+        width: 230px;              /* 🔹 고정 폭으로 맞추기 */
+        white-space: normal;
+        word-break: break-all;      /* 🔹 영어/긴 단어도 강제 줄바꿈 */
+    ">
+        <div style="font-weight:600; margin-bottom:6px; font-size:14px;">
+            ${stadium.name}
+        </div>
+        <div style="font-size:12px; color:#555; margin-bottom:10px;">
+            ${stadium.address}
+        </div>
+        <button
+            style="
+                padding: 8px 10px;
+                font-size: 12px;
+                border: none;
+                border-radius: 4px;
+                background-color:#6c5ce7;
+                color:#fff;
+                cursor:pointer;
+            "
+            onclick="location.href='/stadium/detail?id=${stadium.stadiumId}'"
+        >
+            상세보기
+        </button>
+    </div>
+`;
+
+
+
+        kakaoInfoWindow = new kakao.maps.InfoWindow({
+            content: content
+        });
+
+        kakaoInfoWindow.open(kakaoMap, marker);
+        kakaoMap.panTo(marker.getPosition());
     }
-    async function checkPendingReviews() {
-        if (localStorage.getItem('hasReadReviews') === 'true') {
-            hasReviewNotif = false;
-            return;
+
+    function updateMapMarkers(list) {
+        if (!kakaoMap) return;
+
+        // 기존 마커 제거 및 정보 초기화
+        kakaoMarkers.forEach(m => m.setMap(null));
+        kakaoMarkers = [];
+        markerInfoById.clear();
+
+        if (kakaoInfoWindow) {
+            kakaoInfoWindow.close();
+            kakaoInfoWindow = null;
         }
-        try {
-            await new Promise(r => setTimeout(r, 200));
-            const mockReviews = { "count": 1 };
-            if (mockReviews.count > 0) {
-                hasReviewNotif = true;
-            }
-        } catch (error) { console.error("후기 알림 요청 중 오류:", error); }
-    }
-    async function checkUpcomingSchedules() {
-        if (localStorage.getItem('hasReadSchedules') === 'true') {
-            hasScheduleNotif = false;
-            return;
-        }
-        try {
-            await new Promise(r => setTimeout(r, 500));
-            const mockSchedules = [ { id: 1, date: "2025-11-01" } ];
-            if (mockSchedules.length > 0) {
-                hasScheduleNotif = true;
-            }
-        } catch (error) { console.error("일정 요청 중 오류 발생:", error); }
-    }
 
-    // ERD 반영: 더미 구장 데이터 (Stadium 엔티티 속성 반영)
-    const MOCK_FIELDS = [
-        { id: 1, name: "강남 풋살 아레나", address: "서울 강남구 테헤란로 123", size: "6 vs 6", fee: "50,000원/시간", etcInfo: "샤워실, 주차장, 대기실", contact: "02-1234-5678" },
-        { id: 2, name: "수원 월드컵 구장", address: "경기 수원시 팔달구 100", size: "5 vs 5", fee: "45,000원/시간", etcInfo: "샤워실, 대기실", contact: "031-9876-5432" },
-        { id: 3, name: "인천 문학 미니구장", address: "인천 연수구 동춘동 50", size: "5 vs 5", fee: "40,000원/시간", etcInfo: "주차장", contact: "032-1111-2222" },
-    ];
+        const bounds = new kakao.maps.LatLngBounds();
 
-    // 구장 목록 렌더링 함수
-    function renderFieldList(fields) {
-        const listContainer = document.getElementById('field-list');
-        const noResults = document.getElementById('no-results-message');
-        listContainer.innerHTML = '';
+        list.forEach(s => {
+            if (!s.latitude || !s.longitude) return;
+            const pos = new kakao.maps.LatLng(s.latitude, s.longitude);
+            const marker = new kakao.maps.Marker({ position: pos, map: kakaoMap });
 
-        if (fields.length === 0) {
-            noResults.style.display = 'block';
-            return;
-        }
-        noResults.style.display = 'none';
-
-        fields.forEach(field => {
-            const card = document.createElement('div');
-            card.className = 'field-card';
-            card.dataset.fieldId = field.id;
-
-
-
-            card.innerHTML = ` <h3>${field.name}</h3> `;
-
-            card.addEventListener('click', () => {
-                location.href = `/stadium/detail?id=${field.id}`;
+            // 마커 클릭 시 인포윈도우 + 지도 이동
+            kakao.maps.event.addListener(marker, 'click', () => {
+                showStadiumInfo(marker, s);
             });
 
-            listContainer.appendChild(card);
-        });
-    }
+            kakaoMarkers.push(marker);
+            bounds.extend(pos);
 
-    // 검색 실행 함수 (API 호출 시뮬레이션)
-    function performSearch() {
-        const keyword = document.getElementById('search-keyword').value.toLowerCase();
-        const region = document.getElementById('filter-region').value;
-
-        console.log(`검색 실행: 키워드(${keyword}), 지역(${region})`);
-
-        const filtered = MOCK_FIELDS.filter(field => {
-            const nameMatch = field.name.toLowerCase().includes(keyword);
-            const addressMatch = field.address.toLowerCase().includes(keyword);
-
-            const regionFilter = region ? field.address.includes(region === 'seoul' ? '서울' : (region === 'gyeonggi' ? '경기' : '인천')) : true;
-
-            return (nameMatch || addressMatch) && regionFilter;
+            // stadiumId 기준으로 marker / 데이터 저장
+            const id = s.stadiumId || s.id || s.stadium_id;
+            if (id != null) {
+                markerInfoById.set(String(id), { marker, data: s });
+            }
         });
 
-        renderFieldList(filtered);
+        if (kakaoMarkers.length > 0) {
+            kakaoMap.setBounds(bounds);
+        }
     }
 
+    // ⭐ renderFieldList: 카드 클릭 시 지도 이동 + 인포윈도우 열기
+    function renderFieldList(fields, updateMap = true) {
+        const list = document.getElementById("field-list");
+        const noMsg = document.getElementById("no-results-message");
+        let initialMsg = document.getElementById("initial-message");
 
-    // --- (★페이지별★) 로직 실행 ---
-    document.addEventListener('DOMContentLoaded', async () => {
-        const accessToken = localStorage.getItem('accessToken');
-        const currentPath = window.location.pathname;
+        list.innerHTML = "";
 
-        // ⭐⭐ 회원 전용 페이지 접근 차단 로직 ⭐⭐
-        if (!accessToken) {
-            alert("❌ 회원 전용 페이지입니다.\n로그인 후에 이용하실 수 있습니다.");
-            localStorage.setItem('redirectAfterLogin', currentPath);
-            window.location.href = '/login';
+        if (!fields || fields.length === 0) {
+            noMsg.style.display = "block";
+            // 검색 결과가 없을 때는 지도의 마커도 지웁니다.
+            updateMapMarkers([]);
             return;
         }
 
-        if (accessToken) {
-            if (profileMenuToggle) profileMenuToggle.style.display = 'block';
+        noMsg.style.display = "none";
 
-            // 로그인/로그아웃 메뉴 상태 설정
-            if (navLoginLink) navLoginLink.parentElement.style.display = 'none';
-            if (navLogoutLink) navLogoutLink.parentElement.style.display = 'list-item';
+        fields.forEach(field => {
+            const card = document.createElement("div");
+            card.className = "field-card";
+            card.innerHTML = `
+                <h3>${field.name}</h3>
+            `;
 
-            await checkPendingReviews();
-            await checkUpcomingSchedules();
-            updateGlobalBadge();
-        } else {
-            // 비회원 상태일 경우 메뉴 설정
-            if (navLoginLink) navLoginLink.parentElement.style.display = 'list-item';
-            if (navLogoutLink) navLogoutLink.parentElement.style.display = 'none';
+            card.addEventListener('click', () => {
+                const id = field.stadiumId || field.id || field.stadium_id;
+                if (!id || !kakaoMap) return;
+
+                const info = markerInfoById.get(String(id));
+                if (info && info.marker) {
+                    // 지도 이동 + 인포윈도우 표시
+                    showStadiumInfo(info.marker, info.data);
+                } else {
+                    // 혹시 아직 마커가 없으면 마커를 새로 그림
+                    updateMapMarkers([field]);
+                    const info2 = markerInfoById.get(String(id));
+                    if (info2 && info2.marker) {
+                        showStadiumInfo(info2.marker, info2.data);
+                    }
+                }
+            });
+
+            list.appendChild(card);
+        });
+
+        // 검색 버튼 눌렀을 때만 마커 업데이트
+        if (updateMap) {
+            updateMapMarkers(fields);
         }
+    }
 
-        // ⭐⭐ 보강: 메뉴바의 채팅 링크 클릭 방지 (회원만 허용) ⭐⭐
-        if (navChatLinkElement) {
-            const chatLinkAnchor = navChatLinkElement.querySelector('a');
-            if (chatLinkAnchor && !accessToken) {
-                chatLinkAnchor.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    alert("❌ 실시간 채팅은 회원만 이용할 수 있습니다.");
-                    window.location.href = '/login';
-                });
-            }
+    async function fetchStadiums(keyword) {
+        const url = keyword
+            ? `/api/stadiums/search?keyword=${encodeURIComponent(keyword)}`
+            : `/api/stadiums`;
+
+        try {
+            const response = await fetch(url);
+            if (!response.ok) throw new Error("API 호출 실패");
+            return await response.json();
+        } catch (e) {
+            console.error("데이터 로드 중 오류 발생:", e);
+            return [];
         }
+    }
 
-        // 검색 필터 초기화 및 이벤트 바인딩 유지
-        const dateFilter = document.getElementById('filter-date');
-        if (dateFilter) {
-            dateFilter.valueAsDate = new Date();
+    async function performSearch() {
+        const keyword = document.getElementById("search-keyword").value.trim();
+
+        // 키워드가 비어 있으면 전체 목록을 다시 로드
+        const stadiums = await fetchStadiums(keyword);
+
+        // 검색 버튼을 눌렀을 때는 반드시 마커를 업데이트해야 합니다.
+        renderFieldList(stadiums, true);
+
+        // 검색 결과가 없을 경우 지도를 서울 중심으로 리셋
+        if (stadiums.length === 0 && kakaoMap) {
+            updateMapMarkers([]);
+            kakaoMap.setCenter(new kakao.maps.LatLng(37.5665, 126.9780));
+            kakaoMap.setLevel(5);
         }
-
-        const searchBtn = document.getElementById('search-btn');
-        if (searchBtn) {
-            searchBtn.addEventListener('click', performSearch);
-        }
-
-        // 초기 로드 시 전체 목록 표시
-        renderFieldList(MOCK_FIELDS);
-    });
+    }
 </script>
+
+</body>
+</html>
