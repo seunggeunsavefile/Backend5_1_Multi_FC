@@ -8,8 +8,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -33,9 +34,6 @@ public class UserController {
             @ModelAttribute UserDto userDto,
             @RequestParam(value = "profile_image_file", required = false) MultipartFile profileImageFile
     ) {
-        System.out.println("👉 [요청 도착] DTO: " + userDto);
-        System.out.println("👉 [요청 도착] 파일: " + (profileImageFile != null ? profileImageFile.getOriginalFilename() : "없음"));
-
         try {
             userService.signup(userDto, profileImageFile);
             return new ResponseEntity<>("회원가입 성공", HttpStatus.CREATED);
@@ -47,8 +45,7 @@ public class UserController {
         }
     }
 
-    // --- [로그인 기능 추가] ---
-    // login.html의 스크립트가 호출하는 API
+    // --- [로그인 기능 수정] ---
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody Map<String, String> payload) {
         String username = payload.get("username");
@@ -74,16 +71,14 @@ public class UserController {
                 return ResponseEntity.ok(response);
 
             } else {
-                System.out.println("❌ 로그인 실패: 아이디 또는 비밀번호 불일치");
                 return new ResponseEntity<>("아이디 또는 비밀번호가 올바르지 않습니다.", HttpStatus.UNAUTHORIZED);
             }
         } catch (Exception e) {
+            System.err.println("❌ 로그인 중 예외 발생:");
             e.printStackTrace();
             return new ResponseEntity<>("로그인 중 서버 오류가 발생했습니다.", HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
-
-    // --- [기존] 중복 확인 API ---
 
     // 아이디 중복 확인 API
     @GetMapping("/check-username")
@@ -184,47 +179,21 @@ public class UserController {
     }
 
     @GetMapping("/me")
-    public ResponseEntity<UserDto> getCurrentUser() {
-        log.info("📡 /api/users/me 호출됨");
-
-        // ✅ SecurityContext에서 Authentication 가져오기
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
-        if (authentication == null || !authentication.isAuthenticated()) {
-            log.error("❌ 인증 정보가 없음");
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+    public ResponseEntity<?> getCurrentUser(@AuthenticationPrincipal UserDetails userDetails) {
+        if (userDetails == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("로그인되지 않았습니다.");
         }
 
-        // ✅ Principal에서 username 추출
-        String username = authentication.getName();
-        log.info("✅ 인증된 사용자: {}", username);
+        UserDto user = userService.getUserProfile(userDetails.getUsername());
 
-        if (username == null || username.equals("anonymousUser")) {
-            log.error("❌ 익명 사용자");
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
-
-        try {
-            // ✅ username으로 사용자 정보 조회
-            UserDto user = userService.getUserByUsername(username);
-
-            if (user == null) {
-                log.error("❌ 사용자를 찾을 수 없음: {}", username);
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-            }
-
-            // 보안: 민감 정보 제거
-            user.setPassword(null);
-            user.setResetCode(null);
-            user.setResetCodeExpires(null);
-
-            log.info("✅ 사용자 정보 조회 성공: userId={}, nickname={}", user.getUserId(), user.getNickname());
-            return ResponseEntity.ok(user);
-
-        } catch (Exception e) {
-            log.error("❌ 사용자 정보 조회 실패: {}", e.getMessage(), e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
+        // 보안을 위해 비밀번호는 제외하고 필요한 정보만 Map으로 반환
+        Map<String, Object> response = new HashMap<>();
+        response.put("userId", user.getUserId());
+        response.put("username", user.getUsername());
+        response.put("nickname", user.getNickname());
+        response.put("email", user.getEmail());
+        response.put("profileImage", user.getProfileImage());
+        return ResponseEntity.ok(response);
     }
 
     // ✅ 수정: /search 엔드포인트
@@ -282,5 +251,8 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
     }
+
+
+
 
 }

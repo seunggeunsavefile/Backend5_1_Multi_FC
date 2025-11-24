@@ -7,6 +7,643 @@
     <link rel="stylesheet" th:href="@{/css/style.css}">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700;900&family=Noto+Sans+KR:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+    <style>
+        /* [기존 스타일 유지] */
+        .chat-main {
+            padding-top: 70px;
+            display: flex;
+            min-height: 100vh;
+            background-color: #f7f7f7;
+            position: relative;
+            overflow-x: hidden;
+            transition: all 0.3s ease-in-out;
+        }
+        .chat-sidebar {
+            width: 300px;
+            background: white;
+            border-right: 1px solid #ddd;
+            flex-shrink: 0;
+            display: flex;
+            flex-direction: column;
+        }
+        .chat-content-area {
+            flex-grow: 1;
+            background: #fff;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            transition: all 0.3s ease-in-out;
+            min-width: 0;
+        }
+
+        /* 핵심 CSS: 사이드바가 열릴 때 메인 콘텐츠를 밀어냅니다. */
+        .chat-main.sidebar-open {
+            margin-right: 280px;
+        }
+
+        .chat-header {
+            padding: 15px 20px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 18px;
+            font-weight: 700;
+            color: #2c3e50;
+        }
+
+        /* ★채팅 유형 탭 버튼 스타일 (깔끔한 글씨 밑줄 형식)★ */
+        .chat-type-tabs {
+            display: flex;
+            justify-content: space-around;
+            padding: 10px 0 0 0;
+            margin-bottom: 0;
+            border-bottom: 1px solid #eee;
+        }
+        .chat-type-tabs button {
+            flex-grow: 1;
+            padding: 10px 5px;
+            margin: 0;
+            background: none !important;
+            border: none !important;
+            border-radius: 0 !important;
+            font-size: 14px;
+            font-weight: 600;
+            color: #999;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            transition: all 0.2s;
+            outline: none;
+        }
+        .chat-type-tabs button.active {
+            color: #6c5ce7;
+            border-bottom-color: #6c5ce7;
+        }
+        .chat-type-tabs button:hover:not(.active) {
+            color: #2c3e50;
+            background-color: transparent;
+        }
+
+
+        /* 채팅방 목록 */
+        .room-list-container {
+            flex-grow: 1;
+            overflow-y: auto;
+        }
+        .room-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 10px 15px 20px;
+            border-bottom: 1px solid #f7f7f7;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .room-item:hover, .room-item.active {
+            background-color: #f0f0f0;
+        }
+        .room-info {
+            flex-grow: 1;
+            min-width: 0;
+            padding-right: 10px;
+        }
+        .room-name {
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        .last-message {
+            font-size: 13px;
+            color: #888;
+            margin-top: 4px;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+        }
+
+        /* 삭제 버튼 스타일 */
+        .delete-room-btn {
+            background: none;
+            border: none;
+            color: #e74c3c;
+            font-size: 15px;
+            cursor: pointer;
+            flex-shrink: 0;
+            opacity: 0.7;
+            padding: 5px;
+        }
+        .delete-room-btn:hover {
+            opacity: 1;
+        }
+
+        /* 채팅방 상세 */
+        .chat-messages {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 20px;
+            background-color: #f7f7f7;
+        }
+        .chat-input-area {
+            border-top: 1px solid #ddd;
+            padding: 10px 20px;
+            display: flex;
+            align-items: center;
+            background: white;
+        }
+        .chat-input-area input {
+            flex-grow: 1;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 20px;
+            margin-right: 10px;
+            font-size: 15px;
+        }
+        .chat-input-area button {
+            background-color: #6c5ce7;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .chat-input-area button:hover {
+            background-color: #8e44ad;
+        }
+        /* 각 메시지 묶음 */
+        .message-wrapper {
+            margin: 12px 0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* 정렬 */
+        .message-wrapper.other {
+            align-items: flex-start;
+        }
+
+        .message-wrapper.mine {
+            align-items: flex-end;
+        }
+
+        /* 닉네임 */
+        .message-nickname {
+            font-size: 13px;
+            color: #444;
+            margin-bottom: 3px;
+            margin-left: 4px;
+            font-weight: 600;
+        }
+
+        /* 말풍선 + 시간 행 */
+        .bubble-row {
+            display: flex;
+            align-items: flex-end;
+            gap: 6px;
+        }
+
+        .bubble-row.other {
+            justify-content: flex-start;
+        }
+
+        .bubble-row.mine {
+            justify-content: flex-end;
+        }
+
+        /* 말풍선 스타일 */
+        .message-bubble {
+            max-width: 250px;
+            padding: 9px 12px;
+            border-radius: 18px;
+            line-height: 1.4;
+            font-size: 14px;
+            word-break: break-word;
+        }
+
+        /* 상대 말풍선 */
+        .message-bubble.other {
+            background: #ffffff;
+            border: 1px solid #ddd;
+            color: #222;
+        }
+
+        /* 내 말풍선 (카톡 블루 계열) */
+        .message-bubble.mine {
+            background: #d2e4fc;
+            color: #111;
+        }
+
+        /* 시간 */
+        .message-time {
+            font-size: 11px;
+            color: #777;
+            margin-bottom: 15px;
+        }
+
+        .message-text {
+            padding: 10px 15px;
+            max-width: 70%;
+            word-wrap: break-word;
+            font-size: 15px;
+        }
+        .message-meta {
+            font-size: 11px;
+            color: #888;
+            align-self: flex-end;
+            margin: 0 5px;
+        }
+
+        /* 룸이 선택되지 않았을 때 */
+        #chat-welcome-message {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 20px;
+            color: #999;
+            height: 100%;
+            text-align: center;
+        }
+        #current-chat-room {
+            display: none;
+            flex-direction: column;
+            position: relative;
+            height: 100%;
+            overflow: hidden; /* 인라인 프로필이 벗어나지 않도록 */
+        }
+
+        /* 상태 메시지 */
+        #connection-status {
+            position: absolute;
+            top: 70px;
+            left: 0;
+            width: 100%;
+            background-color: #f0f0f0;
+            color: #e74c3c;
+            padding: 8px;
+            text-align: center;
+            font-size: 14px;
+            font-weight: 600;
+            z-index: 990;
+            display: none;
+        }
+
+        /* ★참여자 목록 사이드바 스타일★ */
+        #participant-sidebar {
+            position: fixed;
+            top: 70px;
+            right: 0;
+            width: 280px;
+            height: calc(100vh - 70px);
+            background: white;
+            box-shadow: -4px 0 10px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+            transform: translateX(100%);
+            transition: transform 0.3s ease-in-out;
+            display: flex;
+            flex-direction: column;
+            border-left: 1px solid #ddd;
+        }
+        #participant-sidebar.open {
+            transform: translateX(0);
+        }
+        .sidebar-header {
+            padding: 15px 20px;
+            font-size: 18px;
+            font-weight: 700;
+            color: #2c3e50;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .sidebar-close-btn {
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            color: #555;
+        }
+        .participant-list-container {
+            flex-grow: 1;
+            padding: 10px 0;
+        }
+
+        /* 참여자 항목 스타일 개선 */
+        .participant-item {
+            display: flex;
+            align-items: center;
+            padding: 10px 20px;
+            border-bottom: 1px solid #f7f7f7;
+            cursor: pointer;
+        }
+        .participant-item:hover {
+            background-color: #fcfcfc;
+        }
+        .participant-icon-wrapper {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            background-color: #f0f0f0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-right: 10px;
+            flex-shrink: 0;
+        }
+        .participant-icon-wrapper i {
+            font-size: 16px;
+            color: #6c5ce7;
+            margin: 0;
+        }
+        .participant-details {
+            display: flex;
+            flex-direction: column;
+            line-height: 1.3;
+        }
+        .participant-name {
+            font-size: 15px;
+            color: #333;
+            font-weight: 500;
+        }
+        .participant-role-badge {
+            font-size: 11px;
+            font-weight: 700;
+            padding: 2px 5px;
+            border-radius: 5px;
+            margin-left: 5px;
+            color: white;
+            white-space: nowrap;
+        }
+        .role-admin { background-color: #6c5ce7; }
+        .role-host { background-color: #e74c3c; }
+        .role-me { background-color: #3498db; }
+
+        /* 모바일 대응 */
+        @media (max-width: 900px) {
+            .chat-main.sidebar-open {
+                width: 100%;
+                margin-right: 0;
+            }
+            #participant-sidebar {
+                width: 100%;
+                height: calc(100vh - 70px);
+            }
+        }
+
+        /* ★모달 스타일★ */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10001;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+        }
+        .modal-overlay.open {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            max-width: 400px;
+            width: 90%;
+            transform: translateY(-20px);
+            transition: transform 0.3s;
+            position: relative;
+        }
+        .modal-overlay.open .modal-content {
+            transform: translateY(0);
+        }
+        .modal-content h2 {
+            font-size: 24px;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #6c5ce7;
+            padding-bottom: 10px;
+        }
+        .modal-content p {
+            font-size: 15px;
+            color: #555;
+            margin-bottom: 10px;
+        }
+        .modal-content strong {
+            color: #6c5ce7;
+            margin-left: 5px;
+        }
+        .modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        .modal-actions button {
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .btn-cancel {
+            background: #f0f0f0;
+            color: #555;
+            border: 1px solid #ddd;
+        }
+        .btn-create {
+            background: #6c5ce7;
+            color: white;
+            border: none;
+        }
+
+        /* 새 채팅 모달 전용 입력 필드 스타일 */
+        #new-chat-modal .modal-content input,
+        #new-chat-modal .modal-content select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            box-sizing: border-box;
+            font-size: 15px;
+        }
+
+        /* ★친구 초대 모달 목록 스타일 */
+        .invite-friend-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid #f7f7f7;
+            cursor: pointer;
+        }
+        .invite-friend-item:hover {
+            background-color: #fafafa;
+        }
+        .invite-friend-item.selected {
+            background-color: #e6e6ff; /* 연한 보라색 배경 */
+        }
+        .invite-friend-item span {
+            font-size: 15px;
+            color: #333;
+        }
+        .friend-status {
+            font-size: 12px;
+            color: #28a745; /* 온라인 색상 */
+            margin-left: 10px;
+        }
+        .friend-status.offline {
+            color: #999;
+        }
+        .friend-checkbox {
+            transform: scale(1.2);
+            accent-color: #6c5ce7;
+        }
+
+        /* ★초대 모달 내 버튼 */
+        #invite-modal .modal-content button {
+            padding: 5px 15px;
+            border-radius: 5px;
+            font-weight: 600;
+        }
+        #final-invite-btn:disabled {
+            background-color: #aaa;
+            cursor: not-allowed;
+        }
+
+        /* ★★★ 최종 수정: 인라인 프로필 상세 정보 스타일 (버그 해결 및 UI 확정) ★★★ */
+        .inline-profile-detail {
+            /* ⭐⭐⭐ 위치 조정: FIXED + 우측 참여자 사이드바 옆에 나오도록 ⭐⭐⭐ */
+            position: fixed;
+            top: 100px;
+            right: 280px; /* 참여자 사이드바 너비만큼 왼쪽으로 띄우기 (280px) */
+            width: 200px; /* 창 크기 조정 */
+            height: auto;
+            background: white;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+            padding: 15px;
+
+            /* ⭐⭐⭐ 초기 숨김 상태 (JS에서 display:none 제어) ⭐⭐⭐ */
+            transform: translateX(100%);
+            transition: transform 0.3s ease-in-out;
+            display: none; /* ⭐⭐ 초기 렌더링 시 아예 숨김 ⭐⭐ */
+            flex-direction: column;
+            z-index: 9999;
+            border: 1px solid #ddd;
+        }
+
+        /* 창이 열렸을 때 (현재 위치(right: 280px)로 이동) */
+        .inline-profile-detail.open {
+            transform: translateX(0%); /* X축 이동 0% = right: 280px 위치에 표시 */
+            display: flex; /* ⭐⭐ 열릴 때만 보이게 설정 ⭐⭐ */
+        }
+
+        .inline-profile-detail .close-profile-btn {
+            position: absolute;
+            top: 5px;
+            right: 10px;
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            color: #555;
+        }
+        .profile-detail-img {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-bottom: 8px;
+            border: 2px solid #6c5ce7;
+        }
+        .profile-info-content h3 {
+            font-size: 16px;
+            color: #2c3e50;
+            margin-bottom: 8px;
+        }
+        .profile-meta-info p {
+            font-size: 12px;
+            color: #555;
+            margin-bottom: 4px;
+        }
+        .profile-meta-info strong {
+            font-size: 13px;
+        }
+        .chat-one-on-one-btn, .send-friend-request-btn {
+            padding: 8px 10px;
+            margin-top: 8px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            transition: background-color 0.2s;
+            font-size: 13px;
+        }
+        /* 프로필 상세 창이 열렸을 때 메시지 영역을 밀어냅니다. (fixed position이라 필요 없음) */
+        .chat-content-area.profile-open {
+            padding-left: 0;
+        }
+        /* ⭐⭐ 보강: 채팅방 상세 정보 (인원/유형) 헤더 스타일 ⭐⭐ */
+        .room-title-wrapper {
+            display: flex;
+            align-items: center;
+        }
+        .room-status-info {
+            font-size: 13px;
+            font-weight: 500;
+            color: #6c5ce7;
+            margin-left: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .room-status-info .fa-lock { color: #e74c3c; } /* 1:1 채팅 아이콘 색상 */
+        .room-status-info .fa-users { color: #6c5ce7; } /* 그룹 채팅 아이콘 색상 */
+        /* ⭐⭐ 보강 끝 ⭐⭐ */
+        /* ⭐⭐ 보강: 안 읽은 메시지 뱃지 및 인원 수 표시를 위한 컨테이너 ⭐⭐ */
+        .room-item-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-shrink: 0;
+        }
+        .unread-badge {
+            background-color: #e74c3c;
+            color: white;
+            font-size: 11px;
+            font-weight: 700;
+            border-radius: 40px;
+            padding: 3px 8px;
+            flex-shrink: 0;
+            display: inline-block;
+            min-width: 24px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.07);
+            text-align: center;
+        }
+        /* ⭐⭐ 보강 끝 ⭐⭐ */
+
+        /* ★추가: 친구 초대 버튼 스타일 개선 */
+        .invite-action-btn {
+            padding: 15px 25px !important; /* 내부 패딩 증가로 높이/크기 증가 */
+            font-size: 16px !important; /* 폰트 크기 유지 */
+            font-weight: 700 !important;
+            cursor: pointer !important; /* 마우스 포인터 추가 */
+            transition: background-color 0.3s, transform 0.2s;
+        }
+        .invite-action-btn:hover {
+            transform: translateY(-1px);
+            background-color: #27ae60 !important; /* hover 색상 변경 */
+        }
+    </style>
 </head>
 <body>
 
@@ -120,15 +757,15 @@
     </div>
     <div id="participant-list-container" class="participant-list-container"></div>
     <div style="padding: 15px; border-top: 1px solid #eee;">
-        <button class="chat-btn-create invite-action-btn" style="width: 100%;" onclick="openInviteModal()" id="open-invite-modal-btn">
+        <button class="btn-create invite-action-btn" style="width: 100%;" onclick="openInviteModal()" id="open-invite-modal-btn">
             <i class="fas fa-user-plus"></i> 친구 초대하기
         </button>
     </div>
 </div>
 
 <!-- ✅ 모달: 새 채팅방 생성 -->
-<div id="new-chat-modal" class="chat-modal-overlay">
-    <div class="chat-modal-content">
+<div id="new-chat-modal" class="modal-overlay">
+    <div class="modal-content">
         <h2>새 채팅방 시작</h2>
 
         <label for="new-chat-type">채팅방 유형 선택</label>
@@ -155,15 +792,15 @@
         </div>
 
         <div class="modal-actions">
-            <button class="chat-btn-cancel" onclick="openNewChatModal(false)" id="cancel-new-chat-btn">취소</button>
-            <button class="chat-btn-create" onclick="createNewChat()" id="create-new-chat-btn">채팅 시작</button>
+            <button class="btn-cancel" onclick="openNewChatModal(false)" id="cancel-new-chat-btn">취소</button>
+            <button class="btn-create" onclick="createNewChat()" id="create-new-chat-btn">채팅 시작</button>
         </div>
     </div>
 </div>
 
 <!-- ✅ 모달: 친구 초대 -->
-<div id="invite-modal" class="chat-modal-overlay">
-    <div class="chat-modal-content">
+<div id="invite-modal" class="modal-overlay">
+    <div class="modal-content">
         <h2>친구 초대</h2>
         <p id="invite-room-info" style="font-size: 14px; color: #555; margin-bottom: 15px;">
             현재 방: <strong id="invite-room-name">...</strong>
@@ -176,8 +813,8 @@
                 <span id="selected-invite-count">0</span>명 선택됨
             </p>
             <div>
-                <button class="chat-btn-cancel" onclick="openInviteModal(false)" id="cancel-invite-btn">취소</button>
-                <button class="chat-btn-create" onclick="sendInvite()" id="final-invite-btn">초대하기</button>
+                <button class="btn-cancel" onclick="openInviteModal(false)" id="cancel-invite-btn">취소</button>
+                <button class="btn-create" onclick="sendInvite()" id="send-invite-btn">초대하기</button>
             </div>
         </div>
     </div>
@@ -453,7 +1090,8 @@
 
         if(receivedMessage.roomId === currentRoomId) {
             displayMessage({
-                sender: receivedMessage.senderNickname,
+                sender: receivedMessage.senderId,
+                senderNickname: receivedMessage.senderNickname,
                 content: receivedMessage.content,
                 timestamp : formatTimestamp(receivedMessage.sentAt || new Date()),
             });
@@ -487,7 +1125,7 @@
     }
 
     function updateLastMessageInList(roomId, content, senderNickname) {
-        const roomItem = document.querySelector(`room-item-[data-room-id="${roomId}"]`);
+        const roomItem = document.querySelector(`.room-item-[data-room-id="${roomId}"]`);
         if(roomItem) {
             const roomInfo = roomItem.querySelector('.room-info');
             if(roomInfo) {
@@ -592,7 +1230,8 @@
 
 
             displayMessage({
-                sender : message.senderNickname,
+                sender : message.senderId,
+                senderNickname : message.senderNickname,
                 content : message.content,
                 timestamp : formatTimestamp(message.sentAt || new Date())
             });
@@ -625,25 +1264,18 @@
 
         const chatMessage = {
             roomId: currentRoomId,
-            sender: myUserId,
-            senderNickname: myUsername,
+            sender: currentUserId,
+            senderNickname: currentNickname,
             content: messageContent,
         };
 
-        console.log(chatMessage);
+        console.log("chatMessage :", chatMessage);
 
         // 1. 서버로 전송 (실시간 웹소켓)
         stompClient.send(`/app/chatroom/${currentRoomId}/send`, {}, JSON.stringify(chatMessage));
 
         // 2. 입력 필드 초기화
         inputArea.value = '';
-
-        // // 3. 화면에 즉시 표시 (UX 개선)
-        // displayMessage({
-        //     sender: myUsername,
-        //     content: messageContent,
-        //     timestamp: new Date().toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })
-        // });
 
         // 4. 목록의 마지막 메시지 업데이트
         updateLastMessage(currentRoomId, messageContent);
@@ -664,28 +1296,73 @@
     }
 
     function displayMessage(message) {
-        const isMine = message.sender === myUsername;
+        const isMine = message.sender === myUserId;
+
+        const wrapper = document.createElement('div');
+        wrapper.className = 'message-wrapper ' + (isMine ? 'mine' : 'other');
+
+        if (!isMine) {
+            const nicknameDiv = document.createElement('div');
+            nicknameDiv.className = 'message-nickname';
+            nicknameDiv.textContent = message.senderNickname;
+            wrapper.appendChild(nicknameDiv);
+        }
+
+        const bubbleRow = document.createElement('div');
+        bubbleRow.className = 'bubble-row ' + (isMine ? 'mine' : 'other');
+
+        const timeDiv = document.createElement('div');
+        timeDiv.className = 'message-meta';
+        timeDiv.textContent = message.timestamp;
+
         const bubble = document.createElement('div');
         bubble.className = 'message-bubble ' + (isMine ? 'mine' : 'other');
+        bubble.innerHTML = message.content;
 
-        let senderName = isMine ? '' : message.sender;
-        if (message.sender.includes("(운영진)") || message.sender.includes("관리자")) {
-            senderName = `<span style="font-weight: 700; color: #6c5ce7;">${senderName}</span>`;
-        } else if (message.sender.includes("(방장)")) {
-            senderName = `<span style="font-weight: 700; color: #e74c3c;">${senderName}</span>`;
-        }
+        // 시간
+        const time = document.createElement('div');
+        time.className = 'message-time';
+        time.textContent = message.timestamp;
 
-        const meta = `<div class="message-meta">${message.timestamp}</div>`;
-        const content = `<div class="message-content message-text">${senderName}${!isMine && senderName ? ': ' : ''}${message.content}</div>`;
-
+        // 카톡처럼 말풍선 오른쪽에 시간 붙이기
         if (isMine) {
-            bubble.innerHTML = meta + content;
+            bubbleRow.appendChild(time);
+            bubbleRow.appendChild(bubble);
         } else {
-            bubble.innerHTML = content + meta;
+            bubbleRow.appendChild(bubble);
+            bubbleRow.appendChild(time);
         }
 
-        chatContainer.appendChild(bubble);
+        wrapper.appendChild(bubbleRow);
+
+        chatContainer.appendChild(wrapper);
         chatContainer.scrollTop = chatContainer.scrollHeight;
+
+        // const isMine = message.sender === myUserId;
+        // const bubble = document.createElement('div');
+        // bubble.className = 'message-bubble ' + (isMine ? 'mine' : 'other');
+        //
+        // if(!isMine) {
+        //     const nicknameDiv = document.createElement('div');
+        //     nicknameDiv.className = 'message-nickname';
+        //     nicknameDiv.textContent = message.senderNickname;
+        //     bubble.appendChild(nicknameDiv);
+        // }
+        //
+        //
+        //
+        //
+        // const meta = `<div class="message-meta">${message.timestamp}</div>`;
+        // const content = `<div class="message-content message-text">${message.senderNickname}${!isMine && message.senderNickname ? ': ' : ''}${message.content}</div>`;
+        //
+        // if (isMine) {
+        //     bubble.innerHTML = meta + content;
+        // } else {
+        //     bubble.innerHTML = content + meta;
+        // }
+        //
+        // chatContainer.appendChild(bubble);
+        // chatContainer.scrollTop = chatContainer.scrollHeight;
     }
 
     // 채팅방 목록 관리
@@ -870,7 +1547,8 @@
 
             messages.forEach(msg => {
                 displayMessage({
-                    sender : msg.senderNickname,
+                    sender : msg.senderId,
+                    senderNickname : msg.senderNickname,
                     content : msg.content,
                     timestamp: formatTimestamp(msg.sentAt)
                 });
@@ -1135,7 +1813,7 @@
         const recipientInput = newChatRecipientInput.value.trim();
         const maxParticipantsInput = document.getElementById('new-chat-max-participants'); // 추가된 변수
         const maxParticipants = parseInt(maxParticipantsInput.value);
-        const createBtn = document.querySelector('.chat-btn-create');
+        const createBtn = document.querySelector('.btn-create');
         createBtn.disabled = true;
 
         if (!title) {
@@ -1144,7 +1822,7 @@
         }
 
         try {
-            const token = localStorage.getItem('accessToken');
+            //const token = localStorage.getItem('accessToken');
             let apiUrl = '';
             let requestOptions = {
                 method: 'POST',

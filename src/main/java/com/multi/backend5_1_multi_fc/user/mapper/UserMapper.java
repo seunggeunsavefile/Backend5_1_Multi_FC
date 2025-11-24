@@ -4,6 +4,8 @@ import com.multi.backend5_1_multi_fc.user.dto.UserDto;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
+import java.util.List;
+
 @Mapper
 public interface UserMapper {
 
@@ -71,4 +73,18 @@ public interface UserMapper {
      * @return UserDto
      */
     UserDto findUserByEmail(String email);
+
+    /**
+     * 10. 사용자 Id로 사용자 정보 조회 (Chat 용)
+     * @param userId - 이메일
+     * @return UserDto
+     */
+    UserDto findByUserId(Long userId);
+
+    /**
+     * 11. 사용자 닉네임으로 사용자들 정보 조회 (Chat 용)
+     * @param nickname - 이메일
+     * @return UserDto
+     */
+    List<UserDto> findUsersByNickname(String nickname);
 }

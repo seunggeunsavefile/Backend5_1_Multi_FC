@@ -70,4 +70,12 @@
     <select id="findUsernameByEmail" parameterType="String" resultType="String">
         SELECT username FROM User WHERE email = #{email}
     </select>
+
+    <select id="findByUserId" parameterType="Long" resultMap="userResultMap">
+        SELECT * FROM User WHERE user_id = #{user_id}
+    </select>
+
+    <select id="findUsersByNickname" parameterType="String" resultMap="userResultMap">
+        SELECT * FROM User WHERE nickname LIKE CONCAT('%', #{nickname}, '%') LIMIT 10
+    </select>
 </mapper>

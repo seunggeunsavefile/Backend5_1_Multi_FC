@@ -31,3 +31,4 @@ public class MyPageDao {
         return myPageMapper.updatePasswordByUserId(userId, encodedPassword);
     }
 }
+

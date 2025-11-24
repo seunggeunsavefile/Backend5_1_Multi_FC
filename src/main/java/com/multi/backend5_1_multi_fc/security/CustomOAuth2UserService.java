@@ -51,17 +51,11 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
             throw new OAuth2AuthenticationException("Unsupported registrationId: " + registrationId);
         }
 
-
-        System.out.println("========== SSO 로그인 시도 ==========");
-        System.out.println("플랫폼: " + registrationId);
-        System.out.println("이메일: " + email);
-
         // 2. DB에서 이메일로 사용자 조회
         UserDto user = userMapper.findUserByEmail(email);
 
         if (user != null) {
             // (A) 이미 가입된 회원 (로그인 성공)
-            System.out.println("✅ 기존 회원 확인됨! ID: " + user.getUsername());
 
             Map<String, Object> userAttributes = new HashMap<>(attributes);
 
@@ -75,7 +69,6 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         }
 
         // (B) 신규 회원 (회원가입 필요)
-        System.out.println("🆕 신규 회원입니다. 회원가입 페이지로 이동합니다.");
 
         Map<String, Object> customAttributes = new HashMap<>(attributes);
         customAttributes.put("email", email);

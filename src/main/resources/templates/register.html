@@ -8,6 +8,101 @@
     <link rel="stylesheet" th:href="@{/css/style.css}">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700;900&family=Noto+Sans+KR:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+    <style>
+        .input-group.address-group { display: flex; gap: 10px; align-items: flex-end; }
+        .input-group.address-group .input-wrapper { flex-grow: 1; }
+        .address-group button { padding: 12px 15px; font-size: 14px; font-weight: 600; color: #fff; background: #95a5a6; border: none; border-radius: 10px; cursor: pointer; transition: background 0.3s; white-space: nowrap; min-width: 80px; }
+        .address-group button:hover { background: #7f8c8d; }
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.5); display: none; justify-content: center; align-items: center; z-index: 9999; }
+        .modal-overlay.show { display: flex; }
+        .modal { background: #fff; max-width: 900px; width: 90%; max-height: 80vh; border-radius: 12px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25); display: flex; flex-direction: column; overflow: hidden; }
+        .modal-header { padding: 16px 20px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; }
+        .modal-header h1 { margin: 0; font-size: 20px; }
+        .modal-close-btn { background: none; border: none; font-size: 22px; cursor: pointer; }
+        .modal-body { padding: 16px 20px; overflow-y: auto; }
+        .modal-body h2 { margin-top: 24px; }
+        .modal-body .clause { background: #f4f4f4; border: 1px solid #ddd; padding: 15px; margin-top: 10px; }
+        .modal-footer { padding: 16px 20px; border-top: 1px solid #eee; text-align: center; }
+        .agree-btn { padding: 12px 24px; font-size: 16px; font-weight: 600; border: none; border-radius: 8px; background: #6c5ce7; color: #fff; cursor: pointer; }
+        .agree-btn:hover { background: #574bdb; }
+        .terms-link { color: #3498db; text-decoration: underline; cursor: pointer; }
+
+        .info-message {
+            font-size: 13px !important;
+            font-weight: 500 !important;
+            margin-top: 5px !important;
+            display: none !important;
+            min-height: 0 !important;
+        }
+        .info-message.success {
+            color: #2ecc71 !important;
+            display: block !important;
+        }
+        .info-message.error {
+            color: #e74c3c !important;
+            display: block !important;
+        }
+        .profile-upload-container {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            margin-top: 10px;
+        }
+        .preview-wrapper {
+            position: relative;
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            border: 2px solid #ddd;
+            background-color: #fff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+        .preview-text {
+            font-size: 14px;
+            color: #aaa;
+            font-weight: bold;
+            z-index: 1;
+        }
+        .profile-preview {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: none;
+            z-index: 2;
+        }
+        .profile-preview.active {
+            display: block;
+        }
+        .profile-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .reset-img-btn {
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 5px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        .reset-img-btn:hover { background-color: #c0392b; }
+        input[type="text"]:read-only,
+        input[type="email"]:read-only {
+            background-color: #eee !important;
+            color: #777;
+            cursor: not-allowed;
+        }
+    </style>
 </head>
 
 <body>
@@ -33,20 +128,23 @@
 
                     <div class="input-group">
                         <label for="email">이메일 (Email)</label>
-                        <input type="email" id="email" name="email" placeholder="비밀번호 찾기 등에 사용" required>
-                        <p id="email-message" class="register-info-message"></p>
+                        <input type="email" id="email" name="email" placeholder="비밀번호 찾기 등에 사용" required
+                               th:value="${socialInfo != null} ? ${socialInfo.email} : ''"
+                               th:readonly="${socialInfo != null}">
+                        <p id="email-message" class="info-message"></p>
                     </div>
 
                     <div class="input-group">
                         <label for="username">아이디 (User name)</label>
                         <input type="text" id="username" name="username" placeholder="5~20자 영문 소문자, 숫자, (_)만 사용" required>
-                        <p id="username-message" class="register-info-message"></p>
+                        <p id="username-message" class="info-message"></p>
                     </div>
 
                     <div class="input-group">
                         <label for="nickname">닉네임</label>
-                        <input type="text" id="nickname" name="nickname" placeholder="2~16자 한글, 영문, 숫자" required>
-                        <p id="nickname-message" class="register-info-message"></p>
+                        <input type="text" id="nickname" name="nickname" placeholder="2~16자 한글, 영문, 숫자" required
+                               th:value="${socialInfo != null} ? ${socialInfo.nickname} : ''">
+                        <p id="nickname-message" class="info-message"></p>
                     </div>
 
                     <div class="input-group">
@@ -55,7 +153,7 @@
                             <input type="password" id="password" name="password" placeholder="8자 이상, 영문/숫자/특수문자 조합" required pattern="^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$">
                             <i class="fas fa-eye-slash toggle-password" data-target="password"></i>
                         </div>
-                        <p id="password-message" class="register-info-message"></p>
+                        <p id="password-message" class="info-message"></p>
                     </div>
 
                     <div class="input-group">
@@ -117,9 +215,25 @@
                     </div>
 
                     <div class="input-group">
-                        <label for="profile-pic">프로필 사진 (선택)</label>
-                        <input type="file" id="profile-pic" name="profile_image_file" accept="image/*">
-                        <p id="profile-pic-message" class="register-info-message"></p>
+                        <label>프로필 사진</label>
+
+                        <input type="hidden" id="socialProfileUrl"
+                               th:value="${socialInfo != null} ? ${socialInfo.profileImage} : ''">
+
+                        <div class="profile-upload-container">
+                            <div class="preview-wrapper">
+                                <span class="preview-text">미리보기</span>
+                                <img id="image-preview" class="profile-preview" src="" alt="프로필 미리보기">
+                            </div>
+
+                            <div class="profile-actions">
+                                <input type="file" id="profile-pic" name="profile_image_file" accept="image/*">
+                                <button type="button" id="reset-image-btn" class="reset-img-btn">
+                                    <i class="fas fa-undo"></i> 기본 이미지로 변경
+                                </button>
+                            </div>
+                        </div>
+                        <p id="profile-pic-message" class="info-message"></p>
                     </div>
 
 
@@ -144,20 +258,20 @@
 </main>
 
 <!-- ========= 이용약관 모달 ========= -->
-<div id="terms-modal-overlay" class="register-modal-overlay">
-    <div class="register-modal">
-        <div class="register-modal-header">
+<div id="terms-modal-overlay" class="modal-overlay">
+    <div class="modal">
+        <div class="modal-header">
             <h1>Multi FC 이용약관</h1>
-            <button type="button" class="register-modal-close-btn" id="terms-modal-close">&times;</button>
+            <button type="button" class="modal-close-btn" id="terms-modal-close">&times;</button>
         </div>
-        <div class="register-modal-body">
+        <div class="modal-body">
             <h2>제 1 조 (목적)</h2>
-            <div class="register-modal-clause">
+            <div class="clause">
                 <p>본 약관은 Multi FC(이하 "회사")가 제공하는 풋살 매칭 및 관련 제반 서비스의 이용과 관련하여 회사와 회원과의 권리, 의무 및 책임사항 등을 규정함을 목적으로 합니다.</p>
             </div>
 
             <h2>제 2 조 (정의)</h2>
-            <div class="register-modal-clause">
+            <div class="clause">
                 <p>1. "서비스"라 함은 회사가 제공하는 풋살 매칭, 팀 구성, 경기장 예약, 커뮤니티 등 풋살 관련 모든 서비스를 의미합니다.</p>
                 <p>2. "회원"이라 함은 본 약관에 동의하고 회사와 서비스 이용계약을 체결한 자를 말합니다.</p>
                 <p>3. "아이디(ID)"라 함은 회원의 식별과 서비스 이용을 위하여 회원이 설정하고 회사가 승인한 문자와 숫자의 조합을 의미합니다.</p>
@@ -166,7 +280,7 @@
             </div>
 
             <h2>제 3 조 (약관의 게시와 개정)</h2>
-            <div class="register-modal-clause">
+            <div class="clause">
                 <p>1. 회사는 이 약관의 내용을 회원이 쉽게 알 수 있도록 서비스 초기 화면 또는 연결화면에 게시합니다.</p>
                 <p>2. 회사는 필요한 경우 관련 법령을 위배하지 않는 범위에서 본 약관을 개정할 수 있습니다.</p>
                 <p>3. 회사가 약관을 개정할 경우에는 적용일자 및 개정사유를 명시하여 현행약관과 함께 서비스 초기화면에 그 적용일자 7일 이전부터 적용일자 전일까지 공지합니다.</p>
@@ -174,7 +288,7 @@
             </div>
 
             <h2>제 4 조 (회원가입)</h2>
-            <div class="register-modal-clause">
+            <div class="clause">
                 <p>1. 회원가입은 이용자가 약관의 내용에 대하여 동의를 한 다음 회원가입 신청을 하고 회사가 이러한 신청에 대하여 승낙함으로써 체결됩니다.</p>
                 <p>2. 회원가입 신청 시 다음 각 호의 정보를 제공해야 합니다:</p>
                 <p>&nbsp;&nbsp;&nbsp;가. 이메일 주소</p>
@@ -191,14 +305,14 @@
             </div>
 
             <h2>제 5 조 (회원정보의 변경)</h2>
-            <div class="register-modal-clause">
+            <div class="clause">
                 <p>1. 회원은 개인정보관리화면을 통하여 언제든지 본인의 개인정보를 열람하고 수정할 수 있습니다.</p>
                 <p>2. 회원은 회원가입 신청 시 기재한 사항이 변경되었을 경우 온라인으로 수정을 하거나 전자우편 기타 방법으로 회사에 대하여 그 변경사항을 알려야 합니다.</p>
                 <p>3. 제2항의 변경사항을 회사에 알리지 않아 발생한 불이익에 대하여 회사는 책임지지 않습니다.</p>
             </div>
 
             <h2>제 6 조 (개인정보의 보호 및 관리)</h2>
-            <div class="register-modal-clause">
+            <div class="clause">
                 <p>1. 회사는 관계법령이 정하는 바에 따라 회원의 개인정보를 보호하기 위해 노력합니다.</p>
                 <p>2. 회원의 개인정보 보호 및 사용에 대해서는 관련법령 및 회사의 개인정보처리방침이 적용됩니다.</p>
                 <p>3. 회원의 아이디와 비밀번호에 관한 관리책임은 회원에게 있으며, 이를 제3자가 이용하도록 하여서는 안 됩니다.</p>
@@ -206,14 +320,14 @@
             </div>
 
             <h2>제 7 조 (회사의 의무)</h2>
-            <div class="register-modal-clause">
+            <div class="clause">
                 <p>1. 회사는 관련법과 본 약관이 금지하거나 미풍양속에 반하는 행위를 하지 않으며, 계속적이고 안정적으로 서비스를 제공하기 위하여 최선을 다하여 노력합니다.</p>
                 <p>2. 회사는 회원이 안전하게 서비스를 이용할 수 있도록 개인정보(신용정보 포함)보호를 위해 보안시스템을 갖추어야 하며 개인정보처리방침을 공시하고 준수합니다.</p>
                 <p>3. 회사는 서비스 이용과 관련하여 회원으로부터 제기된 의견이나 불만이 정당하다고 인정할 경우 이를 처리하여야 합니다.</p>
             </div>
 
             <h2>제 8 조 (회원의 의무)</h2>
-            <div class="register-modal-clause">
+            <div class="clause">
                 <p>1. 회원은 다음 행위를 하여서는 안 됩니다:</p>
                 <p>&nbsp;&nbsp;&nbsp;가. 신청 또는 변경 시 허위내용의 등록</p>
                 <p>&nbsp;&nbsp;&nbsp;나. 타인의 정보 도용</p>
@@ -228,7 +342,7 @@
             </div>
 
             <h2>제 9 조 (서비스의 제공)</h2>
-            <div class="register-modal-clause">
+            <div class="clause">
                 <p>1. 회사는 회원에게 아래와 같은 서비스를 제공합니다:</p>
                 <p>&nbsp;&nbsp;&nbsp;가. 풋살 경기 매칭 서비스</p>
                 <p>&nbsp;&nbsp;&nbsp;나. 팀 생성 및 관리 서비스</p>
@@ -241,14 +355,14 @@
             </div>
 
             <h2>제 10 조 (서비스의 중단)</h2>
-            <div class="register-modal-clause">
+            <div class="clause">
                 <p>1. 회사는 컴퓨터 등 정보통신설비의 보수점검, 교체 및 고장, 통신의 두절 등의 사유가 발생한 경우에는 서비스의 제공을 일시적으로 중단할 수 있습니다.</p>
                 <p>2. 회사는 제1항의 사유로 서비스의 제공이 일시적으로 중단됨으로 인하여 이용자 또는 제3자가 입은 손해에 대하여 배상합니다. 단, 회사가 고의 또는 과실이 없음을 입증하는 경우에는 그러하지 아니합니다.</p>
                 <p>3. 사업종목의 전환, 사업의 포기, 업체 간의 통합 등의 이유로 서비스를 제공할 수 없게 되는 경우에는 회사는 제8조에 정한 방법으로 이용자에게 통지하고 당초 회사에서 제시한 조건에 따라 소비자에게 보상합니다.</p>
             </div>
 
             <h2>제 11 조 (매칭 서비스 이용)</h2>
-            <div class="register-modal-clause">
+            <div class="clause">
                 <p>1. 회원은 매칭 신청 시 정확한 정보(실력 수준, 선호 포지션, 가능 시간 등)를 제공해야 합니다.</p>
                 <p>2. 매칭이 성사된 후 회원은 약속된 시간과 장소를 준수해야 하며, 부득이한 사유로 참석이 불가능한 경우 최소 3시간 전에 취소 또는 통지해야 합니다.</p>
                 <p>3. 정당한 사유 없이 매칭 약속을 3회 이상 불이행한 회원에 대해서는 회사가 서비스 이용을 일시적 또는 영구적으로 제한할 수 있습니다.</p>
@@ -256,14 +370,14 @@
             </div>
 
             <h2>제 12 조 (경기장 예약 및 이용)</h2>
-            <div class="register-modal-clause">
+            <div class="clause">
                 <p>1. 회사는 제휴 경기장의 정보를 제공하며, 예약 서비스를 중개할 수 있습니다.</p>
                 <p>2. 경기장 예약 및 이용에 관한 계약은 회원과 해당 경기장 운영자 간에 체결되며, 회사는 중개 역할만을 수행합니다.</p>
                 <p>3. 경기장 이용 중 발생하는 안전사고, 시설 손해, 분쟁 등에 대해서는 회원과 경기장 운영자가 책임을 지며, 회사는 고의 또는 중과실이 없는 한 책임을 지지 않습니다.</p>
             </div>
 
             <h2>제 13 조 (게시물의 관리)</h2>
-            <div class="register-modal-clause">
+            <div class="clause">
                 <p>1. 회원이 서비스 내에 게시한 게시물의 저작권은 해당 게시물의 저작자에게 귀속됩니다.</p>
                 <p>2. 회원이 서비스 내에 게시하는 게시물은 검색결과 내지 서비스 및 관련 프로모션 등에 노출될 수 있으며, 해당 노출을 위해 필요한 범위 내에서는 일부 수정, 복제, 편집되어 게시될 수 있습니다.</p>
                 <p>3. 회사는 다음 각 호에 해당하는 게시물이나 자료를 사전통지 없이 삭제하거나 이동 또는 등록 거부를 할 수 있습니다:</p>
@@ -277,13 +391,13 @@
             </div>
 
             <h2>제 14 조 (권리의 귀속)</h2>
-            <div class="register-modal-clause">
+            <div class="clause">
                 <p>1. 서비스에 대한 저작권 및 지적재산권은 회사에 귀속됩니다. 단, 회원의 게시물 및 제휴계약에 따라 제공된 저작물 등은 제외합니다.</p>
                 <p>2. 회사는 서비스와 관련하여 회원에게 회사가 정한 이용조건에 따라 계정, 아이디, 콘텐츠 등을 이용할 수 있는 이용권만을 부여하며, 회원은 이를 양도, 판매, 담보제공 등의 처분행위를 할 수 없습니다.</p>
             </div>
 
             <h2>제 15 조 (계약해지 및 이용제한)</h2>
-            <div class="register-modal-clause">
+            <div class="clause">
                 <p>1. 회원이 이용계약을 해지하고자 하는 때에는 회원 본인이 직접 서비스 내의 회원탈퇴 메뉴를 이용하여 해지 신청을 하여야 합니다.</p>
                 <p>2. 회사는 회원이 다음 각 호의 사유에 해당하는 경우, 사전통지 없이 이용계약을 해지하거나 또는 기간을 정하여 서비스 이용을 중지할 수 있습니다:</p>
                 <p>&nbsp;&nbsp;&nbsp;가. 타인의 서비스 이용을 방해하거나 타인의 개인정보를 도용한 경우</p>
@@ -296,14 +410,14 @@
             </div>
 
             <h2>제 16 조 (손해배상)</h2>
-            <div class="register-modal-clause">
+            <div class="clause">
                 <p>1. 회사는 무료로 제공되는 서비스와 관련하여 회원에게 어떠한 손해가 발생하더라도 동 손해가 회사의 고의 또는 중대한 과실로 인한 손해를 제외하고 이에 대하여 책임을 부담하지 아니합니다.</p>
                 <p>2. 회사는 회원이 서비스를 이용하여 기대하는 수익을 상실한 것에 대하여 책임을 지지 않으며, 그 밖의 서비스를 통하여 얻은 자료로 인한 손해에 관하여 책임을 지지 않습니다.</p>
                 <p>3. 회원이 본 약관의 규정을 위반함으로 인하여 회사에 손해가 발생하게 되는 경우, 이 약관을 위반한 회원은 회사에 발생하는 모든 손해를 배상하여야 합니다.</p>
             </div>
 
             <h2>제 17 조 (면책조항)</h2>
-            <div class="register-modal-clause">
+            <div class="clause">
                 <p>1. 회사는 천재지변 또는 이에 준하는 불가항력으로 인하여 서비스를 제공할 수 없는 경우에는 서비스 제공에 관한 책임이 면제됩니다.</p>
                 <p>2. 회사는 회원의 귀책사유로 인한 서비스 이용의 장애에 대하여 책임을 지지 않습니다.</p>
                 <p>3. 회사는 회원이 서비스를 이용하여 기대하는 수익을 얻지 못하거나 상실한 것에 대하여 책임을 지지 않습니다.</p>
@@ -312,24 +426,24 @@
             </div>
 
             <h2>제 18 조 (분쟁의 해결)</h2>
-            <div class="register-modal-clause">
+            <div class="clause">
                 <p>1. 회사는 회원이 제기하는 정당한 의견이나 불만을 반영하고 그 피해를 보상처리하기 위하여 피해보상처리기구를 설치·운영합니다.</p>
                 <p>2. 회사는 회원으로부터 제출되는 불만사항 및 의견은 우선적으로 그 사항을 처리합니다. 다만, 신속한 처리가 곤란한 경우에는 회원에게 그 사유와 처리일정을 즉시 통보해 드립니다.</p>
                 <p>3. 회사와 회원 간에 발생한 전자상거래 분쟁과 관련하여 회원의 피해구제신청이 있는 경우에는 공정거래위원회 또는 시·도지사가 의뢰하는 분쟁조정기관의 조정에 따를 수 있습니다.</p>
             </div>
 
             <h2>제 19 조 (재판권 및 준거법)</h2>
-            <div class="register-modal-clause">
+            <div class="clause">
                 <p>1. 이 약관에 명시되지 않은 사항은 전기통신사업법 등 관계법령과 상관습에 따릅니다.</p>
                 <p>2. 서비스 이용으로 발생한 분쟁에 대해 소송이 제기되는 경우 회사의 본사 소재지를 관할하는 법원을 관할 법원으로 합니다.</p>
             </div>
 
             <h2>부칙</h2>
-            <div class="register-modal-clause">
+            <div class="clause">
                 <p>본 약관은 <span id="terms-date"></span>부터 적용됩니다.</p>
             </div>
         </div>
-        <div class="register-modal-footer">
+        <div class="modal-footer">
             <button type="button" class="agree-btn" id="terms-modal-agree">
                 위 약관 내용을 확인하였으며, 동의합니다.
             </button>
@@ -339,92 +453,114 @@
 <script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
 
 <script>
-    // 비밀번호 보기 토글
+    // 1. 비밀번호 토글
     document.querySelectorAll('.toggle-password').forEach(icon => {
         icon.addEventListener('click', function() {
-            const input = this.parentElement.querySelector('input');
-            const type = input.getAttribute('type') === 'password' ? 'text' : 'password';
-            input.setAttribute('type', type);
-            this.classList.toggle('fa-eye');
-            this.classList.toggle('fa-eye-slash');
+            const targetInput = document.getElementById(this.dataset.target);
+            if (targetInput.type === 'password') {
+                targetInput.type = 'text';
+                this.classList.remove('fa-eye-slash');
+                this.classList.add('fa-eye');
+            } else {
+                targetInput.type = 'password';
+                this.classList.remove('fa-eye');
+                this.classList.add('fa-eye-slash');
+            }
         });
     });
 
-    // Daum 우편번호 서비스 연동
+    // 2. 주소 찾기
     function searchAddress() {
         new daum.Postcode({
             oncomplete: function(data) {
-                var addr = (data.userSelectedType === 'R') ? data.roadAddress : data.jibunAddress;
-                if(data.userSelectedType === 'R' && data.bname !== '' && /[동|로|가]$/g.test(data.bname)){
-                    addr += ' (' + data.bname + ')';
-                }
-                document.getElementById("address").value = addr;
-                document.getElementById("address-detail").focus(); // 상세 주소로 포커스
+                document.getElementById("address").value = data.roadAddress || data.jibunAddress;
+                document.getElementById("address-detail").focus();
+                // 강제 이벤트 발생 (유효성 체크용)
+                document.getElementById("address").dispatchEvent(new Event('change'));
             }
         }).open();
     }
 
-    // 회원가입 로직
+    // 3. 약관 모달
+    const modalOverlay = document.getElementById('terms-modal-overlay');
+    document.getElementById('open-terms-modal').addEventListener('click', () => modalOverlay.classList.add('show'));
+    document.getElementById('terms-modal-close').addEventListener('click', () => modalOverlay.classList.remove('show'));
+    document.getElementById('terms-modal-agree').addEventListener('click', () => {
+        document.getElementById('terms-agree').checked = true;
+        document.getElementById('terms-agree').dispatchEvent(new Event('change'));
+        modalOverlay.classList.remove('show');
+    });
+
+    // ⭐️ 4. 핵심 로직 (유효성 검사 + 이미지 프리뷰) ⭐️
     document.addEventListener('DOMContentLoaded', () => {
         const registerForm = document.getElementById('register-form');
-        const errorMsg = document.getElementById('error-message');
         const registerSubmitBtn = document.getElementById('register-submit-btn');
 
-        // 입력 필드
+        // 필드
         const emailInput = document.getElementById('email');
         const usernameInput = document.getElementById('username');
         const nicknameInput = document.getElementById('nickname');
         const passwordInput = document.getElementById('password');
         const confirmPasswordInput = document.getElementById('confirm-password');
         const termsCheckbox = document.getElementById('terms-agree');
+        const skillLevelSelect = document.getElementById('skill-level');
+        const addressInput = document.getElementById('address');
+        const genderInputs = document.querySelectorAll('input[name="gender"]');
+        const dateElement = document.getElementById('terms-date');
 
-        // 피드백 메시지 필드
+        // 메시지창
         const emailMsg = document.getElementById('email-message');
         const usernameMsg = document.getElementById('username-message');
         const nicknameMsg = document.getElementById('nickname-message');
         const passwordMsg = document.getElementById('password-message');
+        const profilePicMsg = document.getElementById('profile-pic-message');
+        const errorMsg = document.getElementById('error-message');
 
-        // 약관 모달 관련
-        const termsModalOverlay = document.getElementById('terms-modal-overlay');
-        const openTermsModal = document.getElementById('open-terms-modal');
-        const termsModalClose = document.getElementById('terms-modal-close');
-        const termsModalAgree = document.getElementById('terms-modal-agree');
-        const termsDateSpan = document.getElementById('terms-date');
+        // 이미지 관련
+        const profilePicInput = document.getElementById('profile-pic');
+        const imagePreview = document.getElementById('image-preview');
+        const resetImageBtn = document.getElementById('reset-image-btn');
+        const socialProfileUrlInput = document.getElementById('socialProfileUrl');
 
-        // 유효성 상태
+        // 초기 유효성 상태
         let validationStatus = {
-            email: false,
+            email: emailInput.value.length > 0 && emailInput.readOnly, // 소셜이면 true
             username: false,
-            nickname: false,
+            nickname: nicknameInput.value.length > 0,
             password: false,
-            terms: false
+            terms: false,
+            skill: false,
+            address: false,
+            gender: true
         };
 
-        // 1. 버튼 상태 관리 함수
+        // 버튼 상태 업데이트
         function checkSubmitButtonState() {
             const allValid = Object.values(validationStatus).every(Boolean);
             registerSubmitBtn.disabled = !allValid;
             registerSubmitBtn.textContent = allValid ? 'Create Account' : '모든 항목을 확인해주세요';
         }
 
-        // 2. UI 피드백 함수
+        // 메시지 표시/숨김
         function showFeedback(element, message, isError) {
             if (!element) return;
             element.textContent = message;
-            element.className = isError ? 'register-info-message error' : 'register-info-message success';
-            element.style.color = isError ? '#e74c3c' : '#2ecc71';
-            element.style.display = "block";
+            element.className = isError ? 'info-message error' : 'info-message success';
+            // display:block은 CSS 클래스로 제어됨
         }
         function hideFeedback(element) {
-            if (element) element.style.display = "none";
+            if (element) {
+                element.textContent = '';
+                element.className = 'info-message'; // display:none 됨
+            }
         }
 
-        // 3. API 중복 체크
+        // ⭐️ 유효성 검사 함수 (Debounce) ⭐️
         let debounceTimer;
         async function validateField(field, value, messageElement, apiUrl, regex, regexMsg) {
             clearTimeout(debounceTimer);
 
-            // 1. 형식(Regex) 검사
+            // 1. 정규식 검사
             if (!regex.test(value)) {
                 showFeedback(messageElement, regexMsg, true);
                 validationStatus[field] = false;
@@ -432,7 +568,7 @@
                 return;
             }
 
-            // 2. 중복(API) 검사
+            // 2. API 중복 검사 (0.5초 대기)
             debounceTimer = setTimeout(async () => {
                 try {
                     const response = await fetch(`${apiUrl}?${field}=${encodeURIComponent(value)}`);
@@ -446,116 +582,141 @@
                         validationStatus[field] = true;
                     }
                 } catch (e) {
-                    showFeedback(messageElement, '중복 확인 중 오류 발생.', true);
-                    validationStatus[field] = false;
+                    console.error(e); // 에러 발생 시 조용히 처리하거나 메시지 표시
                 }
                 checkSubmitButtonState();
             }, 500);
         }
 
-        // 프로필 사진 파일 크기 체크
-        const profilePicInput = document.getElementById('profile-pic');
-        const profilePicMsg = document.getElementById('profile-pic-message');
-        const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+        // --- 이벤트 리스너 (검사 로직) ---
 
-        profilePicInput.addEventListener('change', (e) => {
-            const file = e.target.files[0];
+        // 1. 이메일
+        if (emailInput.readOnly) {
+            // 소셜 가입: 이미 검증됨
+            showFeedback(emailMsg, '✅ 소셜 로그인 인증 완료', false);
+        } else {
+            // 일반 가입: 입력 시 검사
+            emailInput.addEventListener('input', () => {
+                const regex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+                validateField('email', emailInput.value, emailMsg, '/api/users/check-email', regex, '올바른 이메일 형식이 아닙니다.');
+            });
+        }
 
-            if (file) {
-                // 파일 크기 체크
-                if (file.size > MAX_FILE_SIZE) {
-                    const fileSizeMB = (file.size / 1024 / 1024).toFixed(2);
-                    showFeedback(profilePicMsg, `⚠️ 파일 크기가 너무 큽니다! (현재: ${fileSizeMB}MB, 최대: 5MB) 용량을 줄여주세요.`, true);
-                    profilePicInput.value = ''; // 파일 선택 초기화
-                } else {
-                    const fileSizeMB = (file.size / 1024 / 1024).toFixed(2);
-                    showFeedback(profilePicMsg, `✅ 파일 업로드 가능 (${fileSizeMB}MB)`, false);
-                }
-            } else {
-                // 파일 선택 취소 시 메시지 숨기기
-                hideFeedback(profilePicMsg);
-            }
-        });
-
-
-        // 정규식 제약조건 및 API 연동
-        emailInput.addEventListener('input', () => {
-            const regex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-            validateField('email', emailInput.value, emailMsg, '/api/users/check-email', regex, '올바른 이메일 형식이 아닙니다.');
-        });
+        // 2. 아이디
         usernameInput.addEventListener('input', () => {
             const regex = /^[a-z0-9_]{5,20}$/;
-            validateField('username', usernameInput.value, usernameMsg, '/api/users/check-username', regex, '5~20자 영문 소문자, 숫자, (_)만 사용 가능합니다.');
+            validateField('username', usernameInput.value, usernameMsg, '/api/users/check-username', regex, '5~20자 영문 소문자, 숫자, (_)만 사용 가능');
         });
+
+        // 3. 닉네임
         nicknameInput.addEventListener('input', () => {
             const regex = /^[가-힣a-zA-Z0-9]{2,16}$/;
-            validateField('nickname', nicknameInput.value, nicknameMsg, '/api/users/check-nickname', regex, '2~16자 한글, 영문, 숫자만 사용 가능합니다.');
+            validateField('nickname', nicknameInput.value, nicknameMsg, '/api/users/check-nickname', regex, '2~16자 한글, 영문, 숫자만 사용 가능');
         });
 
-        // 4. 비밀번호 조건 실시간 검사
+        // 4. 비밀번호
         passwordInput.addEventListener('input', () => {
-            const password = passwordInput.value;
             const regex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$/;
-
-            if (regex.test(password)) {
-                showFeedback(passwordMsg, '안전한 비밀번호입니다.', false);
+            if (regex.test(passwordInput.value)) {
+                showFeedback(passwordMsg, '사용 가능한 비밀번호입니다.', false);
                 validationStatus.password = true;
             } else {
-                showFeedback(passwordMsg, '8자 이상, 영문/숫자/특수문자 조합이 필요합니다.', true);
+                showFeedback(passwordMsg, '8자 이상, 영문/숫자/특수문자를 모두 포함해야 합니다.', true);
                 validationStatus.password = false;
             }
+            if (confirmPasswordInput.value) confirmPasswordInput.dispatchEvent(new Event('input'));
             checkSubmitButtonState();
         });
 
-        // 5. 약관 모달 및 동의
-        if (termsDateSpan) {
-            const today = new Date();
-            termsDateSpan.textContent = `${today.getFullYear()}년 ${today.getMonth() + 1}월 ${today.getDate()}일`;
-        }
-        openTermsModal.addEventListener('click', (e) => {
-            e.preventDefault();
-            termsModalOverlay.classList.add('show');
-        });
-        termsCheckbox.addEventListener('click', (e) => {
-            e.preventDefault();
-            termsModalOverlay.classList.add('show');
-        });
-        termsModalClose.addEventListener('click', () => {
-            termsModalOverlay.classList.remove('show');
-        });
-        termsModalOverlay.addEventListener('click', (e) => {
-            if (e.target === termsModalOverlay) {
-                termsModalOverlay.classList.remove('show');
+        confirmPasswordInput.addEventListener('input', () => {
+            if (passwordInput.value === confirmPasswordInput.value && validationStatus.password) {
+                showFeedback(passwordMsg, '비밀번호가 일치합니다.', false);
+            } else if (passwordInput.value !== confirmPasswordInput.value) {
+                showFeedback(passwordMsg, '비밀번호가 일치하지 않습니다.', true);
             }
         });
-        termsModalAgree.addEventListener('click', () => {
-            termsCheckbox.checked = true;
-            validationStatus.terms = true;
-            checkSubmitButtonState();
-            termsModalOverlay.classList.remove('show');
+
+        // 5. 기타 필수 항목
+        termsCheckbox.addEventListener('change', () => { validationStatus.terms = termsCheckbox.checked; checkSubmitButtonState(); });
+        skillLevelSelect.addEventListener('change', () => { validationStatus.skill = !!skillLevelSelect.value; checkSubmitButtonState(); });
+        addressInput.addEventListener('change', () => { validationStatus.address = !!addressInput.value; checkSubmitButtonState(); });
+
+
+        // ⭐️ 이미지 프리뷰 및 초기화 로직 ⭐️
+        function updateImagePreview() {
+            const file = profilePicInput.files[0];
+            const socialUrl = socialProfileUrlInput.value;
+
+            // 1. 파일이 있으면 -> 파일 미리보기
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    imagePreview.src = e.target.result;
+                    imagePreview.classList.add('active'); // 이미지 보임
+                };
+                reader.readAsDataURL(file);
+            }
+            // 2. 소셜 URL이 있으면 -> 소셜 이미지 미리보기
+            else if (socialUrl) {
+                imagePreview.src = socialUrl;
+                imagePreview.classList.add('active'); // 이미지 보임
+            }
+            // 3. 둘 다 없으면 -> "미리보기" 텍스트만 보임 (이미지 숨김)
+            else {
+                imagePreview.src = '';
+                imagePreview.classList.remove('active'); // 이미지 숨김
+            }
+        }
+
+        // 파일 선택 시
+        profilePicInput.addEventListener('change', (e) => {
+            // 파일 크기 체크
+            const file = e.target.files[0];
+            if (file && file.size > 5 * 1024 * 1024) {
+                showFeedback(profilePicMsg, '파일 크기는 5MB 이하여야 합니다.', true);
+                profilePicInput.value = ''; // 초기화
+            } else {
+                hideFeedback(profilePicMsg);
+                updateImagePreview();
+            }
         });
 
-        // 6. 회원가입 제출
+        // 초기화 버튼 클릭 시
+        resetImageBtn.addEventListener('click', () => {
+            profilePicInput.value = ''; // 파일 취소
+            socialProfileUrlInput.value = ''; // 소셜 정보도 취소
+            updateImagePreview(); // "미리보기" 텍스트 상태로 복귀
+        });
+
+        // 초기 실행
+        updateImagePreview();
+        if (nicknameInput.value) nicknameInput.dispatchEvent(new Event('input')); // 소셜 닉네임 검사 트리거
+        checkSubmitButtonState();
+
+        // 약관 날짜
+        if (dateElement) {
+            const today = new Date();
+            const year = today.getFullYear();
+            const month = String(today.getMonth() + 1).padStart(2, '0'); // 월은 0부터 시작하므로 +1
+            const day = String(today.getDate()).padStart(2, '0');
+
+            dateElement.textContent = `${year}년 ${month}월 ${day}일`;
+        }
+
+        // ⭐️ 폼 제출 ⭐️
         registerForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            errorMsg.style.display = 'none';
 
-            // 최종 유효성 검사
             if (!Object.values(validationStatus).every(Boolean)) {
-                errorMsg.textContent = '❌ 모든 항목을 올바르게 입력해주세요.';
-                errorMsg.style.display = 'block';
+                alert("필수 항목을 모두 입력해주세요.");
                 return;
             }
             if (passwordInput.value !== confirmPasswordInput.value) {
-                errorMsg.textContent = '❌ 비밀번호가 일치하지 않습니다.';
-                errorMsg.style.display = 'block';
+                alert("비밀번호가 일치하지 않습니다.");
                 return;
             }
 
-            // FormData 객체 생성
             const formData = new FormData();
-
-            // 텍스트 데이터 담기
             formData.append('email', emailInput.value);
             formData.append('username', usernameInput.value);
             formData.append('nickname', nicknameInput.value);
@@ -563,33 +724,26 @@
             formData.append('gender', document.querySelector('input[name="gender"]:checked').value);
             formData.append('position', document.getElementById('position').value);
             formData.append('level', document.getElementById('skill-level').value);
+            formData.append('address', (addressInput.value + ' ' + document.getElementById('address-detail').value).trim());
 
-            // 주소 합치기
-            const fullAddress = (document.getElementById('address').value + ' ' + document.getElementById('address-detail').value).trim();
-            formData.append('address', fullAddress);
-
-            // 파일 데이터 담기
-            const profileFile = document.getElementById('profile-pic').files[0];
-            if (profileFile) {
-                formData.append('profile_image_file', profileFile);
+            // 이미지 데이터 (파일 우선, 없으면 소셜URL)
+            if (profilePicInput.files[0]) {
+                formData.append('profile_image_file', profilePicInput.files[0]);
+            } else if (socialProfileUrlInput.value) {
+                formData.append('profileImage', socialProfileUrlInput.value);
             }
 
             try {
                 registerSubmitBtn.textContent = '처리 중...';
                 registerSubmitBtn.disabled = true;
 
-                //  /api/users/signup 으로 전송
-                const response = await fetch('/api/users/signup', {
-                    method: 'POST',
-                    body: formData
-                });
+                const response = await fetch('/api/users/signup', { method: 'POST', body: formData });
 
                 if (response.ok) {
-                    alert("🎉 회원가입 성공! 로그인 페이지로 이동합니다.");
+                    alert("가입 완료! 로그인해주세요.");
                     window.location.href = '/login';
                 } else {
-                    const errorText = await response.text();
-                    throw new Error(errorText || '회원가입 실패');
+                    throw new Error(await response.text());
                 }
             } catch (error) {
                 errorMsg.textContent = '❌ ' + error.message;
@@ -598,10 +752,9 @@
                 registerSubmitBtn.disabled = false;
             }
         });
-
-        // 초기 버튼 상태 설정
-        checkSubmitButtonState();
     });
 </script>
+</body>
+</html>
 </body>
 </html>

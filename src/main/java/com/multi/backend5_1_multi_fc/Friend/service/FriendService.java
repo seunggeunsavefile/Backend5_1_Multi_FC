@@ -65,3 +65,4 @@ public class FriendService {
         if (updated == 0) throw new FriendException("거절할 요청이 없습니다.");
     }
 }
+

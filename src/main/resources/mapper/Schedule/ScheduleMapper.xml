@@ -108,7 +108,7 @@
                  JOIN Match_Room mr   ON mr.room_id    = mp.room_id
                  LEFT JOIN Stadium st ON st.stadium_id = mr.stadium_id
         WHERE mp.user_id = #{userId}
-          AND mp.status  = '승인'
+          AND mp.status  = '확정'
           AND mr.status = 'CLOSED'
           AND mr.match_date >= CURDATE()
           AND NOT EXISTS (

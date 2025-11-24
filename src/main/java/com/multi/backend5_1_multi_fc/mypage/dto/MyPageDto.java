@@ -5,7 +5,7 @@ import lombok.Data;
 import java.sql.Timestamp;
 
 //마이페이지 전용 DTO
- @Data
+@Data
 public class MyPageDto {
 
     private Long userId;

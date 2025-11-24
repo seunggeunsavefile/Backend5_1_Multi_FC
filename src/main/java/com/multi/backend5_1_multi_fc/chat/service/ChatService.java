@@ -5,8 +5,8 @@ import com.multi.backend5_1_multi_fc.chat.dao.ChatParticipantDao;
 import com.multi.backend5_1_multi_fc.chat.dao.ChatRoomDao;
 import com.multi.backend5_1_multi_fc.chat.dto.*;
 import com.multi.backend5_1_multi_fc.notification.service.NotificationService;
-import com.multi.backend5_1_multi_fc.user.dao.UserDao;
 import com.multi.backend5_1_multi_fc.user.dto.UserDto;
+import com.multi.backend5_1_multi_fc.user.mapper.UserMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
@@ -21,7 +21,7 @@ public class ChatService {
     private final ChatRoomDao chatRoomDao;
     private final ChatMessageDao chatMessageDao;
     private  final ChatParticipantDao chatParticipantDao;
-    private final UserDao userDao;
+    private final UserMapper userMapper;
     private final NotificationService notificationService;
     private final SimpMessagingTemplate messagingTemplate;
 
@@ -57,7 +57,7 @@ public class ChatService {
                 .orElse(null);
 
         if(opponent != null){
-            UserDto opponentUser = userDao.findByUserId(opponent.getUserId());
+            UserDto opponentUser = userMapper.findByUserId(opponent.getUserId());
             return opponentUser.getNickname() + "님과의 채팅";
         }
 
@@ -79,7 +79,7 @@ public class ChatService {
         }
 
         Long currentLastRoom = chatRoomDao.getLastRoomId();
-        UserDto targetUser = userDao.findByUserId(userId2);
+        UserDto targetUser = userMapper.findByUserId(userId2);
 
         ChatRoomDto newRoom = ChatRoomDto.builder()
                 .roomId(currentLastRoom + 1)

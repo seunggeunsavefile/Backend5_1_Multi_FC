@@ -12,10 +12,10 @@ public class CommunityDto {
     // 게시글 작성
     @Data
     public static class PostCreateRequest{
-    private String category;  //일반 유저는 자유게시판만
-    private String title;
-    private String content;
-    private String imageUrl;
+        private String category;  //일반 유저는 자유게시판만
+        private String title;
+        private String content;
+        private String imageUrl;
     }
 
     // 게시글 수정

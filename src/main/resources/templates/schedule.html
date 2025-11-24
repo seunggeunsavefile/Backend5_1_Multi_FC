@@ -8,8 +8,158 @@
     <link rel="stylesheet" th:href="@{/css/style.css}">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700;900&family=Noto+Sans+KR:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+    <style>
+        /* (기존 CSS 스타일 유지) */
+        .schedule-search-main {
+            padding: 100px 40px 40px 40px;
+            background-color: #f7f7f7;
+            min-height: 100vh;
+        }
+        .search-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+        .search-title {
+            font-size: 28px;
+            font-weight: 700;
+            color: #2c3e50;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #6c5ce7;
+            padding-bottom: 10px;
+        }
+        .filter-section {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+        }
+        .filter-section input,
+        .filter-section select,
+        .filter-section button {
+            padding: 12px 15px;
+            font-size: 15px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background: #f9f9f9;
+            font-family: inherit;
+        }
+        .filter-section input[type="date"] {
+            flex-grow: 1;
+            min-width: 200px;
+        }
+        .filter-section button {
+            background-color: #6c5ce7;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+        }
+        .match-list-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        .match-item-card {
+            background: white;
+            border: 1px solid #eee;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            overflow: hidden;
+            transition: transform 0.3s, box-shadow 0.3s;
+            border-left: 5px solid #6c5ce7;
+        }
+        .match-item-card.closed {
+            border-left-color: #aaa;
+        }
+        .match-item-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 15px rgba(0,0,0,0.1);
+        }
+        .match-item-header {
+            padding: 15px 20px;
+            background: #fdfdfd;
+            border-bottom: 1px solid #eee;
+        }
+        .match-item-header .date {
+            font-size: 18px;
+            font-weight: 700;
+            color: #6c5ce7;
+        }
+        .match-item-card.closed .match-item-header .date {
+            color: #555;
+        }
+        .match-item-body {
+            padding: 20px;
+        }
+        .match-item-body .location,
+        .match-item-body .status {
+            display: flex;
+            align-items: center;
+            font-size: 15px;
+            color: #555;
+            margin-bottom: 12px;
+        }
+        .match-item-body .location i,
+        .match-item-body .status i {
+            margin-right: 10px;
+            color: #6c5ce7;
+            width: 16px;
+        }
+        .match-item-body p i.fa-crown {
+            color: #f39c12;
+        }
+
+        .match-item-card.closed .match-item-body .location i,
+        .match-item-card.closed .match-item-body .status i {
+            color: #aaa;
+        }
+        .match-item-body .status {
+            margin-bottom: 20px;
+        }
+        .status-badge {
+            font-weight: 600;
+            padding: 4px 8px;
+            border-radius: 5px;
+            color: white;
+            margin-right: 8px;
+        }
+        .status-badge.open {
+            background-color: #28a745;
+        }
+        .status-badge.closed {
+            background-color: #888;
+        }
+        .details-button {
+            display: block;
+            width: 100%;
+            text-align: center;
+            padding: 10px;
+            text-decoration: none;
+            background-color: #6c5ce7;
+            color: white;
+            font-weight: 600;
+            border-radius: 8px;
+            transition: background-color 0.3s;
+        }
+        .details-button:hover {
+            background-color: #8e44ad;
+        }
+        .details-button.disabled {
+            background: #aaa;
+            cursor: not-allowed;
+        }
+        .details-button.disabled:hover {
+            background: #aaa;
+        }
+    </style>
 </head>
-<body class="match-search-page">
+<body>
+
 <header class="quick-menu">
     <div class="logo"><a href="/">Multi FC</a></div>
     <div class="header-icons">
@@ -45,7 +195,7 @@
 
 <main class="schedule-search-main">
     <div class="search-container">
-        <h1 class="search-title">📅 경기일정 검색</h1>
+        <h1 class="search-title">📅 경기일정 검색 (내가 참가한 경기)</h1>
 
         <div class="filter-section">
             <input type="date" id="filter-date">
@@ -178,14 +328,21 @@
         { value: '울산광역시', text: '울산광역시' }
     ];
 
-    // ⭐⭐ ERD 반영: 더미 매치 데이터 (특별시/광역시 위치로 재정의) ⭐⭐
-    const MOCK_MATCHES = [
-        { id: 1, date: "2025-11-01 (토) 19:00", location: "서울특별시 강남 풋살장", creator: "캡틴손", current: 8, max: 10, status: "open", type: "팀 매칭", skill: "중급", amenities: ["샤워 가능", "주차 가능"] },
-        { id: 2, date: "2025-11-03 (월) 20:00", location: "부산광역시 서면 풋살장", creator: "운영진", current: 12, max: 12, status: "closed", type: "개인 매칭", skill: "고급", amenities: ["주차 가능"] },
-        { id: 3, date: "2025-11-05 (수) 21:00", location: "인천광역시 연수구 풋살파크", creator: "구원투수", current: 5, max: 12, status: "open", type: "팀 매칭", skill: "초급", amenities: ["샤워 가능"] },
-        { id: 4, date: "2025-11-10 (월) 19:00", location: "대전광역시 유성구 풋살장", creator: "테스터", current: 8, max: 10, status: "open", type: "팀 매칭", skill: "중급", amenities: ["샤워 가능", "주차 가능"] },
-    ];
+    // ⭐ [추가] 지역 필터링을 위한 단축 이름 맵핑 (JS 로직 개선)
+    const REGION_SHORT_NAMES = {
+        '서울특별시': '서울',
+        '부산광역시': '부산',
+        '대구광역시': '대구',
+        '인천광역시': '인천',
+        '광주광역시': '광주',
+        '대전광역시': '대전',
+        '울산광역시': '울산',
+    };
 
+
+    let allMySchedules = [];
+    let currentUserId = null;
+    let currentUserName = null;
 
     // ⭐⭐ 매치 목록 렌더링 함수 ⭐⭐
     function renderMatchList(matches) {
@@ -207,18 +364,20 @@
             card.className = `match-item-card ${statusClass}`;
             card.dataset.matchId = match.id;
 
-            // ⭐⭐ 유형/실력/편의 시설 문구 제거 ⭐⭐
+            const isHost = match.creator === currentUserName;
+            const creatorDisplay = isHost ? '나 (Host)' : match.creator;
+
             card.innerHTML = `
                 <div class="match-item-header">
                     <span class="date">${match.date}</span>
                 </div>
                 <div class="match-item-body">
                     <p style="font-size: 14px; color: #6c5ce7; font-weight: 600; margin-bottom: 12px;">
-                        <i class="fas fa-crown" style="margin-right: 5px;"></i> 생성자: ${match.creator}
+                        <i class="fas fa-crown" style="margin-right: 5px;"></i> 생성자: ${creatorDisplay}
                     </p>
                     <p class="location">
                         <i class="fas fa-map-marker-alt"></i>
-                        ${match.location}
+                        ${match.stadiumName} (${match.location})
                     </p>
 
                     <p class="status">
@@ -234,23 +393,74 @@
         });
     }
 
-    // ⭐⭐ 수정: 검색 실행 함수 (단일 지역/상태 필터링) ⭐⭐
-    function performSearch() {
-        const date = document.getElementById('filter-date').value;
-        const region = document.getElementById('filter-region').value; // 특별시/광역시 값
-        const status = document.getElementById('filter-status').value; // 상태 값
+    // ⭐⭐ 새로운 함수: 서버에서 내 스케줄 목록을 가져옴 ⭐⭐
+    async function fetchMySchedules() {
+        const userId = localStorage.getItem('userId');
+        const userName = localStorage.getItem('userNickname');
 
-        let filtered = MOCK_MATCHES;
+        if (!userId) {
+            console.error("User ID not found in localStorage.");
+            return [];
+        }
+        currentUserId = Number(userId);
+        currentUserName = userName;
+
+        try {
+            const response = await fetch(`/api/matchrooms/my-schedules?userId=${userId}`);
+
+            if (!response.ok) {
+                console.error("Failed to fetch schedules:", response.statusText);
+                document.getElementById('match-list-container').innerHTML = `<p style="color:red; text-align:center;">경기 목록을 불러오는 중 오류가 발생했습니다. (API ${response.status})</p>`;
+                return [];
+            }
+
+            const rawMatches = await response.json();
+
+            // ⭐️ 서버 DTO를 프론트엔드 렌더링 형식에 맞게 변환
+            allMySchedules = rawMatches.map(match => ({
+                id: match.roomId,
+                date: `${match.matchDate} (${match.matchTime})`,
+                // location에 stadiumAddress (전체 주소)를 저장 (필터링 기준)
+                location: match.stadiumAddress || '주소 정보 없음',
+                // display용 구장 이름 (카드에 표시)
+                stadiumName: match.stadiumName || '구장 정보 없음',
+                creator: match.hostNickname || ('Host ID: ' + match.hostId),
+                current: match.currentPlayers || 0,
+                max: match.maxPlayers,
+                status: match.status.toLowerCase() === 'closed' ? 'closed' : 'open',
+            }));
+
+            return allMySchedules;
+
+        } catch (error) {
+            console.error("API call error:", error);
+            document.getElementById('match-list-container').innerHTML = `<p style="color:red; text-align:center;">네트워크 연결 중 오류 발생.</p>`;
+            return [];
+        }
+    }
+
+    // ⭐⭐ 수정: 검색 실행 함수 (지역 필터링 로직 개선) ⭐⭐
+    function performSearch() {
+        const dateFilterValue = document.getElementById('filter-date').value;
+        const region = document.getElementById('filter-region').value;
+        const status = document.getElementById('filter-status').value;
+
+        let filtered = allMySchedules;
 
         // 1. 날짜 필터
-        if (date) {
-            filtered = filtered.filter(match => match.date.includes(date));
+        if (dateFilterValue) {
+            filtered = filtered.filter(match => match.date.includes(dateFilterValue));
         }
 
-        // 2. 지역 (특별시/광역시) 필터
+        // 2. 지역 (특별시/광역시) 필터: 단축명 매핑 사용
         if (region && region !== '전체지역') {
-            // location이 '서울특별시' 등으로 시작하는지 확인
-            filtered = filtered.filter(match => match.location.startsWith(region));
+            // 긴 지역명(예: '서울특별시')을 주소 데이터의 짧은 시작명(예: '서울')으로 변환
+            const shortRegion = REGION_SHORT_NAMES[region] || region.substring(0, 2);
+
+            filtered = filtered.filter(match =>
+                // match.location (전체 주소)가 변환된 짧은 지역명으로 시작하는지 검사
+                match.location.startsWith(shortRegion)
+            );
         }
 
         // 3. 상태 필터
@@ -291,9 +501,13 @@
             if (navLogoutLink) navLogoutLink.parentElement.style.display = 'none';
         }
 
+        // ⭐️⭐️ 초기 로드 시 서버에서 데이터를 가져옵니다.
+        const schedules = await fetchMySchedules();
+
         // 검색 필터 초기화 및 이벤트 바인딩
         const dateFilter = document.getElementById('filter-date');
         if (dateFilter) {
+            // 오늘 날짜로 초기화
             dateFilter.valueAsDate = new Date();
         }
 
@@ -304,8 +518,7 @@
 
         const regionFilter = document.getElementById('filter-region');
 
-        // 1. 지역 옵션을 채웁니다. (중복 방지)
-        // HTML에 '전체지역' 옵션이 이미 있으므로, JS는 METRO_CITIES만 추가합니다.
+        // 1. 지역 옵션을 채웁니다.
         METRO_CITIES.forEach(city => {
             const option = document.createElement('option');
             option.value = city.value;
@@ -314,7 +527,7 @@
         });
 
         // 초기 로드 시 전체 목록 표시
-        renderMatchList(MOCK_MATCHES);
+        renderMatchList(schedules);
     });
 </script>
 </body>

@@ -9,7 +9,7 @@ import java.util.List;
 @Mapper
 public interface MatchParticipantMapper {
 
-    void insert(@Param("roomId") Long roomId, @Param("userId") Long userId);
+    void insert(@Param("roomId") Long roomId, @Param("userId") Long userId, @Param("position") String position);
 
     int existsByRoomAndUser(@Param("roomId") Long roomId, @Param("userId") Long userId);
 
@@ -19,10 +19,11 @@ public interface MatchParticipantMapper {
 
     int countByRoom(@Param("roomId") Long roomId);
 
-    // 조회
+    // ⭐️ [추가] userId로 User 테이블의 position을 조회하는 메서드
+    String findUserDefaultPosition(@Param("userId") Long userId);
+
     ParticipantDto findHostInfo(@Param("roomId") Long roomId);
     List<ParticipantDto> findParticipantsInfo(@Param("roomId") Long roomId);
 
-    // ✅ [추가됨] 상태 변경 (수락 기능)
     void updateStatus(@Param("roomId") Long roomId, @Param("userId") Long userId, @Param("status") String status);
 }

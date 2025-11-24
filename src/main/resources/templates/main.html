@@ -3,15 +3,105 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MULTI FC - 메인 페이지</title> <link rel="stylesheet" th:href="@{/css/style.css?v=219}">
+    <title>Multi FC - 메인 페이지</title> <link rel="stylesheet" th:href="@{/css/style.css?v=219}">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700;900&family=Noto+Sans+KR:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 
+    <style>
+        /* 기존 main.html 내의 스타일을 IAMGROUND 스타일에 맞게 정리 */
+
+        .main-content {
+            /* 이 클래스는 전체 페이지 레이아웃을 위해 그대로 사용 */
+            min-height: 100vh;
+            /* Hero 섹션 아래 콘텐츠들이 body 배경 위로 올라오도록 투명하게 설정 */
+            background: transparent;
+            padding: 0;
+        }
+
+        /* Hero 섹션 아래 콘텐츠들이 body 배경 위로 올라오도록 투명하게 설정 */
+        #upcoming-schedule-section, #review-notification-section {
+            position: relative;
+            z-index: 10; /* 비디오 배경 위에 오도록 */
+        }
+
+        /* ⭐⭐⭐ [추가] 알림 배너 닫기 버튼 스타일 ⭐⭐⭐ */
+        #review-notification-section {
+            /* 기존 스타일 유지: flex를 사용했다는 가정 하에 padding을 조정 */
+            position: relative;
+            padding-right: 40px; /* 닫기 버튼 공간 확보 */
+        }
+        .close-review-btn {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            padding: 5px;
+            opacity: 0.6;
+            transition: opacity 0.2s;
+            line-height: 1;
+            z-index: 20;
+        }
+        .close-review-btn:hover {
+            opacity: 1;
+        }
+        /* ⭐⭐⭐ [추가 끝] ⭐⭐⭐ */
+
+        /* 비회원 로그인 유도 버튼은 hero 섹션 아래에 배치되도록 조정 */
+        .login-prompt-button {
+            z-index: 50;
+            display: inline-block;
+            margin: 10px 5px 0 5px;
+            padding: 10px 20px;
+            font-size: 16px;
+            font-weight: 600;
+            color: white;
+            background: #6c5ce7;
+            border-radius: 25px;
+            text-decoration: none;
+            transition: background 0.3s;
+        }
+
+        /* ⭐⭐⭐ 슬라이더 아이템 스타일 (이전 요청의 최종 수정 내용 유지) ⭐⭐⭐ */
+        .schedule-item {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(240, 240, 240, 0.95)) !important;
+            color: #2c3e50 !important;
+            border: 1px solid rgba(0,0,0,0.1);
+            text-align: left;
+        }
+        .schedule-item strong {
+            font-size: 17px;
+            color: #2c3e50;
+            display: block;
+            margin-bottom: 5px;
+        }
+        .schedule-item .item-location {
+            font-size: 14px;
+            color: #555;
+            display: flex;
+            align-items: center;
+        }
+        .schedule-item .item-location i {
+            margin-right: 5px;
+            color: #8e44ad;
+        }
+        .schedule-item .item-type {
+            font-size: 13px;
+            font-weight: 700;
+            color: #e74c3c;
+            margin-bottom: 5px;
+        }
+        /* ⭐⭐⭐ 슬라이더 아이템 스타일 끝 ⭐⭐⭐ */
+
+    </style>
 </head>
 <body>
 
 <header class="quick-menu">
-    <div class="logo"><a href="/">MULTI FC</a></div>
+    <div class="logo"><a href="/">Multi FC</a></div>
     <div class="header-icons">
         <button id="profile-menu-toggle" class="profile-icon" style="position: relative;">
             <i class="fas fa-user-circle"></i>
@@ -252,45 +342,94 @@
     let hasReviewNotif = false;
     let hasScheduleNotif = false;
 
+    // ⭐ [수정] 후기 작성이 필요한 구장 ID 목록 (동적으로 가져옴)
+    let pendingReviewStadiumIds = [];
+
+    // ⭐ [추가] 다가오는 일정 데이터 (실제 API 응답 저장용)
+    let upcomingSchedules = [];
+
     function updateGlobalBadge() {
-        if (hasReviewNotif || hasScheduleNotif) {
+        if (pendingReviewStadiumIds.length > 0 || hasScheduleNotif) {
             if (badge) badge.style.display = 'block';
         } else {
             if (badge) badge.style.display = 'none';
         }
     }
+
     async function checkPendingReviews() {
         if (localStorage.getItem('hasReadReviews') === 'true') {
             hasReviewNotif = false;
             return;
         }
+
+        const currentUserId = localStorage.getItem('userId');
+        if (!currentUserId) return; // 로그인 안 했으면 통과
+
         try {
-            await new Promise(r => setTimeout(r, 200));
-            const mockReviews = { "count": 1 };
-            if (mockReviews.count > 0) {
-                hasReviewNotif = true;
+            // ⭐ [수정] 새로운 API 호출: 로그인된 사용자가 후기 작성이 필요한 구장 ID 목록을 가져옴
+            const response = await fetch(`/api/reviews/pending-stadiums?userId=${currentUserId}`);
+
+            if (response.ok) {
+                const ids = await response.json();
+                pendingReviewStadiumIds = ids;
+
+                if (ids && ids.length > 0) {
+                    hasReviewNotif = true;
+                } else {
+                    hasReviewNotif = false;
+                }
             }
-        } catch (error) { console.error("후기 알림 요청 중 오류:", error); }
+        } catch (error) {
+            console.error("후기 알림 요청 중 오류:", error);
+            hasReviewNotif = false;
+        }
     }
+
     async function checkUpcomingSchedules() {
         if (localStorage.getItem('hasReadSchedules') === 'true') {
             hasScheduleNotif = false;
             return;
         }
+
+        const accessToken = localStorage.getItem('accessToken');
+        if (!accessToken) {
+            hasScheduleNotif = false;
+            return;
+        }
+
         try {
-            await new Promise(r => setTimeout(r, 500));
-            // 이전 이미지에서는 3개의 일정이 있었으므로, 3개 이상의 목업 데이터를 가정합니다.
-            const mockSchedules = [
-                { id: 1, date: "2025-11-01", time: "19:00", location: "서울 강남 풋살장", type: "개인 매치" },
-                { id: 2, date: "2025-11-03", time: "20:00", location: "수원 월드컵 풋살장", type: "팀 매치" },
-                { id: 3, date: "2025-11-05", time: "21:00", location: "용인 풋살파크", type: "개인 매치" },
-                { id: 4, date: "2025-11-08", time: "18:00", location: "분당 탄천 구장", type: "팀 매치" }
-            ];
-            if (mockSchedules.length > 0) {
-                hasScheduleNotif = true;
+            const response = await fetch(`/api/schedule/upcoming`, {
+                headers: {
+                    'Authorization': 'Bearer ' + accessToken,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+
+                upcomingSchedules = data.map(item => ({
+                    id: item.scheduleId,
+                    matchId: item.matchId,
+                    type: item.scheduleType,    // "경기" / "개인"
+                    date: item.scheduleDate,
+                    time: item.scheduleTime,
+                    title: item.title
+                }));
+
+                hasScheduleNotif = upcomingSchedules.length > 0;
+            } else {
+                console.error("다가오는 일정 조회 실패:", response.status);
+                hasScheduleNotif = false;
+                upcomingSchedules = [];
             }
-        } catch (error) { console.error("일정 요청 중 오류 발생:", error); }
+        } catch (error) {
+            console.error("일정 요청 중 오류 발생:", error);
+            hasScheduleNotif = false;
+            upcomingSchedules = [];
+        }
     }
+
 
     // ⭐⭐ [추가] 알림 닫기 로직: 리뷰 알림 배너 숨기기 ⭐⭐
     function closeReviewNotification() {
@@ -304,6 +443,36 @@
 
     // --- (★페이지별★) 로직 실행 ---
     document.addEventListener('DOMContentLoaded', async () => {
+
+        // ⭐️ 1. SSO 로그인 후 처리 (토큰 저장 + 내 정보 가져오기) ⭐️
+        const urlParams = new URLSearchParams(window.location.search);
+        const token = urlParams.get('token');
+
+        if (token) {
+            // (1) 토큰 저장
+            localStorage.setItem('accessToken', token);
+
+            // (2) URL 정리
+            window.history.replaceState({}, document.title, "/");
+
+            // (3) 내 정보(닉네임) 가져오기 API 호출
+            try {
+                const response = await fetch('/api/users/me', {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+
+                if (response.ok) {
+                    const userData = await response.json();
+                    // 닉네임과 아이디를 저장 (화면 표시에 사용됨)
+                    localStorage.setItem('username', userData.nickname);
+                    localStorage.setItem('userId', userData.username);
+                }
+            } catch (e) {
+                console.error("사용자 정보 가져오기 실패", e);
+            }
+
+        }
+
         const accessToken = localStorage.getItem('accessToken');
         const loggedInUsername = localStorage.getItem('username'); //
         const mainLoginLink = document.getElementById('main-login-link');
@@ -397,6 +566,7 @@
 
             const userMenuUsername = document.getElementById('user-menu-username');
             if (userMenuUsername) {
+                console.log("✅ [main.html] 현재 localStorage 닉네임 값:", loggedInUsername);
                 userMenuUsername.textContent = loggedInUsername; // 헤더 닉네임 변경
             }
 
@@ -423,13 +593,18 @@
                 chatPromoLink.textContent = "실시간 채팅 바로가기";
             }
 
-            // (★) 후기 알림 배너 표시 로직 (텍스트 및 닫기 버튼 추가)
-            if (reviewSection && hasReviewNotif) {
+            // (★) 후기 알림 배너 표시 로직 (링크에 stadiumId 추가)
+            if (reviewSection && pendingReviewStadiumIds.length > 0) {
+                // ⭐⭐ [수정됨] 후기 작성 링크에 첫 번째 stadiumId 파라미터 추가 ⭐⭐
+                const targetStadiumId = pendingReviewStadiumIds[0];
+                const reviewLinkUrl = `/reviews/write?stadiumId=${targetStadiumId}`;
+                const count = pendingReviewStadiumIds.length;
+
                 reviewSection.innerHTML = `
                     <div class="review-notification-text">
-                        <i class="fas fa-bell"></i> 작성하지 않은 경기 후기가 <strong>1건</strong> 있습니다.
+                        <i class="fas fa-bell"></i> 작성하지 않은 경기 후기가 <strong>${count}건</strong> 있습니다.
                     </div>
-                    <a href="/reviews/write" id="main-review-link" class="review-notification-link">후기 작성하기</a>
+                    <a href="${reviewLinkUrl}" id="main-review-link" class="review-notification-link">후기 작성하기</a>
                     <button class="close-review-btn" onclick="closeReviewNotification()">&times;</button>
                 `;
                 reviewSection.style.display = 'flex';
@@ -438,7 +613,8 @@
                 mainReviewLink.addEventListener('click', (e) => {
                     localStorage.setItem('hasReadReviews', 'true');
                     reviewSection.style.display = 'none';
-                    hasReviewNotif = false;
+                    // 알림을 읽었으므로 배열 초기화
+                    pendingReviewStadiumIds = [];
                     updateGlobalBadge();
                 });
 
@@ -451,60 +627,77 @@
                 scheduleSection.style.display = 'block';
                 const noScheduleView = document.getElementById('no-schedule-view');
 
-                // 목업 데이터 (3개 이상)
-                // ⭐⭐⭐ 수정된 목업 데이터 (type 추가) ⭐⭐⭐
-                const mockSchedules = [
-                    { id: 1, date: "2025-11-01", time: "19:00", location: "서울 강남 풋살장", type: "개인 매치" },
-                    { id: 2, date: "2025-11-03", time: "20:00", location: "수원 월드컵 풋살장", type: "팀 매치" },
-                    { id: 3, date: "2025-11-05", time: "21:00", location: "용인 풋살파크", type: "개인 매치" },
-                    { id: 4, date: "2025-11-08", time: "18:00", location: "분당 탄천 구장", type: "팀 매치" }
-                ];
-                // ⭐⭐⭐ 수정된 목업 데이터 끝 ⭐⭐⭐
+                // ✔ checkUpcomingSchedules()에서 채워준 값 사용
+                const list = upcomingSchedules;
 
-                if (mockSchedules.length > 0) {
-                    // 슬라이더 DOM 렌더링 및 로직 유지
+                if (list && list.length > 0) {
                     sliderTrack.innerHTML = '';
                     paginationContainer.innerHTML = '';
 
-                    mockSchedules.forEach((schedule, index) => {
+                    list.forEach((schedule, index) => {
                         const item = document.createElement('div');
                         item.className = 'schedule-item';
-                        // ⭐⭐⭐ 수정된 HTML 구조: 날짜, 시간, 장소, 타입을 명확히 표시 ⭐⭐⭐
-                        item.innerHTML = `
-                            <div class="item-info-wrapper">
-                                <div class="item-type">${schedule.type}</div>
-                                <strong>${schedule.date} (${schedule.time})</strong>
-                                <div class="item-location"><i class="fas fa-map-marker-alt"></i>${schedule.location}</div>
-                            </div>
-                            <a href="/schedule/detail/${schedule.id}" class="schedule-item-link">상세보기</a>
-                        `;
-                        // ⭐⭐⭐ 수정된 HTML 구조 끝 ⭐⭐
+
+                        const isMatch = schedule.type === '경기';   // 경기 일정인지 여부
+
+                        if (isMatch) {
+                            const targetMatchId = schedule.matchId;
+                            // ⭐ 경기 일정 카드
+                            item.innerHTML = `
+                                <div class="item-info-wrapper">
+                                    <div class="item-type type-match">경기 일정</div>
+                                    <strong>${schedule.title || ''}</strong>
+                                    <div class="item-location">
+                                        <i class="fas fa-clock"></i>
+                                        ${schedule.date || ''} ${schedule.time ? `(${schedule.time})` : ''}
+                                    </div>
+                                </div>
+                                 <a href="/schedule/detail/${targetMatchId}" class="schedule-item-link">상세보기</a>
+                            `;
+                        } else {
+                            // ⭐ 개인 일정 카드
+                            item.innerHTML = `
+                                <div class="item-info-wrapper">
+                                    <div class="item-type type-personal">개인 일정</div>
+                                    <strong>${schedule.title || '(제목 없는 일정)'}</strong>
+                                    <div class="item-location">
+                                        <i class="fas fa-calendar-alt"></i>
+                                        ${schedule.date || ''} ${schedule.time ? `(${schedule.time})` : ''}
+                                    </div>
+                                </div>
+                                <a href="/mypage?tab=calendar&date=${schedule.date}&scheduleId=${schedule.id}" class="schedule-item-link">
+                                달력에서 보기</a>
+                            `;
+                        }
 
                         sliderTrack.appendChild(item);
 
                         const dot = document.createElement('span');
                         dot.className = 'dot';
                         dot.dataset.index = index;
-                        // 클릭 이벤트는 위에서 통합해서 처리합니다.
                         paginationContainer.appendChild(dot);
                     });
 
-                    totalSlides = mockSchedules.length; // 각 아이템당 1페이지
+                    totalSlides = list.length;
                     currentIndex = 0;
 
                     updateSliderControls();
                     updatePaginationDots();
-                    if(document.querySelector('.schedule-slider-container')) document.querySelector('.schedule-slider-container').style.display = 'block';
-                    if(noScheduleView) noScheduleView.style.display = 'none';
+
+                    if (document.querySelector('.schedule-slider-container')) {
+                        document.querySelector('.schedule-slider-container').style.display = 'block';
+                    }
+                    if (noScheduleView) noScheduleView.style.display = 'none';
 
                 } else if (noScheduleView) {
-                    // 일정이 없을 때 빈 메시지 표시 (Hero 섹션 내에서)
-                    noScheduleView.innerHTML = '<p class="no-schedule-message" style="color:white; text-shadow: 0 0 3px black;">아직 7일 이내의 일정이 없습니다. 😥</p>';
+                    noScheduleView.innerHTML =
+                        '<p class="no-schedule-message" style="color:white; text-shadow: 0 0 3px black;">아직 7일 이내의 일정이 없습니다. 😥</p>';
                     noScheduleView.style.display = 'block';
-                    if(document.querySelector('.schedule-slider-container')) document.querySelector('.schedule-slider-container').style.display = 'none';
+                    if (document.querySelector('.schedule-slider-container')) {
+                        document.querySelector('.schedule-slider-container').style.display = 'none';
+                    }
                 }
             }
-
         } else {
             // [비회원일 때] - Hero 섹션에 로그인 유도 메시지 표시
             if (profileMenuToggle) profileMenuToggle.style.display = 'none';
@@ -538,16 +731,15 @@
                 };
             }
 
-            // ⭐⭐ 보강: 메뉴바의 채팅 링크 클릭 방지 ⭐⭐
             if (navChatLinkElement) {
-                navChatLinkElement.querySelector('a').addEventListener('click', function(e) {
+                // ✅ 수정됨: 요소를 바로 사용
+                navChatLinkElement.addEventListener('click', function(e) {
                     e.preventDefault();
-                    alert("❌ 실시간 채팅은 회원만 이용할 수 없습니다.");
+                    // alert("❌ 실시간 채팅은 회원만 이용할 수 없습니다."); // (메시지가 좀 어색해서 수정 제안)
+                    alert("로그인이 필요한 서비스입니다.");
                     window.location.href = '/login';
                 });
             }
         }
     });
 </script>
-</body>
-</html>

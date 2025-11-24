@@ -28,8 +28,8 @@ public interface CommunityMapper {
 
     // 게시글 수정
     int updatePostByWriter(@Param("postId")Long postId,
-                            @Param("userId") Long userId,
-                            @Param("req") CommunityDto.PostUpdateRequest req);
+                           @Param("userId") Long userId,
+                           @Param("req") CommunityDto.PostUpdateRequest req);
 
     // 게시글 삭제
     int deletePostByWriter(@Param("postId") Long postId,

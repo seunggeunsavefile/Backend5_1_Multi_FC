@@ -16,12 +16,12 @@ public interface CommentMapper {
 
     // 댓글 수정
     int updateCommentByWriter(@Param("commentId") Long commentId,
-                               @Param("userId") Long userId,
-                               @Param("req") CommunityDto.CommentUpdateRequest req);
+                              @Param("userId") Long userId,
+                              @Param("req") CommunityDto.CommentUpdateRequest req);
 
     // 댓글 삭제
     int deleteCommentByWriter(@Param("commentId") Long commentId,
-                               @Param("userId") Long userId);
+                              @Param("userId") Long userId);
 
     // 특정 게시글의 전체 댓글 조회
     List<CommunityDto.CommentResponse> findCommentByPostId(@Param("postId") Long postId);

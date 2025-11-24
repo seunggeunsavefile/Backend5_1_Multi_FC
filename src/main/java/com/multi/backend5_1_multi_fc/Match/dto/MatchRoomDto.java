@@ -1,4 +1,3 @@
-// 경기방 응답 DTO
 package com.multi.backend5_1_multi_fc.match.dto;
 
 import lombok.AllArgsConstructor;
@@ -13,10 +12,15 @@ import lombok.Setter;
 public class MatchRoomDto {
     private Long roomId;
     private Long stadiumId;
-    private Long hostId;      // 생성자(Host)
+    private Long hostId;
     private String matchDate;
     private String matchTime;
     private Integer maxPlayers;
     private String level;
     private String status;
+
+    // ⭐️ [추가] 프론트엔드 표시를 위한 필드
+    private String stadiumName;
+    private String hostNickname;
+    private Integer currentPlayers;
 }

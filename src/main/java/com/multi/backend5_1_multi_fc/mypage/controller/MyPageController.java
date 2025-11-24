@@ -8,6 +8,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -22,20 +24,14 @@ public class MyPageController {
     private final MyPageService myPageService;
     private final S3Service s3Service;
 
-    private String getUsernameFromToken(String authHeader) {
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+    // SecurityContext에서 username 가져오기
+    private String getCurrentUsername() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null || !auth.isAuthenticated()
+                || "anonymousUser".equals(auth.getPrincipal())) {
             throw new MyPageException("로그인이 필요한 요청입니다.");
         }
-
-        String token = authHeader.substring("Bearer ".length());
-
-        // 현재 로그인에서 만든 더미 토큰 규칙에 맞춰서 username 추출
-        String prefix = "dummy-jwt-token-for-";
-        if (!token.startsWith(prefix)) {
-            throw new MyPageException("유효하지 않은 토큰입니다.");
-        }
-
-        return token.substring(prefix.length()); // 실제 username
+        return auth.getName();
     }
 
     // 내 정보 조회 (로그인한 유저 기준)
@@ -43,7 +39,7 @@ public class MyPageController {
     public ResponseEntity<MyPageDto> getMyInfo(
             @RequestHeader(value = "Authorization", required = false) String authHeader
     ) {
-        String username = getUsernameFromToken(authHeader);
+        String username =  getCurrentUsername();
         MyPageDto myInfo = myPageService.getMyInfo(username); // 여기서 DB 조회
         return ResponseEntity.ok(myInfo);
     }
@@ -54,7 +50,7 @@ public class MyPageController {
             @RequestHeader(value = "Authorization", required = false) String authHeader,
             @RequestBody MyPageDto.PasswordVerifyRequest request
     ) {
-        String username = getUsernameFromToken(authHeader);
+        String username =  getCurrentUsername();
         try {
             myPageService.verifyPassword(username, request); // DB에서 현재 비번 검증
             return ResponseEntity.ok(Map.of(
@@ -71,18 +67,14 @@ public class MyPageController {
     @PutMapping(value = "/update", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> updateProfile(
             @RequestHeader(value = "Authorization", required = false) String authHeader,
-
-            // 🔹 텍스트 필드들 (폼에서 append 하는 이름이랑 같아야 함)
             @RequestPart("email") String email,
             @RequestPart("nickname") String nickname,
             @RequestPart("position") String position,
             @RequestPart("skillLevel") String level,
             @RequestPart("location") String address,
-
-            // 🔹 파일 (선택)
             @RequestPart(value = "profilePic", required = false) MultipartFile profilePic
     ) {
-        String username = getUsernameFromToken(authHeader);
+        String username =  getCurrentUsername();
 
         // 기존 내 정보 가져와서 gender / 기존 이미지 유지
         MyPageDto myInfo = myPageService.getMyInfo(username);
@@ -93,17 +85,15 @@ public class MyPageController {
         request.setPosition(position);
         request.setLevel(level);
         request.setAddress(address);
-
-        // 🔹 gender는 이미 잘 동작 중 → 기존 값 그대로 유지
         request.setGender(myInfo.getGender());
 
         try {
-            // 🔹 새 파일 있으면 S3 업로드
+            // 새 파일 있으면 S3 업로드
             if (profilePic != null && !profilePic.isEmpty()) {
                 String imageUrl = s3Service.uploadFile(profilePic);
                 request.setProfileImage(imageUrl);
             } else {
-                // 🔹 파일 안 보냈으면 기존 이미지 URL 유지
+                // 파일 안 보냈으면 기존 이미지 URL 유지
                 request.setProfileImage(myInfo.getProfileImage());
             }
         } catch (IOException e) {
@@ -122,7 +112,7 @@ public class MyPageController {
             @RequestHeader(value = "Authorization", required = false) String authHeader,
             @RequestBody MyPageDto.UpdatePasswordRequest request
     ) {
-        String username = getUsernameFromToken(authHeader);
+        String username =  getCurrentUsername();
         myPageService.updatePassword(username, request); // DB 비밀번호 변경
         return ResponseEntity.ok(Map.of("message", "비밀번호가 성공적으로 변경되었습니다."));
     }

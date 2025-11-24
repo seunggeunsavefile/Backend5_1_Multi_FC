@@ -16,6 +16,8 @@ public interface MatchRoomMapper {
 
     List<MatchRoomDto> findByStadium(Long stadiumId);
 
-    // ✅ [추가됨] 경기 상태 변경 (마감 처리용)
+    // ⭐️ [추가] 특정 사용자가 참여/생성한 매치룸 조회
+    List<MatchRoomDto> findByUserId(@Param("userId") Long userId);
+
     void updateStatus(@Param("roomId") Long roomId, @Param("status") String status);
 }

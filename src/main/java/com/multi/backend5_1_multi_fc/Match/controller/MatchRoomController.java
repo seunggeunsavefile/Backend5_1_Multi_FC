@@ -30,7 +30,13 @@ public class MatchRoomController {
         return matchRoomService.findByStadium(stadiumId);
     }
 
-    /** ✅ [신규] 경기 마감 */
+    /** ⭐️ [추가] 내가 참가/생성한 경기 목록 조회 API */
+    @GetMapping("/my-schedules")
+    public List<MatchRoomDto> getMySchedules(@RequestParam Long userId) {
+        // 실제 운영 환경에서는 SecurityContext에서 userId를 가져와야 합니다.
+        return matchRoomService.findByUserId(userId);
+    }
+
     @PostMapping("/{roomId}/close")
     public void closeMatch(@PathVariable Long roomId) {
         matchRoomService.closeMatch(roomId);

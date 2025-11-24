@@ -19,24 +19,32 @@ public class MatchParticipantService {
     private final MatchRoomMapper matchRoomMapper;
     private final MatchEventPublisher eventPublisher;
 
-    /** 참가 신청 */
     @Transactional
+    // ⭐️ [수정] position 인자를 제거하고 userId만 받습니다.
     public void join(Long roomId, Long userId) {
         MatchRoomDto room = matchRoomMapper.findById(roomId);
-        // 마감된 경기면 참가 불가
+
+        // 1. User 테이블에서 기본 position 정보 조회
+        String defaultPosition = participantMapper.findUserDefaultPosition(userId);
+
+        if (defaultPosition == null || defaultPosition.trim().isEmpty()) {
+            defaultPosition = "미정"; // DB에 포지션 값이 없을 경우 기본값 설정
+        }
+
         if ("CLOSED".equals(room.getStatus())) {
             throw new IllegalStateException("이미 마감된 경기입니다.");
         }
         if (room.getHostId().equals(userId)) return;
 
         if (participantMapper.existsByRoomAndUser(roomId, userId) == 0) {
-            participantMapper.insert(roomId, userId);
+            // 2. 기본 포지션을 DB에 저장
+            participantMapper.insert(roomId, userId, defaultPosition);
+
             int currentCount = participantMapper.countByRoom(roomId);
             eventPublisher.publishParticipantEvent(roomId, userId, "JOIN", currentCount);
         }
     }
 
-    /** 참가 취소 */
     @Transactional
     public void cancel(Long roomId, Long userId) {
         MatchRoomDto room = matchRoomMapper.findById(roomId);
@@ -49,21 +57,17 @@ public class MatchParticipantService {
         }
     }
 
-    /** ✅ [신규] 참가자 수락 */
     @Transactional
     public void approve(Long roomId, Long userId) {
         participantMapper.updateStatus(roomId, userId, "확정");
         int currentCount = participantMapper.countByRoom(roomId);
-        // UPDATE 액션으로 알림 전송
         eventPublisher.publishParticipantEvent(roomId, userId, "UPDATE", currentCount);
     }
 
-    /** ✅ [신규] 참가자 강퇴/거절 */
     @Transactional
     public void reject(Long roomId, Long userId) {
         participantMapper.delete(roomId, userId);
         int currentCount = participantMapper.countByRoom(roomId);
-        // LEAVE 액션으로 알림 전송 (목록에서 사라짐)
         eventPublisher.publishParticipantEvent(roomId, userId, "LEAVE", currentCount);
     }
 

@@ -11,6 +11,12 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 import java.util.Map;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import com.multi.backend5_1_multi_fc.user.dto.UserDto;
+import jakarta.servlet.http.HttpSession;
+import org.springframework.ui.Model;
 
 
 @Controller
@@ -28,18 +34,18 @@ public class AuthController {
     public String forgotPasswordPage() { return "forgot-password"; }
 
     @GetMapping("/register")
-    public String registerPage() { return "register"; }
+    public String registerPage(HttpSession session, Model model) {
+        // 1. 세션에서 "socialInfo"를 가져옵니다.
+        UserDto socialInfo = (UserDto) session.getAttribute("socialInfo");
 
+        if (socialInfo != null) {
+            // 2. 모델에 socialInfo를 추가합니다.
+            model.addAttribute("socialInfo", socialInfo);
+            // 3. (중요) 세션에서 정보를 제거합니다 (새로고침 시 중복 방지)
+            session.removeAttribute("socialInfo");
+        }
 
-
-    @PostMapping("/register")
-    public ResponseEntity<?> handleRegistration(
-            @RequestParam String name, @RequestParam String email,
-            @RequestParam String username, @RequestParam String nickname,
-            @RequestParam String password, @RequestParam String address,
-            @RequestParam(required = false) MultipartFile profilePic,
-            @RequestParam(required = false) String termsAgree) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(Map.of("message", "회원가입 성공"));
+        return "register";
     }
 
     @PostMapping("/find-id")

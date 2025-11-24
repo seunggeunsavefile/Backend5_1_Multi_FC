@@ -32,12 +32,13 @@ public class MatchRoomService {
         return matchRoomMapper.findByStadium(stadiumId);
     }
 
-    /** ✅ [신규] 경기 모집 마감 (매칭 확정) */
+    // ⭐️ [추가] 내가 참가/생성한 경기 목록 조회
+    public List<MatchRoomDto> findByUserId(Long userId) {
+        return matchRoomMapper.findByUserId(userId);
+    }
+
     @Transactional
     public void closeMatch(Long roomId) {
         matchRoomMapper.updateStatus(roomId, "CLOSED");
-
-        // 마감 이벤트를 발행하여 보고 있는 사람들에게 알림 (선택 사항)
-        // 여기서는 단순히 상태만 바꾸지만, 필요하면 WebSocket 메시지를 보낼 수도 있습니다.
     }
 }

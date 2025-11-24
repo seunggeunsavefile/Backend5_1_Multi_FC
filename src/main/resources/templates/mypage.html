@@ -255,11 +255,12 @@
         logoutButton.addEventListener('click', (e) => {
             e.preventDefault();
             localStorage.removeItem('accessToken');
+            localStorage.removeItem('username');
             window.location.href = '/login';
         });
     }
 
-
+    // 25-11-18 추가
     function formatToHHMM(timeStr) {
         if (!timeStr) return '';
         const parts = timeStr.split(':'); // ["HH","mm","ss"]
@@ -268,6 +269,7 @@
         }
         return timeStr; // 이미 HH:mm 이거나 다른 형식이면 그대로
     }
+
 
     // 알림 배지
     const badge = document.getElementById('notification-badge');
@@ -299,7 +301,7 @@
         }
 
         try {
-            const response = await fetch('/api/users/me', {
+            const response = await fetch('/api/mypage/me', {
                 method: 'GET',
                 headers: {
                     'Authorization': `Bearer ${token}`
@@ -317,7 +319,7 @@
                 document.getElementById('view-address').textContent = user.address || '정보 없음';
                 document.getElementById('view-skill-level').textContent = user.level || '정보 없음';
                 document.getElementById('view-position-score').textContent = user.position || '정보 없음';
-                localStorage.setItem('username', user.username);
+                localStorage.setItem('username', user.nickname || user.username);
 
                 // 프로필 이미지 표시
                 if (user.profileImage) {
@@ -364,13 +366,6 @@
     let currentDate = new Date();
     currentDate.setDate(1);
 
-    // 초기 더미, 실제로는 loadSchedulesFromStorage에서 덮어씀
-    let MOCK_SCHEDULES = [
-        { id: 1, year: 2025, month: 10, day: 5, time: "09:00", type: 'match', title: '09:00 경기 일정', detail: "장소: 강남 풋살장, 레벨: 중급, 인원: 10명" },
-        { id: 2, year: 2025, month: 10, day: 5, time: "13:00", type: 'personal', title: '13:00 개인 약속', detail: "축구화 세척 및 개인 연습 일정" },
-        { id: 3, year: 2025, month: 10, day: 25, time: "20:00", type: 'match', title: '수원 팀 매치', detail: "장소: 수원 월드컵 구장, 레벨: 고급" },
-        { id: 4, year: 2025, month: 11, day: 10, time: "18:00", type: 'personal', title: '친구와 풋살', detail: "잠실 풋살장" }
-    ];
 
     // ✅ 수정된 버전: 이제 personalSchedules만 사용
     function loadSchedulesFromStorage() {
@@ -415,14 +410,13 @@
             newScheduleTitle.style.display = 'none';
             scheduleTimeInput.style.display = 'none';
 
+            // 25-11-18 수정
             schedulesToday.forEach(schedule => {
                 const li = document.createElement('li');
                 const eventClass = schedule.type === 'match' ? 'match-schedule' : 'personal-schedule';
                 li.className = eventClass;
                 li.dataset.scheduleId = schedule.id;
-
-                const displayTime = formatToHHMM(schedule.time);  // ✅ 초 제거
-
+                const displayTime = formatToHHMM(schedule.time);
                 li.innerHTML = `<span style="font-weight: 700;">${displayTime}</span> ${schedule.title}`;
                 li.onclick = (e) => bindScheduleToDetail(e, schedule);
                 detailList.appendChild(li);
@@ -450,8 +444,12 @@
             newScheduleTitle.style.display = 'block';
             setNewScheduleMode();
         }
+
         fixedDetailWindow.style.display = 'block';
-        event.stopPropagation();
+
+        if (event && event.stopPropagation) {
+            event.stopPropagation();
+        }
     }
 
     function setNewScheduleMode() {
@@ -560,7 +558,7 @@
             document.getElementById('fixed-detail-edit-area').appendChild(summaryDiv);
 
             document.getElementById('go-to-match-btn').addEventListener('click', () => {
-                window.location.href = `/schedule/detail/${schedule.matchId ?? schedule.id}`;
+                window.location.href = `/schedule/detail/${schedule.matchId}`;
             });
             return;
         }
@@ -622,7 +620,6 @@
                     headers: {
                         'Content-Type': 'application/json',
                         'Authorization': `Bearer ${accessToken}`,
-                        'X-USERNAME': localStorage.getItem('username')
                     },
                     body: JSON.stringify(body)
                 });
@@ -638,7 +635,6 @@
                     headers: {
                         'Content-Type': 'application/json',
                         'Authorization': `Bearer ${accessToken}`,
-                        'X-USERNAME': localStorage.getItem('username')
                     },
                     body: JSON.stringify(body)
                 });
@@ -676,7 +672,6 @@
                 method: 'DELETE',
                 headers: {
                     'Authorization': `Bearer ${accessToken}`,
-                    'X-USERNAME': localStorage.getItem('username')
                 }
             });
 
@@ -708,7 +703,6 @@
             method: 'GET',
             headers: {
                 'Authorization': `Bearer ${accessToken}`,
-                'X-USERNAME': localStorage.getItem('username')
             }
         });
 
@@ -732,18 +726,17 @@
                 time: item.scheduleTime,
                 type: item.scheduleType === '경기' ? 'match' : 'personal',
                 title: item.title,
-                detail: '',
-                matchId: null
+                detail: item.content || '',
+                matchId: item.matchId ?? null
             });
         });
 
         renderCalendar();
     }
 
-    // 이번 달 전체 일정 서버에서 불러와서 MOCK_SCHEDULES 채우기
+    // 이번 달 전체 일정 서버에서 불러와서 채우기
     async function loadThisMonthSchedules() {
         const accessToken = localStorage.getItem('accessToken');
-        const username = localStorage.getItem('username');
         if (!accessToken) return;
 
         const year = currentDate.getFullYear();
@@ -754,7 +747,6 @@
                 method: 'GET',
                 headers: {
                     'Authorization': `Bearer ${accessToken}`,
-                    'X-USERNAME': username || ''
                 }
             });
 
@@ -828,6 +820,7 @@
                 .filter(s => s.year === year && s.month === month && s.day === day)
                 .sort((a, b) => a.time.localeCompare(b.time));
 
+            //25-11-18 수정
             if (schedulesToday.length > 0) {
                 const visible = schedulesToday.slice(0, 2);
                 visible.forEach(s => {
@@ -835,7 +828,7 @@
                     eventDiv.className = "calendar-event " + (s.type === "match" ? "match-schedule" : "personal-schedule");
 
                     const timeTextRaw = s.time?.split("~")[0]?.trim() || "";
-                    const timeText = formatToHHMM(timeTextRaw);   // ✅ 초 제거
+                    const timeText = formatToHHMM(timeTextRaw);   //초 제거
 
                     eventDiv.textContent = `${timeText} ${s.title.split(' ')[0]}`;
                     eventDiv.onclick = (e) => {
@@ -997,7 +990,6 @@
         return {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json',
-            'X-USERNAME': localStorage.getItem('username') || ''
         };
     }
 
@@ -1214,15 +1206,57 @@
         const mainTab = urlParams.get('tab');
         const subTab = urlParams.get('subtab');
 
-        if (mainTab === 'calendar') {
-            document.querySelector('.tab-btn[data-tab="tab-calendar"]').click();
-        } else if (mainTab === 'friends') {
-            document.querySelector('.tab-btn[data-tab="tab-friends"]').click();
-            if (subTab === 'add') {
-                document.querySelector('.sub-tab-btn[data-sub-tab="sub-tab-friend-add"]').click();
+        // 캘린더 딥링크 처리
+        const dateParam = urlParams.get('date');        // ex) "2025-11-20"
+        const scheduleIdParam = urlParams.get('scheduleId'); // ex) "123"
+
+        if (mainTab === 'calendar' && dateParam) {
+            const calendarTabBtn = document.querySelector('.tab-btn[data-tab="tab-calendar"]');
+            if (calendarTabBtn) calendarTabBtn.click();
+            const [dy, dm, dd] = dateParam.split('-').map(Number);
+
+            // 캘린더 기준 월을 해당 날짜의 월로 맞추기
+            if (dy && dm) {
+                currentDate = new Date(dy, dm - 1, 1);
+                await loadThisMonthSchedules();   // 그 달 일정 다시 로딩 + 렌더
+                monthYearElement.textContent = `${dy}년 ${dm}월`;
             }
-        } else {
-            document.querySelector('.tab-btn[data-tab="tab-info"]').click();
+
+            // 해당 날짜 상세 패널 열기
+            await openDaySchedule(dd, { stopPropagation: () => {} });
+
+            // 특정 scheduleId까지 넘어왔으면 그 일정 자동 선택
+            if (scheduleIdParam) {
+                setTimeout(() => {
+                    const targetLi = document.querySelector(
+                        `#fixed-schedule-list li[data-schedule-id="${scheduleIdParam}"]`
+                    );
+                    if (!targetLi) return;
+
+                    const schedule = (window.MOCK_SCHEDULES || []).find(
+                        s => String(s.id) === String(scheduleIdParam)
+                    );
+                    if (schedule) {
+                        bindScheduleToDetail({ currentTarget: targetLi }, schedule);
+                    } else {
+                        targetLi.click();
+                    }
+                }, 200);
+            }
+        }
+
+
+        if (!(mainTab === 'calendar' && dateParam)) {
+            if (mainTab === 'calendar' && !dateParam) {
+                document.querySelector('.tab-btn[data-tab="tab-calendar"]').click();
+            } else if (mainTab === 'friends') {
+                document.querySelector('.tab-btn[data-tab="tab-friends"]').click();
+                if (subTab === 'add') {
+                    document.querySelector('.sub-tab-btn[data-sub-tab="sub-tab-friend-add"]').click();
+                }
+            } else {
+                document.querySelector('.tab-btn[data-tab="tab-info"]').click();
+            }
         }
 
         // 🔗 모달 이벤트 바인딩
@@ -1235,7 +1269,7 @@
         if (openFriendModalBtn && friendModalOverlay) {
             openFriendModalBtn.addEventListener('click', () => {
                 friendModalOverlay.classList.add('show');
-                renderModalSearchResults(MODAL_MOCK_DEFAULT_USERS);
+                renderModalSearchResults([]); // 처음엔 빈 상태
                 setTimeout(() => friendModalSearchInput && friendModalSearchInput.focus(), 50);
             });
         }
@@ -1263,6 +1297,8 @@
             });
         }
     });
+
+
 </script>
 </body>
 </html>

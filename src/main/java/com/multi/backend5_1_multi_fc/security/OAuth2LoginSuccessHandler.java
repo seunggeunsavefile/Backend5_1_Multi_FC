@@ -30,8 +30,6 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
 
         boolean isNewUser = oAuth2User.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_PRE_REGISTER"));
 
-        System.out.println("========== SSO 로그인 성공 핸들러 ==========");
-
         if (isNewUser) {
             // (B) 신규 회원 -> 회원가입 페이지로
             UserDto socialInfo = new UserDto();
@@ -42,7 +40,6 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
             HttpSession session = request.getSession();
             session.setAttribute("socialInfo", socialInfo);
 
-            System.out.println("-> 신규 회원 가입 페이지(/register)로 이동");
             getRedirectStrategy().sendRedirect(request, response, "/register");
 
         } else {
@@ -54,9 +51,6 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
             // 2. 토큰 생성 (JwtUtil 사용)
             // (주의: JwtUtil의 메서드명이 generateToken이 맞는지 확인하세요!)
             String token = jwtUtil.generateToken(username);
-
-            System.out.println("✅ JWT 토큰 발급 완료: " + token.substring(0, 10) + "...");
-            System.out.println("-> 메인 페이지로 토큰과 함께 이동");
 
             // 3. 토큰을 URL 파라미터로 붙여서 리다이렉트
             // (프론트엔드에서 이 토큰을 잡아서 저장해야 함)

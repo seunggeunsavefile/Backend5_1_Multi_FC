@@ -62,7 +62,7 @@ public class ChatController {
     //2. 그룹 채팅방 생성
     @PostMapping("/chatroom/group")
     public ChatRoomDto createChatRoom(
-            @RequestBody CreateGroupChatRequest request){
+            @RequestBody CreateGroupChatRequest request) {
         Long userId = getAuthenticatedUserId();
         return chatService.createGroupChatRoom(userId, request);
     }
@@ -70,10 +70,10 @@ public class ChatController {
     //3. 사용자의 채팅방 목록 조회 (타입별) - 동적 이름 포함
     @GetMapping("/chatroom")
     public List<ChatRoomWithParticipantDto> getChatRooms(
-            @RequestParam("type") String roomType){
+            @RequestParam("type") String roomType) {
         Long userId = getAuthenticatedUserId();
         List<ChatRoomWithParticipantDto> rooms = chatService.getUserChatRoomsByType(userId, roomType);
-        for(ChatRoomWithParticipantDto room: rooms){
+        for (ChatRoomWithParticipantDto room : rooms) {
             int unreadCount = chatService.getUnreadMessageCount(room.getRoomId(), userId);
             room.setUnreadCount(unreadCount);
         }
@@ -82,7 +82,7 @@ public class ChatController {
 
     //4. 채팅방 단일 조회 (방의 정보를 응답받는 형태 - 방 제목, 멤버 )
     @GetMapping("/chatroom/{id}")
-    public ChatRoomDto getChatRoom(@PathVariable("id") Long roomId){
+    public ChatRoomDto getChatRoom(@PathVariable("id") Long roomId) {
         return chatService.findChatRoomById(roomId);
     }
 
@@ -95,15 +95,15 @@ public class ChatController {
 
     //6. 채팅방 참가자 목록
     @GetMapping("/chatroom/{id}/participants")
-    public List<ChatParticipantDto> getChatParticipants(@PathVariable("id") Long roomId){
+    public List<ChatParticipantDto> getChatParticipants(@PathVariable("id") Long roomId) {
         return chatService.getParticipantsByRoomId(roomId);
     }
 
     //7. 채팅방 참가자 추가
     @PostMapping("/chatroom/{id}/invite")
-    public void inviteParticipants(@PathVariable("id") Long roomId, @RequestBody List<Long> invitedUserIds){
+    public void inviteParticipants(@PathVariable("id") Long roomId, @RequestBody List<Long> invitedUserIds) {
 
-        for(Long userId: invitedUserIds){
+        for (Long userId : invitedUserIds) {
             chatService.addParticipant(createParticipantDto(roomId, userId));
         }
     }
@@ -115,16 +115,15 @@ public class ChatController {
                 .build();
     }
 
-
     //8. 채팅방 나가기
     @DeleteMapping("/chatroom/{id}/leave")
-    public void leaveChatRoom(@PathVariable("id") Long roomId, @AuthenticationPrincipal CustomUserDetails userDetails){
+    public void leaveChatRoom(@PathVariable("id") Long roomId, @AuthenticationPrincipal CustomUserDetails userDetails) {
         chatService.leaveChatRoom(userDetails.getUserId(), roomId);
     }
 
     //8. 채팅 전송 기능
     @MessageMapping("/chatroom/{roomId}/send")
-    public void sendMessage(@DestinationVariable Long roomId, @Payload ChatMessageDto messageDto, Principal principal){
+    public void sendMessage(@DestinationVariable Long roomId, @Payload ChatMessageDto messageDto, Principal principal) {
 
         try {
             String username = principal.getName();
@@ -146,88 +145,16 @@ public class ChatController {
 
     //9. 안 읽은 채팅 숫자 반환
     @GetMapping("/chatroom/{roomId}/unread-count")
-    public int getUnreadBadge(@PathVariable Long roomId){
+    public int getUnreadBadge(@PathVariable Long roomId) {
         Long userId = getAuthenticatedUserId();
         return chatService.getUnreadMessageCount(roomId, userId);
     }
 
     @PostMapping("/chatroom/{roomId}/mark-read")
-    public ResponseEntity<Void> markRoomAsRead(@PathVariable Long roomId){
+    public ResponseEntity<Void> markRoomAsRead(@PathVariable Long roomId) {
         Long userId = getAuthenticatedUserId();
         System.out.println("markRoomAsRead Start");
         chatService.markRoomAsRead(roomId, userId);
         return ResponseEntity.ok().build();
     }
-
-//    //1. 1대 1 채팅방 생성
-//    @PostMapping("/chatroom/onetoone")
-//    public ChatRoomDto createOneToOneChatRoom(
-//            @RequestParam("targetUserId") Long targetUserId,
-//            @AuthenticationPrincipal CustomUserDetails userDetails) {
-//        return chatService.createOrGetOneToOneChatRoom(userDetails.getUserId(), targetUserId);
-//    }
-//
-//    //2. 그룹 채팅방 생성
-//    @PostMapping("/chatroom/group")
-//    public ChatRoomDto createChatRoom(
-//            @RequestBody CreateGroupChatRequest request,
-//            @AuthenticationPrincipal CustomUserDetails userDetails){
-//        return chatService.createGroupChatRoom(userDetails.getUserId(), request);
-//    }
-//
-//    //3. 사용자의 채팅방 목록 조회 (타입별) - 동적 이름 포함
-//    @GetMapping("/chatroom")
-//    public List<ChatRoomWithParticipantDto> getChatRooms(
-//            @RequestParam("type") String roomType,
-//            @AuthenticationPrincipal CustomUserDetails userDetails){
-//        return chatService.getUserChatRoomsByType(userDetails.getUserId(), roomType);
-//    }
-//
-//    //4. 채팅방 단일 조회 (방의 정보를 응답받는 형태 - 방 제목, 멤버 )
-//    @GetMapping("/chatroom/{id}")
-//    public ChatRoomDto getChatRoom(@PathVariable("id") Long roomId){
-//        return chatService.findChatRoomById(roomId);
-//    }
-//
-//    //5. 채팅방 메세지 목록
-//    @GetMapping("/chatroom/{id}/messages")
-//    public List<ChatMessageDto> getChatMessages(@PathVariable("id") Long roomId, @AuthenticationPrincipal CustomUserDetails userDetails) throws AccessDeniedException {
-//        return chatService.getMessagesByRoomId(userDetails.getUserId(), roomId);
-//    }
-//
-//    //6. 채팅방 참가자 목록
-//    @GetMapping("/chatroom/{id}/participants")
-//    public List<ChatParticipantDto> getChatParticipants(@PathVariable("id") Long roomId){
-//        return chatService.getParticipantsByRoomId(roomId);
-//    }
-//
-//    //7. 채팅방 참가자 추가
-//    @PostMapping("/chatroom/{id}/invite")
-//    public void inviteParticipants(@PathVariable("id") Long roomId, @RequestBody List<Long> invitedUserIds){
-//
-//        for(Long userId: invitedUserIds){
-//            chatService.addParticipant(createParticipantDto(roomId, userId));
-//        }
-//    }
-//
-//    private ChatParticipantDto createParticipantDto(Long roomId, Long userId) {
-//        return ChatParticipantDto.builder()
-//                .roomId(roomId)
-//                .userId(userId)
-//                .build();
-//    }
-//
-//
-//    //8. 채팅방 나가기
-//    @DeleteMapping("/chatroom/{id}/leave")
-//    public void leaveChatRoom(@PathVariable("id") Long roomId, @AuthenticationPrincipal CustomUserDetails userDetails){
-//        chatService.leaveChatRoom(userDetails.getUserId(), roomId);
-//    }
-//
-//    //8. 채팅 전송 기능
-//    @MessageMapping("/chatroom/{roomId}/send")
-//    public void sendMessage(@DestinationVariable Long roomId, @Payload ChatMessageDto messageDto, SimpMessageHeaderAccessor headerAccessor){
-//        messageDto.setRoomId(roomId);
-//        chatService.sendMessage(messageDto);
-//    }
 }

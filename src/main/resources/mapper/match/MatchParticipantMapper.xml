@@ -4,13 +4,19 @@
 <mapper namespace="com.multi.backend5_1_multi_fc.match.mapper.MatchParticipantMapper">
 
     <insert id="insert">
-        INSERT INTO Match_Participant (room_id, user_id, status)
-        VALUES (#{roomId}, #{userId}, '대기')
+        INSERT INTO Match_Participant (room_id, user_id, status, position)
+        VALUES (#{roomId}, #{userId}, '대기', #{position})
     </insert>
 
     <select id="existsByRoomAndUser" resultType="int">
         SELECT COUNT(*) FROM Match_Participant
         WHERE room_id = #{roomId} AND user_id = #{userId}
+    </select>
+
+    <select id="findUserDefaultPosition" resultType="string">
+        SELECT position
+        FROM User
+        WHERE user_id = #{userId}
     </select>
 
     <select id="findUserIdsByRoom" resultType="long">
@@ -31,9 +37,10 @@
         SELECT
             u.user_id   AS userId,
             u.nickname  AS nickname,
-            '미정'       AS position,
+            u.position  AS position,
             'Host'      AS role,
-            '확정'       AS status  FROM Match_Room mr
+            '확정'      AS status
+        FROM Match_Room mr
             JOIN User u ON mr.host_id = u.user_id
         WHERE mr.room_id = #{roomId}
     </select>
@@ -42,9 +49,10 @@
         SELECT
             u.user_id   AS userId,
             u.nickname  AS nickname,
-            '미정'       AS position,
+            mp.position AS position,
             'Player'    AS role,
-            mp.status   AS status   FROM Match_Participant mp
+            mp.status   AS status
+        FROM Match_Participant mp
             JOIN User u ON mp.user_id = u.user_id
         WHERE mp.room_id = #{roomId}
         ORDER BY mp.joined_at ASC

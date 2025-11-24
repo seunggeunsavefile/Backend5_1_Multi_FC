@@ -24,6 +24,14 @@
         .field-card:hover { transform: translateY(-3px); box-shadow: 0 6px 18px rgba(0,0,0,0.12); }
         .field-card h3 { font-size: 16px; color: #2c3e50; }
 
+        /* 헤더 아이콘 스타일 */
+        .header-icons { display: flex; align-items: center; gap: 15px; }
+        .user-menu { position: absolute; top: 60px; right: 20px; background: white; border: 1px solid #ddd; border-radius: 10px; padding: 15px; display: none; width: 200px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); z-index: 1000; }
+        .user-menu.show { display: block; }
+        .user-menu ul { list-style: none; padding: 0; margin-top: 10px; border-top: 1px solid #eee; }
+        .user-menu ul li { padding: 10px 0; }
+        .user-menu ul li a { color: #333; text-decoration: none; display: block; }
+        .user-menu ul li a:hover { color: #6c5ce7; }
     </style>
 </head>
 <body>
@@ -31,23 +39,25 @@
 <header class="quick-menu">
     <div class="logo"><a href="/">MULTI FC</a></div>
     <div class="header-icons">
-        <button id="profile-menu-toggle" class="profile-icon" style="position: relative;">
+        <a href="/login" id="nav-login-btn" style="margin-right:10px; font-weight:bold; color:#333; display:block;">로그인</a>
+
+        <button id="profile-menu-toggle" class="profile-icon" style="position: relative; display: none; background:none; border:none; font-size:24px; cursor:pointer;">
             <i class="fas fa-user-circle"></i>
-            <span id="notification-badge" class="notification-badge"></span>
         </button>
+
         <div id="profile-menu" class="user-menu">
             <div class="user-info">
-                <strong><span id="user-menu-username">사용자</span>님</strong>
+                <strong><span id="user-menu-username">회원</span>님</strong>
                 <p>환영합니다!</p>
             </div>
             <ul>
-                <li><a href="/notifications" id="nav-notifications-link"><i class="fas fa-bell"></i> 알림 목록</a></li>
-                <li><a href="/mypage"><i class="fas fa-user"></i> 마이페이지</a></li>
-                <li><a href="/profile/edit"><i class="fas fa-user-edit"></i> 프로필 수정</a></li>
                 <li><a href="#" id="logout-button"><i class="fas fa-sign-out-alt"></i> 로그아웃</a></li>
             </ul>
         </div>
-        <button id="menu-toggle" class="menu-toggle-btn"><i class="fas fa-bars"></i></button>
+
+        <button id="menu-toggle" class="menu-toggle-btn" style="background:none; border:none; font-size:20px;">
+            <i class="fas fa-bars"></i>
+        </button>
     </div>
     <nav id="main-menu" class="main-nav">
         <ul>

@@ -30,3 +30,4 @@ public class FriendRepo {
 
     public boolean existsAny(Long a, Long b) { return dao.existsRelationAny(a, b); }
 }
+

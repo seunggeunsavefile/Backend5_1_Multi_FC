@@ -17,6 +17,7 @@ public class MatchParticipantController {
 
     @PostMapping("/{roomId}/join")
     public void join(@PathVariable Long roomId, @RequestBody JoinReq req) {
+        // ⭐️ [수정] position 인자 제거
         participantService.join(roomId, req.getUserId());
     }
 
@@ -25,13 +26,11 @@ public class MatchParticipantController {
         participantService.cancel(roomId, req.getUserId());
     }
 
-    /** ✅ [신규] 참가 승인 */
     @PostMapping("/{roomId}/approve")
     public void approve(@PathVariable Long roomId, @RequestBody JoinReq req) {
         participantService.approve(roomId, req.getUserId());
     }
 
-    /** ✅ [신규] 참가 강퇴 */
     @PostMapping("/{roomId}/reject")
     public void reject(@PathVariable Long roomId, @RequestBody JoinReq req) {
         participantService.reject(roomId, req.getUserId());

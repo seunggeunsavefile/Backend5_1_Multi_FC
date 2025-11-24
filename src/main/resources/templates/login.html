@@ -138,6 +138,8 @@
             e.preventDefault();
             localStorage.removeItem('accessToken');
             localStorage.removeItem('username');
+            localStorage.removeItem('userId');        // 추가
+            localStorage.removeItem('userNickname');  // 추가
             window.location.href = '/login';
         });
     }
@@ -146,6 +148,8 @@
             e.preventDefault();
             localStorage.removeItem('accessToken');
             localStorage.removeItem('username');
+            localStorage.removeItem('userId');        // 추가
+            localStorage.removeItem('userNickname');  // 추가
             window.location.href = '/login';
         });
     }
@@ -228,9 +232,16 @@
                         localStorage.removeItem('saved_username');
                     }
 
+                    // 토큰 저장
+                    localStorage.setItem('accessToken', data.accessToken);
 
                     // localStorage에 토큰과 닉네임 저장 (로그인 상태 유지)
-                    localStorage.setItem('accessToken', data.accessToken);
+                    if (data.user) {
+                        localStorage.setItem('userId', data.user.userId);         // 숫자 ID
+                        localStorage.setItem('userNickname', data.user.nickname); // 닉네임
+                    }
+
+                    // 필요하면 기존 username 키도 유지
                     localStorage.setItem('username', data.user.nickname);
 
                     // 성공 모달 띄우기
