@@ -160,9 +160,20 @@
         .details-button.disabled:hover {
             background: #aaa;
         }
-        .flatpickr-current-month {display: flex;align-items: center;justify-content: center;}
-        .flatpickr-current-month {order: 1;margin-right: 4px;}
-        .flatpickr-current-month {order: 2;}
+
+        /* 🔧 flatpickr: 연도 → 월 순서로 보이게 */
+        .flatpickr-current-month {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .flatpickr-current-month .numInputWrapper { /* 연도 */
+            order: 1;
+            margin-right: 4px;
+        }
+        .flatpickr-current-month .flatpickr-monthDropdown-months { /* 월 */
+            order: 2;
+        }
     </style>
 </head>
 <body>
@@ -227,6 +238,12 @@
                 <option value="">상태 (전체)</option>
                 <option value="open">모집중</option>
                 <option value="closed">모집완료</option>
+            </select>
+
+            <!-- 🔥 정렬 기준 -->
+            <select id="sort-order">
+                <option value="desc">최신순</option>
+                <option value="asc">오래된순</option>
             </select>
 
             <button id="search-btn">검색</button>
@@ -421,8 +438,9 @@
                     id: match.roomId,
                     // 화면 표시용: "2025-11-25 (12:30)"
                     date: `${match.matchDate}${timeOnly ? ` (${timeOnly})` : ''}`,
-                    // 필터용 YYYY-MM-DD
-                    matchDate: match.matchDate,
+                    // 필터/정렬용
+                    matchDate: match.matchDate,   // YYYY-MM-DD
+                    matchTime: timeOnly,          // HH:mm
                     location: match.stadiumAddress || '주소 정보 없음',
                     stadiumName: match.stadiumName || '구장 정보 없음',
                     creator: match.hostNickname || ('Host ID: ' + match.hostId),
@@ -431,7 +449,6 @@
                     status: match.status.toLowerCase() === 'closed' ? 'closed' : 'open',
                 };
             });
-
 
             return allMySchedules;
 
@@ -443,11 +460,13 @@
         }
     }
 
-    // 필터 동작
+    // 필터 + 정렬
     function performSearch() {
         const startDateValue = document.getElementById('filter-date-start').value;
         const endDateValue = document.getElementById('filter-date-end').value;
         const status = document.getElementById('filter-status').value;
+        const sortOrderSelect = document.getElementById('sort-order');
+        const sortOrder = sortOrderSelect ? sortOrderSelect.value : 'desc'; // 기본 최신순
 
         let filtered = allMySchedules;
 
@@ -472,6 +491,19 @@
             filtered = filtered.filter(match => match.status === status);
         }
 
+        // 3. 🔥 정렬 (날짜 + 시간 기준)
+        filtered.sort((a, b) => {
+            const aKey = new Date(`${a.matchDate}T${a.matchTime || '00:00'}`);
+            const bKey = new Date(`${b.matchDate}T${b.matchTime || '00:00'}`);
+
+            if (sortOrder === 'asc') {
+                return aKey - bKey; // 오래된순
+            } else {
+                return bKey - aKey; // 최신순
+            }
+        });
+
+        // 4. 렌더링
         renderMatchList(filtered);
     }
 
@@ -605,8 +637,13 @@
         // 기간 select 세팅
         setupPeriodSelect();
 
-        // 초기 전체 목록
-        renderMatchList(schedules);
+        // 초기 전체 목록 (정렬 기본값: 최신순)
+        renderMatchList(
+            [...schedules].sort((a, b) =>
+                new Date(`${b.matchDate}T${b.matchTime || '00:00'}`) -
+                new Date(`${a.matchDate}T${a.matchTime || '00:00'}`)
+            )
+        );
     });
 </script>
 </body>
