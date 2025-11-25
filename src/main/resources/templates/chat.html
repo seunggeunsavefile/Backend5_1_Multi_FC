@@ -581,6 +581,23 @@
             transform: translateY(-1px);
             background-color: #27ae60 !important; /* hover 색상 변경 */
         }
+
+        /* 🔥 친구 초대 모달 X 버튼 스타일 */
+        .modal-close-x {
+            position: absolute;
+            top: 12px;
+            right: 16px;
+            background: none;
+            border: none;
+            font-size: 24px;
+            color: #666;
+            cursor: pointer;
+            line-height: 1;
+            padding: 0;
+        }
+        .modal-close-x:hover {
+            color: #e74c3c;
+        }
     </style>
 </head>
 <body>
@@ -740,19 +757,22 @@
 <!-- ✅ 모달: 친구 초대 -->
 <div id="invite-modal" class="chat-modal-overlay">
     <div class="chat-modal-content">
+        <!-- 🔥 X 버튼 (친구 초대 제목 오른쪽) -->
+        <button type="button" class="modal-close-x" onclick="openInviteModal(false)">&times;</button>
+
         <h2>친구 초대</h2>
         <p id="invite-room-info" style="font-size: 14px; color: #555; margin-bottom: 15px;">
             현재 방: <strong id="invite-room-name">...</strong>
         </p>
 
-        <div id="friend-list-to-invite" style="max-height: 300px; overflow-y: auto;"></div>
+        <div id="friend-list-to-invite" style="max-height: 300px;"></div>
 
         <div class="modal-actions" style="justify-content: space-between; margin-top: 15px;">
             <p style="font-size: 14px; color: #555; margin: 0; align-self: center;">
                 <span id="selected-invite-count">0</span>명 선택됨
             </p>
             <div>
-                <button class="btn-cancel" onclick="openInviteModal(false)" id="cancel-invite-btn">취소</button>
+                <!-- 취소 버튼 제거, 초대 버튼만 유지 -->
                 <button class="btn-create" onclick="sendInvite()" id="send-invite-btn">초대하기</button>
             </div>
         </div>
@@ -1276,32 +1296,6 @@
 
         chatContainer.appendChild(wrapper);
         chatContainer.scrollTop = chatContainer.scrollHeight;
-
-        // const isMine = message.sender === myUserId;
-        // const bubble = document.createElement('div');
-        // bubble.className = 'message-bubble ' + (isMine ? 'mine' : 'other');
-        //
-        // if(!isMine) {
-        //     const nicknameDiv = document.createElement('div');
-        //     nicknameDiv.className = 'message-nickname';
-        //     nicknameDiv.textContent = message.senderNickname;
-        //     bubble.appendChild(nicknameDiv);
-        // }
-        //
-        //
-        //
-        //
-        // const meta = `<div class="message-meta">${message.timestamp}</div>`;
-        // const content = `<div class="message-content message-text">${message.senderNickname}${!isMine && message.senderNickname ? ': ' : ''}${message.content}</div>`;
-        //
-        // if (isMine) {
-        //     bubble.innerHTML = meta + content;
-        // } else {
-        //     bubble.innerHTML = content + meta;
-        // }
-        //
-        // chatContainer.appendChild(bubble);
-        // chatContainer.scrollTop = chatContainer.scrollHeight;
     }
 
     // 채팅방 목록 관리
@@ -1761,7 +1755,6 @@
         }
 
         try {
-            //const token = localStorage.getItem('accessToken');
             let apiUrl = '';
             let requestOptions = {
                 method: 'POST',
@@ -1824,7 +1817,7 @@
     }
 
     // ===========================================
-    // ★친구 초대 기능 로직★ (이전 코드에서 복구)
+    // ★친구 초대 기능 로직★
     // ===========================================
 
     /**
