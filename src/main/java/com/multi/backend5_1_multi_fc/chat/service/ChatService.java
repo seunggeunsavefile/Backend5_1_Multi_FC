@@ -232,8 +232,12 @@ public class ChatService {
             throw new IllegalStateException("채팅방 인원이 가득 찼습니다. (최대 "
                     + chatRoom.getMaxParticipants() + "명)");
         }
+        System.out.println("사용자 초대를 진행합니다" + participant.getUserId() + " " + participant.getRoomId() + " " + chatRoom.getRoomName() + " " + chatRoom.getMaxParticipants() + " " + chatRoom.getMemberCount());
 
         chatParticipantDao.insertParticipant(participant);
+
+        int newMemberCount = chatRoom.getMemberCount() + 1;
+        chatRoomDao.updateMemberCount(chatRoom.getRoomId(), newMemberCount);
 
         notificationService.createAndSendNotification(
                 participant.getUserId(),

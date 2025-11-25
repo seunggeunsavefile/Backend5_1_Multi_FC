@@ -104,15 +104,20 @@ public class ChatController {
     public void inviteParticipants(@PathVariable("id") Long roomId, @RequestBody List<Long> invitedUserIds) {
 
         for (Long userId : invitedUserIds) {
+            System.out.println("초대한 대상자 ID : " + userId);
             chatService.addParticipant(createParticipantDto(roomId, userId));
         }
     }
 
     private ChatParticipantDto createParticipantDto(Long roomId, Long userId) {
-        return ChatParticipantDto.builder()
+        ChatParticipantDto participantDto = ChatParticipantDto.builder()
                 .roomId(roomId)
                 .userId(userId)
                 .build();
+
+        System.out.println("생성된 참여자 객체 정보 :"+participantDto);
+
+        return participantDto;
     }
 
     //8. 채팅방 나가기

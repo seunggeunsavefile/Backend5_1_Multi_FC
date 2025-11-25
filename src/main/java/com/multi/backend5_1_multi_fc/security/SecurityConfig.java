@@ -60,7 +60,8 @@ public class SecurityConfig {
                                 "/schedule", "/schedule/add", "/schedule/detail/**", "/schedule/private/detail",
                                 "/community", "/community/write", "/community/detail/**",
                                 "/reviews/write",
-                                "/team/create", "/team/manage", "/team/invite", "/team-edit"
+                                "/team/create", "/team/manage", "/team/invite", "/team-edit",
+                                "/api/stats/matching-rate/me"
                         ).permitAll()
 
                         //[추가] 준호님 요청
