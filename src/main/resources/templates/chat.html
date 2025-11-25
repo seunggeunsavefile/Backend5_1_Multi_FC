@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MULTI FC - 실시간 채팅</title>
-    <link rel="stylesheet" th:href="@{/css/style.css?v=219}">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700;900&family=Noto+Sans+KR:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 
@@ -390,68 +390,6 @@
             }
         }
 
-        /* ★모달 스타일★ */
-        .modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.6);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 10001;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.3s;
-        }
-        .modal-overlay.open {
-            opacity: 1;
-            pointer-events: auto;
-        }
-        .modal-content {
-            background: white;
-            padding: 30px;
-            border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-            max-width: 400px;
-            width: 90%;
-            transform: translateY(-20px);
-            transition: transform 0.3s;
-            position: relative;
-        }
-        .modal-overlay.open .modal-content {
-            transform: translateY(0);
-        }
-        .modal-content h2 {
-            font-size: 24px;
-            color: #2c3e50;
-            margin-bottom: 20px;
-            border-bottom: 2px solid #6c5ce7;
-            padding-bottom: 10px;
-        }
-        .modal-content p {
-            font-size: 15px;
-            color: #555;
-            margin-bottom: 10px;
-        }
-        .modal-content strong {
-            color: #6c5ce7;
-            margin-left: 5px;
-        }
-        .modal-actions {
-            display: flex;
-            justify-content: flex-end;
-            gap: 10px;
-            margin-top: 20px;
-        }
-        .modal-actions button {
-            padding: 10px 20px;
-            border-radius: 8px;
-            font-weight: 600;
-            cursor: pointer;
-        }
         .btn-cancel {
             background: #f0f0f0;
             color: #555;
@@ -650,32 +588,18 @@
 <header class="quick-menu">
     <div class="logo"><a href="/">Multi FC</a></div>
     <div class="header-icons">
-        <button id="profile-menu-toggle" class="profile-icon" style="position: relative;">
+        <button id="profile-menu-toggle" class="profile-icon" style="position: relative; display: none;">
             <i class="fas fa-user-circle"></i>
-            <span id="notification-badge" class="notification-badge"></span>
         </button>
-
-        <div id="profile-menu" class="user-menu">
-            <div class="user-info">
-                <strong><span id="user-menu-username">사용자</span>님</strong>
-                <p>환영합니다!</p>
-            </div>
-            <ul>
-                <li><a href="/notifications" id="nav-notifications-link"><i class="fas fa-bell"></i> 알림 목록</a></li>
-                <li><a href="/mypage"><i class="fas fa-user"></i> 마이페이지</a></li>
-                <li><a href="/profile/edit"><i class="fas fa-user-edit"></i> 프로필 수정</a></li>
-                <li><a href="#" id="logout-button"><i class="fas fa-sign-out-alt"></i> 로그아웃</a></li>
-            </ul>
-        </div>
+        <div id="profile-menu" class="user-menu"></div>
         <button id="menu-toggle" class="menu-toggle-btn"><i class="fas fa-bars"></i></button>
     </div>
-
     <nav id="main-menu" class="main-nav">
         <ul>
             <li><a href="/"><i class="fas fa-home"></i> 메인 (Home)</a></li>
             <li><a href="/fields"><i class="fas fa-search"></i> 구장검색</a></li>
             <li><a href="/community"><i class="fas fa-users"></i> 커뮤니티</a></li>
-            <li id="nav-chat-link-li"><a href="/chat" id="nav-chat-link"  class="active"><i class="fas fa-comments"></i> 실시간채팅</a></li>
+            <li id="nav-chat-link-li"><a href="/chat" class="active"><i class="fas fa-comments"></i> 실시간채팅</a></li>
             <li><a href="/schedule?stadium"><i class="fas fa-calendar-check"></i> 경기 일정</a></li>
         </ul>
     </nav>
@@ -779,8 +703,8 @@
 </div>
 
 <!-- ✅ 모달: 새 채팅방 생성 -->
-<div id="new-chat-modal" class="modal-overlay">
-    <div class="modal-content">
+<div id="new-chat-modal" class="chat-modal-overlay">
+    <div class="chat-modal-content">
         <h2>새 채팅방 시작</h2>
 
         <label for="new-chat-type">채팅방 유형 선택</label>
@@ -814,8 +738,8 @@
 </div>
 
 <!-- ✅ 모달: 친구 초대 -->
-<div id="invite-modal" class="modal-overlay">
-    <div class="modal-content">
+<div id="invite-modal" class="chat-modal-overlay">
+    <div class="chat-modal-content">
         <h2>친구 초대</h2>
         <p id="invite-room-info" style="font-size: 14px; color: #555; margin-bottom: 15px;">
             현재 방: <strong id="invite-room-name">...</strong>
@@ -1957,14 +1881,15 @@
                 return;
             }
 
-            friends.forEach(friend => {
+            availableFriends.forEach(friend => {
                 const item = document.createElement('div');
                 item.className = 'invite-friend-item';
                 item.innerHTML = `
                 <input type="checkbox" class="friend-checkbox" value="${friend.userId}">
                 <span>${friend.nickname}</span>`;
                 friendListToInvite.appendChild(item);
-            })
+            });
+
         } catch (e) {
             console.error('친구 목록 로드 실패:', e);
             friendListToInvite.innerHTML = '<p style="text-align:center; padding:20px; color:#e74c3c;">친구 목록을 불러올 수 없습니다.</p>';
@@ -1972,7 +1897,7 @@
     }
 
     /**
-     * 최종 초대 전송 (더미 로직)
+     * 최종 초대 전송
      */
     async function sendInvite() {
         const checkboxes = document.querySelectorAll('.friend-checkbox:checked');
@@ -1984,13 +1909,15 @@
         }
 
         try {
+            console.log("초대한 사용자 리스트",invitedUserIds);
             const response = await fetch(`/chatroom/${currentRoomId}/invite`,{
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`,
                 },
-                body: JSON.stringify({ invitedUserIds:invitedUserIds })
+                body: JSON.stringify(invitedUserIds),
+                credentials: 'include'
             });
 
             if(!response.ok) throw new Error('초대 실패');
@@ -1998,6 +1925,7 @@
             alert('초대 메세지를 성공적으로 보냈습니다.');
             openInviteModal(false);
             loadParticipantList(currentRoomId);
+            loadRoomList(currentChatType);
         } catch (e) {
             console.error('초대 실패:', e);
             alert('초대에 실패했습니다.');
