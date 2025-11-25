@@ -42,7 +42,6 @@
             <li id="nav-chat-link-li"><a href="/chat" id="nav-chat-link"><i class="fas fa-comments"></i> 실시간채팅</a></li>
             <li><a href="/schedule?stadium"><i class="fas fa-calendar-check"></i> 경기 일정</a></li>
             <li><a href="/login" id="nav-login-link"><i class="fas fa-sign-in-alt"></i> 로그인</a></li>
-            <li><a href="#" id="nav-logout-link"><i class="fas fa-sign-out-alt"></i> 로그아웃</a></li>
         </ul>
     </nav>
 </header>
@@ -346,20 +345,36 @@
         const accessToken = localStorage.getItem('accessToken');
         const profileIcon = document.getElementById('profile-menu-toggle');
         const userMenuName = document.getElementById('user-menu-username');
+        const navLoginLink = document.getElementById('nav-login-link'); // 🔥 여기서 다시 가져와도 됨
 
         if (accessToken) {
+            // 로그인 상태
             if (profileIcon) profileIcon.style.display = 'flex';
             if (userMenuName) {
                 const nickname = localStorage.getItem('username') || '사용자';
                 userMenuName.textContent = nickname;
             }
+
+            // 🔥 로그인 메뉴 숨기기
+            if (navLoginLink && navLoginLink.parentElement) {
+                navLoginLink.parentElement.style.display = 'none';
+            }
+
             updateGlobalBadge();
             window.addEventListener('storage', (e) => {
                 if (e.key === 'hasNewNotification') updateGlobalBadge();
             });
+        } else {
+            // 비로그인 상태
+            if (profileIcon) profileIcon.style.display = 'none';
+
+            // 🔥 로그인 메뉴 보이게
+            if (navLoginLink && navLoginLink.parentElement) {
+                navLoginLink.parentElement.style.display = 'list-item';
+            }
         }
 
-        // [수정] 탭 클릭 시, data-category 값(전체/공지/자유게시판)을 그대로 renderPostList 에 넘기도록 변경
+        // [기존 코드들 그대로 유지]
         const tabs = tabsContainer.querySelectorAll('button');
         tabs.forEach(tab => {
             tab.addEventListener('click', () => {
@@ -370,10 +385,8 @@
             });
         });
 
-        // ✅ 초기 로드 시 "전체 목록"
         renderPostList(CATEGORY_ALL);
 
-        // ✅ 게시글 클릭 시 상세페이지 이동 (안전장치 차원에서 한 번 더)
         document.querySelectorAll('.post-table').forEach(table => {
             table.addEventListener('click', function(e) {
                 const titleCell = e.target.closest('.col-title');

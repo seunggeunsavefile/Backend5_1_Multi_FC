@@ -68,7 +68,7 @@
             <div class="write-form">
                 <div class="input-group">
                     <label for="category">카테고리 선택</label>
-                    <!-- [수정] DB ENUM(공지 / 자유게시판)에 맞추기 위해 value를 한글로 변경 -->
+                    <!-- DB ENUM(공지 / 자유게시판)에 맞춤 -->
                     <select id="category" name="category" required>
                         <option value="공지">공지사항</option>
                         <option value="자유게시판">자유게시판</option>
@@ -80,7 +80,7 @@
                     <input type="text" id="title" name="title" placeholder="제목을 입력하세요" required>
                 </div>
 
-                <!-- [수정] 이미지 업로드 기능 추가: 첨부 이미지가 있을 경우 백엔드에 함께 전송 -->
+                <!-- 이미지 업로드 -->
                 <div class="input-group">
                     <label for="image">이미지(선택)</label>
                     <input type="file" id="image" name="image" accept="image/*">
@@ -93,10 +93,11 @@
         </form>
     </div>
 </main>
+
 <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
 
 <script>
-    // --- (★공통★) 메뉴 토글 및 로그아웃 로직 (유지) ---
+    // --- (★공통★) 메뉴 토글 및 로그아웃 로직 ---
     const menuToggle = document.getElementById('menu-toggle');
     const mainMenu = document.getElementById('main-menu');
     const profileMenuToggle = document.getElementById('profile-menu-toggle');
@@ -134,6 +135,7 @@
             localStorage.removeItem('accessToken');
             localStorage.removeItem('hasReadReviews');
             localStorage.removeItem('hasReadSchedules');
+            localStorage.removeItem('username');
             window.location.href = '/login';
         });
     }
@@ -144,6 +146,7 @@
             localStorage.removeItem('accessToken');
             localStorage.removeItem('hasReadReviews');
             localStorage.removeItem('hasReadSchedules');
+            localStorage.removeItem('username');
             window.location.href = '/login';
         });
     }
@@ -157,14 +160,12 @@
         });
     }
 
-    // --- (★공통★) URL 기반 메뉴 활성화 함수 (유지) ---
+    // --- URL 기반 메뉴 활성화 ---
     function setActiveMenuItem() {
         const path = window.location.pathname;
         const navLinks = document.querySelectorAll('#main-menu a');
 
-        navLinks.forEach(link => {
-            link.classList.remove('active');
-        });
+        navLinks.forEach(link => link.classList.remove('active'));
 
         navLinks.forEach(link => {
             const href = link.getAttribute('href');
@@ -179,33 +180,29 @@
         });
     }
 
-    // [수정] 기존: 로컬스토리지에서 게시글을 찾아 채웠음 → 변경: 백엔드 API 호출로 실제 DB 게시글을 조회
+    // --- 수정 모드일 때 기존 게시글 불러오기 ---
     async function loadPostForEdit(postId) {
         try {
-            const res = await fetch(`/api/community/posts/${postId}`);  // [수정] 서버에서 단일 게시글 상세 조회
+            const res = await fetch(`/api/community/posts/${postId}`);
             if (!res.ok) {
                 throw new Error('게시글 정보를 불러오지 못했습니다.');
             }
             const post = await res.json();
 
             const headerTitle = document.querySelector('.write-header h1');
-            const submitBtn = document.querySelector('.write-btn-save');// [수정] 버튼 클래스 이름을 실제 DOM(.write-btn-save)과 일치시키기
+            const submitBtn = document.querySelector('.write-btn-save');
 
-            // [수정] 수정 모드일 때 UI 텍스트를 수정용으로 변경
             if (headerTitle) headerTitle.textContent = '게시글 수정';
             if (submitBtn)   submitBtn.textContent   = '수정';
 
-            // [수정] 백엔드에서 내려온 category를 그대로 사용, 없을 때는 기본값 '자유게시판'
             document.getElementById('category').value = post.category || '자유게시판';
             document.getElementById('title').value    = post.title    || '';
 
-            // Quill 에디터 내용 채우기
             const quillEditor = Quill.find(document.querySelector('#editor-container'));
             if (quillEditor) {
                 quillEditor.setText(post.content || '');
             }
 
-            // [수정] 어떤 게시글을 수정 중인지 서버에 보낼 수 있도록 form dataset에 postId 저장
             writeForm.dataset.postId = postId;
         } catch (e) {
             console.error(e);
@@ -216,6 +213,7 @@
 
     let quill;
 
+    // 🔥 여기서 로그인 상태 UI + Quill + 수정모드 처리
     document.addEventListener('DOMContentLoaded', async () => {
         const accessToken = localStorage.getItem('accessToken');
         const currentPath = window.location.pathname;
@@ -225,6 +223,27 @@
             localStorage.setItem('redirectAfterLogin', currentPath);
             window.location.href = '/login';
             return;
+        }
+
+        // 🔥 로그인 상태 UI 반영
+        const profileIcon  = document.getElementById('profile-menu-toggle');
+        const userMenuName = document.getElementById('user-menu-username');
+
+        const storedName = (localStorage.getItem('username') || '').trim();
+        if (storedName) {
+            if (userMenuName) userMenuName.textContent = storedName;
+        } else {
+            if (userMenuName) userMenuName.textContent = '사용자';
+        }
+
+        if (profileIcon) profileIcon.style.display = 'flex';
+
+        // 로그인 상태면 로그인 메뉴 숨기고 로그아웃 표시
+        if (navLoginLink && navLoginLink.parentElement) {
+            navLoginLink.parentElement.style.display = 'none';
+        }
+        if (navLogoutLink && navLogoutLink.parentElement) {
+            navLogoutLink.parentElement.style.display = 'list-item';
         }
 
         // 1. Quill 초기화
@@ -248,41 +267,32 @@
         setActiveMenuItem();
 
         // 2. 수정 모드인지 체크
-        // [수정] URL 쿼리파라미터 id 또는 edit가 있을 경우 수정 모드로 판단
-        const urlParams   = new URLSearchParams(window.location.search);
-        const editPostId  = urlParams.get('id') || urlParams.get('edit');
+        const urlParams  = new URLSearchParams(window.location.search);
+        const editPostId = urlParams.get('id') || urlParams.get('edit');
 
         if (editPostId) {
-            // 수정 모드
-            // [수정] 수정 모드일 때 서버에서 해당 게시글을 불러오도록 변경
             await loadPostForEdit(editPostId);
         } else {
-            // 작성 모드
             const headerTitle = document.querySelector('.write-header h1');
-            const submitBtn   = document.querySelector('.write-btn-save');  // [수정] 버튼 선택자 수정 (.btn-save → .write-btn-save)
+            const submitBtn   = document.querySelector('.write-btn-save');
 
             if (headerTitle) headerTitle.textContent = '새 게시글 작성';
             if (submitBtn)   submitBtn.textContent   = '등록';
         }
     });
 
-
-
-    // --- (★페이지별★) 게시글 작성/수정 로직 ---
+    // --- 작성/수정 제출 로직 ---
     const writeForm = document.getElementById('write-form');
-    const postContentHtmlInput = document.getElementById('post-content-html'); // 숨겨진 필드
+    const postContentHtmlInput = document.getElementById('post-content-html');
     const successMsg = document.getElementById('post-success-message');
     const errorMsg = document.getElementById('post-error-message');
 
-    // ⭐⭐⭐ [최종 수정] 폼 제출 시 로컬 스토리지에 저장하고 이동하도록 로직 변경 ⭐⭐⭐
-    // [수정] 로컬스토리지에 저장하지 않고, 백엔드 API(POST/PUT)로 전송하도록 변경
     writeForm.addEventListener('submit', async function (e) {
         e.preventDefault();
         successMsg.style.display = 'none';
         errorMsg.style.display = 'none';
 
         const accessToken = localStorage.getItem('accessToken');
-        // [수정] 서버 요청 전에도 토큰이 있는지 한 번 더 검증 (보안/안정성 위해 추가 체크)
         if (!accessToken) {
             alert('로그인 후 글을 작성할 수 있습니다.');
             localStorage.setItem('redirectAfterLogin', window.location.pathname);
@@ -294,7 +304,7 @@
         const title = document.getElementById('title').value.trim();
         const quillEditor = Quill.find(document.querySelector('#editor-container'));
         const contentText = quillEditor.getText().trim();
-        const imageInput = document.getElementById('image'); // [수정] 이미지 파일 전송을 위해 input 참조
+        const imageInput = document.getElementById('image');
 
         if (!title || contentText.length === 0) {
             errorMsg.textContent = '❌ 제목과 내용을 모두 입력해주세요.';
@@ -302,15 +312,14 @@
             return;
         }
 
-        const isEdit = !!writeForm.dataset.postId;   // 수정 모드인지 체크
+        const isEdit = !!writeForm.dataset.postId;
         const postId = writeForm.dataset.postId;
 
         try {
             let res;
 
             if (isEdit) {
-                // ✅ 수정: PUT /api/community/posts/{postId}
-                // [수정] 수정 모드에서는 JSON DTO만 보내는 PUT 요청 사용
+                // 수정
                 const updateDto = {
                     title: title,
                     content: contentText
@@ -320,15 +329,14 @@
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${accessToken}`  // [수정] JWT 인증 헤더 추가
+                        'Authorization': `Bearer ${accessToken}`
                     },
                     body: JSON.stringify(updateDto)
                 });
             } else {
-                // ✅ 등록: POST /api/community/posts (multipart/form-data)
-                // [수정] 새 글 작성 시에는 게시글 정보 + 이미지 파일을 multipart/form-data로 전송
+                // 등록
                 const postDto = {
-                    category: category,   // 'notice' 또는 'free'
+                    category: category,
                     title: title,
                     content: contentText
                 };
@@ -338,7 +346,6 @@
                     'post',
                     new Blob([JSON.stringify(postDto)], { type: 'application/json' })
                 );
-                // [수정] 이미지가 선택된 경우에만 formData에 추가
                 if (imageInput && imageInput.files[0]) {
                     formData.append('image', imageInput.files[0]);
                 }
@@ -353,26 +360,21 @@
             }
 
             if (res.ok) {
-                // [수정] 성공 시에는 알림 후 커뮤니티 목록으로 이동
                 alert(isEdit ? '게시글이 수정되었습니다.' : '게시글이 등록되었습니다.');
                 window.location.href = '/community';
             } else {
                 const msg = await res.text();
-                // [수정] 실패 시 서버 응답 메시지를 함께 보여주도록 변경
                 errorMsg.textContent = (isEdit ? '수정 실패: ' : '등록 실패: ') + msg;
                 errorMsg.style.display = 'block';
             }
         } catch (err) {
             console.error(err);
-            // [수정] 네트워크/서버 오류 대응 메시지 변경 (등록/수정 모드 구분)
             errorMsg.textContent = isEdit
                 ? '수정 중 오류가 발생했습니다.'
                 : '등록 중 오류가 발생했습니다.';
             errorMsg.style.display = 'block';
         }
     });
-
-
 </script>
 </body>
 </html>
