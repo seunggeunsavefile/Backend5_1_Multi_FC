@@ -69,6 +69,7 @@ body, html {
     margin-left: 0;
     padding: 0;
 }
+
 .profile-image {
     width: 110px;
     height: 110px;
@@ -96,8 +97,8 @@ body, html {
 
 .notification-badge {
     position: absolute;
-    top: 20px; /* 24px 아이콘에 맞게 조정 */
-    right: 75px; /* 24px 아이콘에 맞게 조정 */
+    top: -2px; /* 24px 아이콘에 맞게 조정 */
+    right: 0px; /* 24px 아이콘에 맞게 조정 */
     background-color: #e74c3c;
     color: white;
     border-radius: 50%;
@@ -154,7 +155,7 @@ body, html {
     display: block;
     /* ⭐⭐⭐ [수정] 좌우 패딩을 12px로 줄여 메뉴 창 크기를 줄입니다. ⭐⭐⭐ */
     padding: 15px 12px;
-    color: #bdc3c7;
+    color: #000000;  /* ✅ 검정으로 변경 */
     text-decoration: none;
     font-size: 16px;
     border-bottom: 1px solid rgba(255,255,255,0.05);
@@ -188,11 +189,6 @@ body, html {
 
 .main-nav ul li:last-child a {
     border-bottom: none;
-}
-.main-nav ul li a.active,
-.main-nav ul li a:hover {
-    color: #3498db;
-    background-color: rgba(52, 152, 219, 0.1);
 }
 
 /* 햄버거 메뉴용 로그아웃 버튼 */
@@ -565,13 +561,7 @@ body, html {
 .tab-btn:hover:not(.active) {
     color: #555;
 }
-.tab-content {
-    display: none;
-}
-.tab-content.active {
-    display: block;
-    animation: fadeIn 0.5s;
-}
+
 @keyframes fadeIn {
     from { opacity: 0; transform: translateY(10px); }
     to { opacity: 1; transform: translateY(0); }
@@ -779,11 +769,7 @@ body, html {
 .calendar-nav button:hover {
     background-color: #eee;
 }
-.calendar-grid {
-    display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    gap: 5px;
-}
+
 .calendar-header-cell {
     text-align: center;
     font-weight: 600;
@@ -827,11 +813,11 @@ body, html {
 
 /* 1. 풀스크린 비디오 컨테이너 */
 .video-background {
-    position: fixed;
+    position: absolute;         /* ✅ fixed → absolute */
     top: 0;
     left: 0;
     width: 100%;
-    height: 100%;
+    height: 100vh;              /* ✅ 첫 화면(hero) 높이만 */
     z-index: -1;
     overflow: hidden;
     background-image: url('futsal_main_background_clean.jpg');
@@ -852,11 +838,11 @@ body, html {
 
 /* 2. 오버레이 (텍스트 명료화) */
 .video-overlay {
-    position: fixed;
+    position: absolute;         /* ✅ fixed → absolute */
     top: 0;
     left: 0;
     width: 100%;
-    height: 100%;
+    height: 100vh;              /* ✅ 첫 화면(hero) 높이만 */
     background: rgba(0, 0, 0, 0.4);
     z-index: -1;
 }
@@ -881,7 +867,6 @@ body, html {
     background-image: url('futsal_main_background_clean.jpg');
     background-size: cover;
     background-position: center;
-    background-attachment: fixed; /* 스크롤 시 배경 고정 */
 }
 
 .hero-section::before {
@@ -891,31 +876,10 @@ body, html {
     left: 0;
     width: 100%;
     height: 100%;
-    /* ⭐⭐⭐ 텍스트 가독성을 위한 진한 오버레이 (0.6) 적용 ⭐⭐⭐ */
-    background: rgba(0, 0, 0, 0.2);
+    background: rgba(0, 0, 0, 0);
     z-index: -1;
 }
 
-/* 4. 텍스트 스타일 재정의 */
-.hero-message {
-    font-size: 6vw;
-    font-weight: 900;
-    text-shadow: 0 6px 15px rgba(0, 0, 0, 0.8);
-    line-height: 1.1;
-    margin-bottom: 20px;
-}
-
-.hero-sub-message {
-    font-size: 2vw;
-    font-weight: 400;
-    text-shadow: 0 3px 8px rgba(0, 0, 0, 0.6);
-    opacity: 0.9;
-    margin-bottom: 40px;
-}
-@media (max-width: 768px) {
-    .hero-message { font-size: 10vw; }
-    .hero-sub-message { font-size: 4vw; }
-}
 
 /* 5. CTA 버튼 스타일 재정의 */
 .cta-button {
@@ -1221,11 +1185,6 @@ body, html {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
     gap: 30px;
-    max-width: 1200px;
-    margin: 0 auto;
-    justify-content: center;
-    padding: 0 20px;
-    flex-wrap: wrap;
 }
 
 /* ⭐⭐ 피처 카드 디자인 개선 ⭐⭐ */
@@ -1233,7 +1192,7 @@ body, html {
     background: rgba(255, 255, 255, 0.1); /* 투명한 흰색 배경 */
     border-radius: 12px;
     box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
-    padding: 40px;
+    padding: 28px 22px;  /* ✅ 기존 40px 내외면 이 정도로 */
     transition: transform 0.3s ease, box-shadow 0.3s ease;
     border-bottom: 4px solid #6c5ce7; /* 보라색 강조 */
     backdrop-filter: blur(5px);
@@ -1329,7 +1288,7 @@ body, html {
 
 .value-grid {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(3, 1fr); /* ✅ 4 → 3으로 변경 */
     gap: 30px;
     max-width: 1200px;
     margin: 0 auto;
@@ -2158,22 +2117,142 @@ body, html {
     padding-bottom: 10px;
 }
 
+/* 필터 한 줄에서 검색 버튼을 끝으로 붙이기 */
 .filter-section {
     display: flex;
-    gap: 15px;
-    margin-bottom: 25px;
     flex-wrap: wrap;
+    gap: 12px;
+    align-items: center;
+    background: #f7f8ff;
+    border: 1px solid #e6e8ff;
+    padding: 14px 16px;
+    border-radius: 12px;
+    margin-bottom: 18px;
 }
 
-.filter-section input,
-.filter-section select,
-.filter-section button {
-    padding: 12px 15px;
-    font-size: 15px;
-    border: 1px solid #ddd;
+/* 날짜 범위를 한 덩어리로 보이게 */
+.date-range {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: #fff;
+    border: 1px solid #e6e8ff;
+    padding: 8px 10px;
     border-radius: 10px;
-    background: #f9f9f9;
-    font-family: inherit;
+    box-shadow: 0 2px 6px rgba(108, 92, 231, 0.06);
+}
+
+/* 날짜 필드 한 칸 */
+.date-field {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 180px;
+}
+
+.date-label {
+    font-size: 12px;
+    font-weight: 700;
+    color: #6c5ce7;
+    display: flex;
+    gap: 6px;
+    align-items: center;
+}
+
+.date-field input[type="date"] {
+    padding: 8px 10px;
+    border: 1px solid #dfe3ff;
+    border-radius: 8px;
+    font-size: 14px;
+    outline: none;
+    background: #fafbff;
+    transition: 0.2s;
+}
+
+.date-field input[type="date"]:focus {
+    border-color: #6c5ce7;
+    box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.12);
+    background: #fff;
+}
+
+/* ~ 구분자 */
+.range-separator {
+    font-size: 18px;
+    font-weight: 900;
+    color: #6c5ce7;
+    padding: 0 2px;
+}
+
+/* 셀렉트 박스 톤 맞추기 */
+.filter-section select {
+    padding: 9px 10px;
+    border: 1px solid #dfe3ff;
+    border-radius: 8px;
+    background: #fff;
+    font-size: 14px;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.filter-section select:focus {
+    border-color: #6c5ce7;
+    box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.12);
+}
+
+/* 검색 버튼 강조 */
+.search-btn {
+    padding: 9px 14px;
+    border: none;
+    border-radius: 9px;
+    background: #6c5ce7;
+    color: white;
+    font-weight: 800;
+    cursor: pointer;
+    transition: 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+/* ✅ schedule 필터 가로 1줄 복구 (데스크탑) */
+@media (min-width: 900px) {
+    .filter-section {
+        flex-wrap: nowrap;     /* 줄바꿈 금지 */
+        align-items: center;
+    }
+
+    .filter-section .date-range {
+        flex: 1 1 auto;        /* 날짜영역이 남는 공간 먹음 */
+        min-width: 520px;
+    }
+
+    .filter-section .date-field {
+        flex: 1 1 0;
+        min-width: 0;          /* min-width 때문에 내려가는 현상 방지 */
+    }
+
+    #filter-status {           /* 상태 select부터 오른쪽으로 밀기 */
+        margin-left: auto;
+    }
+
+    #filter-status,
+    #filter-sort,
+    .search-btn {
+        flex-shrink: 0;        /* 셀렉트/버튼 줄지 않게 */
+    }
+}
+
+/* 모바일은 기존대로 wrap */
+@media (max-width: 899px) {
+    .filter-section { flex-wrap: wrap; }
+    .filter-section .date-range { width: 100%; }
+}
+
+
+.search-btn:hover {
+    transform: translateY(-1px);
+    background: #5648d6;
+    box-shadow: 0 6px 14px rgba(108, 92, 231, 0.25);
 }
 
 .filter-section input[type="text"] {
@@ -2447,7 +2526,7 @@ body, html {
     justify-content: center;
     align-items: center;
     min-height: 100vh;
-    background: url("/images/futsal_main_background_clean.jpg") center/cover no-repeat;
+    background: url("static/css/futsal_main_background_clean.jpg") center/cover no-repeat;
     position: relative;
 }
 
@@ -2528,55 +2607,9 @@ body, html {
     padding: 100px 20px;
 }
 
-/* ✅ 왼쪽 지도 영역 (80%) */
-.field-map-area {
-    flex: 7; /* ← 비율 조정 */
-    height: 500px;
-    background-color: #eee;
-    border-radius: 10px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 20px;
-    color: #888;
-}
 
-/* ✅ 오른쪽 검색 결과 영역 (20%) */
-.field-list-area {
-    flex: 3; /* ← 비율 조정 */
-    display: flex;
-    flex-direction: column;
-    max-height: 500px;
-    overflow-y: auto;
-    background: #fff;
-    padding: 15px;
-    border-radius: 10px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
-}
-
-/* 구장 목록 카드 스타일 (ERD: Stadium 반영) */
-#field-list {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    gap: 20px;
-    margin-top: 20px;
-}
-.field-card {
-    background: #ffffff;
-    border-radius: 10px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
-    padding: 7px;
-    border-left: 5px solid #2ecc71;
-    transition: transform 0.2s;
-    cursor: pointer;
-}
 .field-card:hover {
     transform: translateY(-3px);
-}
-.field-card h3 {
-    font-size: 15px;
-    color: #2c3e50;
-    margin-bottom: 5px;
 }
 .field-meta p {
     font-size: 14px;
@@ -2932,6 +2965,17 @@ body, html {
     cursor: pointer;
     transition: color 0.2s, border-bottom 0.2s;
     margin-right: 5px;
+}
+
+.board-tabs button.active {
+    color: #6c5ce7;
+    font-weight: 700;
+    border-bottom-color: #6c5ce7;
+}
+
+/* 필요하면 :hover 때 살짝 색만 변경 */
+.board-tabs button:hover {
+    color: #6c5ce7;
 }
 
 .write-button {
@@ -3506,12 +3550,6 @@ body, html {
     transform: translateY(-1px);
     background-color: #27ae60 !important;
 }
-.main-content {
-    min-height: 100vh;
-    background: transparent;
-    padding: 0;
-    overflow-x: hidden; /* 가로 스크롤 방지 */
-}
 
 #upcoming-schedule-section, #review-notification-section {
     position: relative;
@@ -3800,14 +3838,7 @@ body, html {
 .info-view-group { margin-bottom: 20px; }
 .info-view-group label { display: block; font-weight: 700; margin-bottom: 6px; color: #2c3e50; font-size: 14px; }
 .info-view-text { width: 100%; padding: 12px 15px; border: 1px solid #ddd; border-radius: 10px; font-size: 16px; background: #f7f7f7; color: #333; min-height: 47px; box-sizing: border-box; display: flex; align-items: center; }
-.info-view-profile-pic {
-    width: 110px;
-    height: 110px;
-    border-radius: 50%;
-    object-fit: cover;
-    object-position: center; /* 중앙 부분 표시 */
-    border: 2px solid #ddd;
-}
+.info-view-profile-pic { width: 120px; height: 120px; border-radius: 50%; object-fit: cover; border: 3px solid #eee; margin-bottom: 15px; }
 
 /* --- 친구 관리 탭 스타일 --- */
 .tab-buttons.sub-tabs { display: flex; margin-bottom: 20px; border-bottom: 1px solid #eee; }
@@ -4503,15 +4534,94 @@ body, html {
     min-width: 200px;
 }
 
-.board-tabs button.active {
-    color: #6c5ce7;
-    font-weight: 700;
-    border-bottom-color: #6c5ce7;
+/* ===========================
+   main.html 내부 <style> 분리본
+   ✅ 디자인 유지 위해 style.css "맨 아래"에 위치해야 함
+=========================== */
+
+/* main-content 투명 유지 */
+.main-content {
+    min-height: 100vh;
+    background: transparent;
+    padding: 0;
 }
 
-/* 필요하면 :hover 때 살짝 색만 변경 */
-.board-tabs button:hover {
-    color: #6c5ce7;
+/* Hero 아래 콘텐츠(일정/알림) z-index 유지 */
+#upcoming-schedule-section,
+#review-notification-section {
+    position: relative;
+    z-index: 10;
+}
+
+/* 알림 배너 닫기 버튼 공간 확보 */
+#review-notification-section {
+    position: relative;
+    padding-right: 40px;
+}
+
+/* 알림 배너 닫기 버튼(HTML inline 버전 유지) */
+.close-review-btn {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    background: none;
+    border: none;
+    color: white;
+    font-size: 16px;
+    cursor: pointer;
+    padding: 5px;
+    opacity: 0.6;
+    transition: opacity 0.2s;
+    line-height: 1;
+    z-index: 20;
+}
+.close-review-btn:hover {
+    opacity: 1;
+}
+
+/* 비회원 로그인 유도 버튼 위치/스타일 유지 */
+.login-prompt-button {
+    z-index: 50;
+    display: inline-block;
+    margin: 10px 5px 0 5px;
+    padding: 10px 20px;
+    font-size: 16px;
+    font-weight: 600;
+    color: white;
+    background: #6c5ce7;
+    border-radius: 25px;
+    text-decoration: none;
+    transition: background 0.3s;
+}
+
+/* 슬라이더 아이템 최종 오버라이드 유지 */
+.schedule-item {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(240, 240, 240, 0.95)) !important;
+    color: #2c3e50 !important;
+    border: 1px solid rgba(0,0,0,0.1);
+    text-align: left;
+}
+.schedule-item strong {
+    font-size: 17px;
+    color: #2c3e50;
+    display: block;
+    margin-bottom: 5px;
+}
+.schedule-item .item-location {
+    font-size: 14px;
+    color: #555;
+    display: flex;
+    align-items: center;
+}
+.schedule-item .item-location i {
+    margin-right: 5px;
+    color: #8e44ad;
+}
+.schedule-item .item-type {
+    font-size: 13px;
+    font-weight: 700;
+    color: #e74c3c;
+    margin-bottom: 5px;
 }
 
 .user-row {
@@ -4580,4 +4690,700 @@ body, html {
 
 .btn-close:hover,.btn-disabled:hover{
     background-color: #a10000;
+}
+
+/* ===========================
+   schedule.html 에서 분리한 CSS
+   (디자인 유지용 / schedule 전용)
+=========================== */
+
+/* schedule 페이지 메인 레이아웃 */
+.schedule-search-main {
+    padding: 100px 40px 40px 40px;
+    background-color: #f7f7f7;
+    min-height: 100vh;
+}
+
+/* schedule 페이지에서 날짜 input이 넓게 늘어나도록 유지 */
+.schedule-search-main .filter-section input[type="date"] {
+    flex-grow: 1;
+    min-width: 200px;
+}
+
+/* ===========================
+   ✅ 경기 생성 모달 버튼 비율 맞추기
+   - 전역 .btn-cancel width:100% 오버라이드
+=========================== */
+
+/* 경기 생성 모달(#match-create-modal) 안 버튼 영역 */
+#match-create-modal .modal-actions {
+    display: flex;
+    gap: 10px;
+}
+
+/* 취소/생성 버튼을 1:1로 */
+#match-create-modal .modal-actions .btn-cancel,
+#match-create-modal .modal-actions .btn-create {
+    flex: 1;                   /* ⭐ 반반 */
+    width: auto !important;    /* ⭐ 전역 width:100% 무력화 */
+    padding: 12px 0;
+    border-radius: 10px;
+    font-size: 16px;
+    font-weight: 700;
+}
+
+/* 색상은 기존 화면 톤에 맞춰 유지 */
+#match-create-modal .modal-actions .btn-cancel {
+    background: #6c5ce7 !important;
+    color: #fff !important;
+    border: none;
+}
+#match-create-modal .modal-actions .btn-create {
+    background: #333 !important;
+    color: #fff !important;
+    border: none;
+}
+
+#match-create-modal .modal-actions .btn-cancel:hover {
+    background: #5648d6 !important;
+}
+#match-create-modal .modal-actions .btn-create:hover {
+    background: #111 !important;
+}
+
+/* ===========================
+   ✅ stadium_detail.html 최종 통합/오버라이드
+   - style.css 맨 아래에 붙여넣기
+=========================== */
+
+/* 1) HTML 인라인 스타일 제거용 ------------------- */
+#nav-login-btn{
+    margin-right: 10px;
+    font-weight: 700;
+    color: #333;
+    display: block;
+}
+
+/* 기존 .menu-toggle-btn을 보완 (HTML inline 제거용) */
+#menu-toggle.menu-toggle-btn{
+    background: none;
+    border: none;
+    font-size: 20px;
+}
+
+/* 탭 섹션 제목 공통 */
+.tab-section-title{
+    font-size: 24px;
+    color: #333;
+    margin-bottom: 15px;
+}
+
+/* 2) 모달 클래스 통일(중요!) ------------------- */
+/* 네 CSS에 stadium-modal-* 는 있는데 modal-* 이 없으면
+   stadium_detail.html 모달이 스타일 없이 뜨는 문제가 생김.
+   그래서 둘 다 같은 스타일로 묶어줌. */
+
+.modal-overlay,
+.stadium-modal-overlay{
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 999; /* 기존 z-index 흐름 유지 */
+}
+
+.modal-overlay.show,
+.stadium-modal-overlay.show{
+    display: flex;
+}
+
+.modal-content,
+.stadium-modal-content{
+    background: #fff;
+    border-radius: 15px;
+    padding: 25px 25px 20px;
+    width: 90%;
+    max-width: 600px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.25);
+}
+
+/* 모달 내부 타이틀/라벨/인풋 톤 */
+.modal-content h2,
+.stadium-modal-content h2{
+    font-size: 24px;
+    margin-bottom: 15px;
+    font-weight: 800;
+    color: #2c3e50;
+}
+
+.modal-content label,
+.stadium-modal-content label{
+    display: block;
+    font-size: 15px;
+    font-weight: 700;
+    color: #34495e;
+    margin-top: 10px;
+    margin-bottom: 6px;
+}
+
+.modal-content input[type="text"],
+.modal-content input[type="date"],
+.modal-content select,
+.stadium-modal-content input[type="text"],
+.stadium-modal-content input[type="date"],
+.stadium-modal-content select{
+    width: 100%;
+    padding: 10px 12px;
+    font-size: 15px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-sizing: border-box;
+    background-color: #f9f9f9;
+    color: #333;
+}
+
+.modal-content input[readonly],
+.stadium-modal-content input[readonly]{
+    background-color: #e9ecef;
+    color: #495057;
+    font-weight: 600;
+    border: 1px solid #ced4da;
+}
+
+/* 시간 선택 줄 */
+.modal-content .time-select-group,
+.stadium-modal-content .time-select-group{
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+.modal-content .time-select-group select,
+.stadium-modal-content .time-select-group select{
+    flex-grow: 1;
+    min-width: 120px;
+}
+.modal-content .time-select-group span,
+.stadium-modal-content .time-select-group span{
+    font-size: 18px;
+    color: #555;
+    font-weight: 600;
+}
+
+/* 3) 모달 버튼 비율 1:1 유지 ------------------- */
+#match-create-modal .modal-actions{
+    display: flex;
+    gap: 10px;
+}
+
+#match-create-modal .modal-actions .btn-cancel,
+#match-create-modal .modal-actions .btn-create{
+    flex: 1;
+    width: auto !important;   /* 전역 width:100% 무효화 */
+    padding: 12px 0;
+    border-radius: 10px;
+    font-size: 16px;
+    font-weight: 700;
+    border: none;
+    cursor: pointer;
+}
+
+#match-create-modal .modal-actions .btn-cancel{
+    background: #6c5ce7 !important;
+    color: #fff !important;
+}
+#match-create-modal .modal-actions .btn-create{
+    background: #333 !important;
+    color: #fff !important;
+}
+
+#match-create-modal .modal-actions .btn-cancel:hover{
+    background: #5648d6 !important;
+}
+#match-create-modal .modal-actions .btn-create:hover{
+    background: #111 !important;
+}
+
+/* 4) stadium 상세 페이지 레이아웃 보정 ------------------- */
+/* stadium-main 내부 container 너비/여백 안정화 */
+.stadium-main .search-container{
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* 리뷰/경기 탭 높이 스크롤 감 */
+.review-right-column{
+    overflow-y: auto;
+}
+
+/* match-list 비어있을 때 문구 가독성 약간 개선 */
+#match-list p{
+    font-size: 13px;
+    color: #777;
+    padding: 10px 0;
+}
+
+/* ===========================
+   ✅ stadium-detail.html 전용 (inline <style> 분리본)
+   - style.css 맨 아래에 위치
+=========================== */
+
+/* 페이지 메인 */
+.stadium-main {
+    padding: 100px 40px 40px;
+    background-color: #f7f7f7;
+    min-height: 100vh;
+}
+
+/* stadium-detail에서 실제 사용하는 컨테이너는 search-container */
+.stadium-main .search-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    background: white;
+    padding: 40px;
+    border-radius: 15px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+    display: grid;
+    grid-template-columns: 1fr 400px;
+    gap: 30px;
+}
+
+/* 타이틀 */
+.stadium-title {
+    grid-column: 1 / -1;
+    font-size: 32px;
+    font-weight: 800;
+    color: #333;
+    margin-bottom: 5px;
+    border-bottom: 3px solid #6c5ce7;
+    padding-bottom: 10px;
+}
+
+/* 왼쪽 영역 */
+.detail-left-column {
+    grid-column: 1 / 2;
+    display: flex;
+    flex-direction: column;
+}
+
+/* 지도 영역 (id="map" 이 map-area 클래스 사용 중) */
+.map-area {
+    width: 100%;
+    height: 350px;
+    background-color: #eee;
+    border-radius: 10px;
+    margin-bottom: 25px;
+}
+
+/* 오른쪽 리뷰/경기 탭 */
+.review-right-column {
+    grid-column: 2 / 3;
+    grid-row: 2 / span 2;
+    background: #fcfcfc;
+    border-radius: 10px;
+    padding: 15px;
+    border: 1px solid #ddd;
+    max-height: 685px;
+    overflow-y: auto;
+}
+
+/* 기본 정보 카드 */
+.info-card {
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    padding: 20px;
+}
+.info-card h2 { margin-bottom: 20px; }
+.info-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+    font-size: 16px;
+}
+.info-item i {
+    width: 25px;
+    color: #6c5ce7;
+    margin-right: 10px;
+}
+
+/* 하단 버튼 */
+.action-button-group {
+    text-align: center;
+    grid-column: 1 / 2;
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+}
+.action-button-group a,
+.action-button-group button {
+    display: inline-block;
+    padding: 14px 28px;
+    font-weight: 700;
+    border-radius: 30px;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    font-size: 16px;
+    border: none;
+    cursor: pointer;
+}
+.btn-schedule {
+    background-color: #333;
+    color: white;
+    border: 2px solid #1a1a1a;
+}
+.btn-schedule:hover {
+    background-color: #1a1a1a;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+}
+.btn-create-match {
+    background-color: #e74c3c;
+    color: white;
+    border: 2px solid #c0392b;
+}
+.btn-create-match:hover {
+    background-color: #c0392b;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(231, 76, 60, 0.3);
+}
+
+/* 탭 */
+.tab-header {
+    display: flex;
+    border-bottom: 2px solid #eee;
+    margin-bottom: 15px;
+}
+.tab-button {
+    flex: 1;
+    text-align: center;
+    padding: 10px 0;
+    cursor: pointer;
+    font-weight: 700;
+    font-size: 15px;
+    border: none;
+    background: none;
+    outline: none;
+    transition: all 0.2s ease;
+}
+.tab-button.active {
+    color: #6c5ce7;
+    border-bottom: 3px solid #6c5ce7;
+}
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+
+/* 경기 필터/리스트 */
+.match-filter {
+    margin-bottom: 10px;
+    font-size: 14px;
+}
+.match-filter label {
+    font-weight: 600;
+    margin-right: 8px;
+}
+.match-filter input[type="date"] {
+    padding: 6px 8px;
+    font-size: 14px;
+    border-radius: 6px;
+    border: 1px solid #ddd;
+    background-color: #fff;
+}
+
+.match-list {
+    margin-top: 10px;
+    border-top: 1px solid #eee;
+}
+.match-item {
+    padding: 10px 0;
+    border-bottom: 1px solid #eee;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+}
+.match-item:last-child { border-bottom: none; }
+.match-item-time {
+    font-weight: 700;
+    color: #333;
+}
+.match-item-meta {
+    font-size: 13px;
+    color: #777;
+}
+.match-item:hover .match-item-time { text-decoration: underline; }
+
+/* 모집 상태 */
+.match-status { font-weight: 700; margin-left: 4px; }
+.match-status.open { color: #27ae60; }
+.match-status.closed { color: #e74c3c; }
+
+/* 후기 */
+#review-list { min-height: 300px; }
+.review-item {
+    border-bottom: 1px solid #eee;
+    padding: 15px 0;
+}
+.review-item:last-child { border-bottom: none; }
+
+.review-header {
+    display: flex;
+    justify-content: space-between;
+    font-size: 14px;
+    margin-bottom: 5px;
+}
+.review-author {
+    font-weight: 700;
+    color: #6c5ce7;
+    display: flex;
+    align-items: center;
+}
+.review-rating {
+    color: #f39c12;
+    font-weight: 700;
+}
+.review-content {
+    font-size: 15px;
+    line-height: 1.5;
+    color: #333;
+}
+
+.review-actions {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    margin-top: 5px;
+    justify-content: flex-end;
+}
+.review-actions .action-btn {
+    background: none;
+    border: none;
+    color: #6c5ce7;
+    font-size: 13px;
+    cursor: pointer;
+    padding: 2px 5px;
+    transition: color 0.2s;
+}
+.review-actions .action-btn.delete { color: #e74c3c; }
+
+/* ===========================
+   모달 (stadium-detail에서 쓰는 modal-*)
+=========================== */
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 999;
+}
+.modal-overlay.show { display: flex; }
+
+.modal-content {
+    background: #fff;
+    border-radius: 15px;
+    padding: 25px 25px 20px;
+    width: 90%;
+    max-width: 600px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.25);
+}
+
+.modal-content h2 {
+    font-size: 24px;
+    margin-bottom: 15px;
+    font-weight: 800;
+    color: #2c3e50;
+}
+.modal-content label {
+    display: block;
+    font-size: 15px;
+    font-weight: 700;
+    color: #34495e;
+    margin-top: 10px;
+    margin-bottom: 6px;
+}
+.modal-content input[type="text"],
+.modal-content input[type="date"],
+.modal-content select,
+.modal-content textarea {
+    width: 100%;
+    padding: 10px 12px;
+    font-size: 15px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-sizing: border-box;
+    background-color: #f9f9f9;
+    color: #333;
+}
+.modal-content input[readonly] {
+    background-color: #e9ecef;
+    color: #495057;
+    font-weight: 600;
+    border: 1px solid #ced4da;
+}
+
+.time-select-group {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+.time-select-group select {
+    flex-grow: 1;
+    min-width: 120px;
+}
+.time-select-group span {
+    font-size: 18px;
+    color: #555;
+    font-weight: 600;
+}
+
+/* 모달 버튼 */
+.modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 20px;
+}
+.modal-actions .btn-cancel,
+.modal-actions .btn-create {
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-weight: 700;
+    cursor: pointer;
+    border: none;
+}
+
+/* 경기 생성 모달 버튼 1:1 */
+#match-create-modal .modal-actions {
+    display: flex;
+    gap: 10px;
+}
+#match-create-modal .modal-actions .btn-cancel,
+#match-create-modal .modal-actions .btn-create {
+    flex: 1;
+    width: auto !important;
+    padding: 12px 0;
+    border-radius: 10px;
+    font-size: 16px;
+    font-weight: 700;
+}
+#match-create-modal .modal-actions .btn-cancel {
+    background: #6c5ce7 !important;
+    color: #fff !important;
+}
+#match-create-modal .modal-actions .btn-create {
+    background: #333 !important;
+    color: #fff !important;
+}
+#match-create-modal .modal-actions .btn-cancel:hover {
+    background: #5648d6 !important;
+}
+#match-create-modal .modal-actions .btn-create:hover {
+    background: #111 !important;
+}
+
+/* =========================
+   fields(구장 검색) 페이지 전용 스타일
+   ========================= */
+
+.field-search-main {
+    padding: 100px 40px 40px 40px;
+    background-color: #f7f7f7;
+    min-height: 100vh;
+}
+
+/* ⚠️ 전역 오염 방지: fields 내부로 스코프 */
+.field-search-main .search-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    background: white;
+    padding: 30px;
+    border-radius: 15px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+}
+
+.field-search-main .search-title {
+    font-size: 28px;
+    font-weight: 700;
+    color: #2c3e50;
+    margin-bottom: 25px;
+    border-bottom: 2px solid #6c5ce7;
+    padding-bottom: 10px;
+}
+
+.field-search-main .filter-section {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 25px;
+    flex-wrap: wrap;
+}
+
+.field-search-main .filter-section input {
+    padding: 12px 15px;
+    font-size: 15px;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    background: #f9f9f9;
+    flex-grow: 1;
+    min-width: 200px;
+}
+
+.field-search-main .filter-section button {
+    padding: 12px 15px;
+    background-color: #6c5ce7;
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    border-radius: 10px;
+}
+
+.field-search-main .search-content {
+    display: flex;
+    gap: 20px;
+}
+
+.field-search-main .map-area {
+    flex: 7;
+    height: 500px;
+    background-color: #eee;
+    border-radius: 10px;
+}
+
+.field-search-main .field-list-area {
+    flex: 3;
+    max-height: 500px;
+    overflow-y: auto;
+    background: #fff;
+    padding: 15px;
+    border-radius: 10px;
+}
+
+.field-search-main #field-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 10px;
+}
+
+.field-search-main .field-card {
+    background: #ffffff;
+    border-radius: 10px;
+    padding: 10px 8px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+    border-left: 5px solid #2ecc71;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.field-search-main .field-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 18px rgba(0,0,0,0.12);
+}
+
+.field-search-main .field-card h3 {
+    font-size: 16px;
+    color: #2c3e50;
 }

@@ -4,80 +4,78 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MULTI FC - 구장 검색</title>
+
+    <!-- ✅ 전역 스타일 -->
     <link rel="stylesheet" th:href="@{/css/style.css}">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700;900&family=Noto+Sans+KR:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <script src="//dapi.kakao.com/v2/maps/sdk.js?appkey=4caaf2cb0e09303d4dd13d3fb5ff15e9&libraries=services"></script>
-    <style>
-        /* 원래 CSS 복구 */
-        .field-search-main { padding: 100px 40px 40px 40px; background-color: #f7f7f7; min-height: 100vh; }
-        .search-container { max-width: 1200px; margin: 0 auto; background: white; padding: 30px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
-        .search-title { font-size: 28px; font-weight: 700; color: #2c3e50; margin-bottom: 25px; border-bottom: 2px solid #6c5ce7; padding-bottom: 10px; }
-        .filter-section { display: flex; gap: 15px; margin-bottom: 25px; flex-wrap: wrap; }
-        .filter-section input { padding: 12px 15px; font-size: 15px; border: 1px solid #ddd; border-radius: 10px; background: #f9f9f9; flex-grow: 1; min-width: 200px; }
-        .filter-section button { padding: 12px 15px; background-color: #6c5ce7; color: white; font-weight: 600; cursor: pointer; border: none; border-radius: 10px; }
-        .search-content { display: flex; gap: 20px; }
-        .map-area { flex: 7; height: 500px; background-color: #eee; border-radius: 10px; }
-        .field-list-area { flex: 3; max-height: 500px; overflow-y: auto; background: #fff; padding: 15px; border-radius: 10px; }
-        #field-list { display: flex; flex-direction: column; gap: 12px; margin-top: 10px; }
-        .field-card { background: #ffffff; border-radius: 10px; padding: 10px 8px; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08); border-left: 5px solid #2ecc71; cursor: pointer; }
-        .field-card:hover { transform: translateY(-3px); box-shadow: 0 6px 18px rgba(0,0,0,0.12); }
-        .field-card h3 { font-size: 16px; color: #2c3e50; }
 
-        /* 헤더 아이콘 스타일 */
-        .header-icons { display: flex; align-items: center; gap: 15px; }
-        .user-menu { position: absolute; top: 60px; right: 20px; background: white; border: 1px solid #ddd; border-radius: 10px; padding: 15px; display: none; width: 200px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); z-index: 1000; }
-        .user-menu.show { display: block; }
-        .user-menu ul { list-style: none; padding: 0; margin-top: 10px; border-top: 1px solid #eee; }
-        .user-menu ul li { padding: 10px 0; }
-        .user-menu ul li a { color: #333; text-decoration: none; display: block; }
-        .user-menu ul li a:hover { color: #6c5ce7; }
-    </style>
+    <!-- 카카오맵 -->
+    <script src="//dapi.kakao.com/v2/maps/sdk.js?appkey=4caaf2cb0e09303d4dd13d3fb5ff15e9&libraries=services"></script>
+
 </head>
+
 <body>
 
+<!-- ✅ 전역 헤더 그대로 사용 -->
 <header class="quick-menu">
     <div class="logo"><a href="/">MULTI FC</a></div>
-    <div class="header-icons">
-        <a href="/login" id="nav-login-btn" style="margin-right:10px; font-weight:bold; color:#333; display:block;">로그인</a>
 
-        <button id="profile-menu-toggle" class="profile-icon" style="position: relative; display: none; background:none; border:none; font-size:24px; cursor:pointer;">
+    <div class="header-icons">
+        <!-- ✅ inline style 제거 -->
+        <a href="/login" id="nav-login-btn">로그인</a>
+
+        <!-- ✅ inline style 제거 (display:none은 JS에서 제어하므로 최소만) -->
+        <button id="profile-menu-toggle" class="profile-icon" style="display:none;">
             <i class="fas fa-user-circle"></i>
+            <span id="notification-badge" class="notification-badge"></span>
         </button>
 
+        <!-- ✅ 전역 user-menu 톤 그대로 적용 -->
         <div id="profile-menu" class="user-menu">
             <div class="user-info">
                 <strong><span id="user-menu-username">회원</span>님</strong>
                 <p>환영합니다!</p>
             </div>
             <ul>
+                <li><a href="/notifications"><i class="fas fa-bell"></i> 알림 목록</a></li>
+                <li><a href="/mypage"><i class="fas fa-user"></i> 마이페이지</a></li>
+                <li><a href="/mypage/profile"><i class="fas fa-user-edit"></i> 프로필 수정</a></li>
                 <li><a href="#" id="logout-button"><i class="fas fa-sign-out-alt"></i> 로그아웃</a></li>
             </ul>
         </div>
 
-        <button id="menu-toggle" class="menu-toggle-btn" style="background:none; border:none; font-size:20px;">
+        <!-- ✅ inline style 제거 -->
+        <button id="menu-toggle" class="menu-toggle-btn">
             <i class="fas fa-bars"></i>
         </button>
     </div>
+
     <nav id="main-menu" class="main-nav">
         <ul>
             <li><a href="/"><i class="fas fa-home"></i> 메인 (Home)</a></li>
             <li><a href="/fields" class="active"><i class="fas fa-search"></i> 구장검색</a></li>
             <li><a href="/community"><i class="fas fa-users"></i> 커뮤니티</a></li>
             <li><a href="/chat"><i class="fas fa-comments"></i> 실시간채팅</a></li>
+            <li><a href="/schedule"><i class="fas fa-calendar-alt"></i> 경기 일정</a></li>
+
         </ul>
     </nav>
 </header>
 
+
 <main class="field-search-main">
     <div class="search-container">
         <h1 class="search-title">🔎 구장 검색</h1>
+
         <div class="filter-section">
             <input type="text" id="search-keyword" placeholder="구장 이름 또는 지역 입력 (예: 강남)">
             <button id="search-btn">검색</button>
         </div>
+
         <div class="search-content">
             <div class="map-area" id="map"></div>
+
             <div class="field-list-area">
                 <h2 style="font-size:22px;">검색 결과</h2>
                 <div id="field-list">
@@ -89,9 +87,10 @@
     </div>
 </main>
 
+
 <script>
     document.addEventListener("DOMContentLoaded", async () => {
-        // 1. 헤더 업데이트 (닉네임 표시)
+        // 1) 로그인 상태에 따른 헤더 표시
         const token = localStorage.getItem('accessToken');
         const nickname = localStorage.getItem('userNickname');
 
@@ -108,39 +107,64 @@
             if (profileIcon) profileIcon.style.display = 'none';
         }
 
-        // 2. 메뉴 이벤트
+        // 2) 메뉴 토글
         const profileMenu = document.getElementById('profile-menu');
-        if (profileIcon) profileIcon.addEventListener('click', () => profileMenu.classList.toggle('show'));
+        if (profileIcon) {
+            profileIcon.addEventListener('click', (e) => {
+                e.stopPropagation();
+
+                // ✅ 프로필 메뉴 열기 전 메인 메뉴는 닫기
+                if (mainMenu) mainMenu.classList.remove('show');
+
+                profileMenu.classList.toggle('show');
+            });
+        }
 
         const menuToggle = document.getElementById('menu-toggle');
         const mainMenu = document.getElementById('main-menu');
-        if (menuToggle) menuToggle.addEventListener('click', () => mainMenu.classList.toggle('show'));
+        if (menuToggle) {
+            menuToggle.addEventListener('click', (e) => {
+                e.stopPropagation();
 
-        document.getElementById('logout-button').addEventListener('click', (e) => {
-            e.preventDefault();
-            localStorage.removeItem('accessToken');
-            localStorage.removeItem('userId');
-            localStorage.removeItem('userNickname');
-            window.location.href = '/login';
+                // ✅ 메인 메뉴 열기 전 프로필 메뉴는 닫기
+                if (profileMenu) profileMenu.classList.remove('show');
+
+                mainMenu.classList.toggle('show');
+            });
+        }
+
+        // 바깥 클릭 시 메뉴 닫기
+        document.addEventListener('click', () => {
+            if (profileMenu) profileMenu.classList.remove('show');
+            if (mainMenu) mainMenu.classList.remove('show');
         });
 
-        // 3. 지도 및 초기 목록 로드
-        initMap();
+        // 3) 로그아웃
+        const logoutBtn = document.getElementById('logout-button');
+        if (logoutBtn) {
+            logoutBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                localStorage.removeItem('accessToken');
+                localStorage.removeItem('userId');
+                localStorage.removeItem('userNickname');
+                window.location.href = '/login';
+            });
+        }
 
-        // ⭐ 초기 목록 로드 및 렌더링 (마커 없이)
+        // 4) 지도 초기화 + 초기 목록 (마커 없이)
+        initMap();
         const list = await fetchStadiums("");
-        renderFieldList(list, false); // false: 초기에는 마커 안 그리기
+        renderFieldList(list, false);
 
         document.getElementById("search-btn").addEventListener("click", performSearch);
     });
 
     let kakaoMap = null;
-    let kakaoMarkers = [];               // 생성된 마커들
-    let markerInfoById = new Map();      // stadiumId -> { marker, data }
-    let kakaoInfoWindow = null;         // 현재 열려 있는 인포윈도우
+    let kakaoMarkers = [];
+    let markerInfoById = new Map();
+    let kakaoInfoWindow = null;
 
     function initMap(lat = 37.5665, lng = 126.9780) {
-        // 서울 시청을 기본 중심으로 설정하여 마커 없이 지도만 초기화
         if (!(window.kakao && window.kakao.maps)) return;
         kakaoMap = new kakao.maps.Map(document.getElementById('map'), {
             center: new kakao.maps.LatLng(lat, lng),
@@ -151,49 +175,22 @@
     function showStadiumInfo(marker, stadium) {
         if (!kakaoMap || !marker || !stadium) return;
 
-        // 이전 인포윈도우 닫기
-        if (kakaoInfoWindow) {
-            kakaoInfoWindow.close();
-        }
+        if (kakaoInfoWindow) kakaoInfoWindow.close();
 
-        // 인포윈도우 내용 (이름 / 주소 / 상세보기 버튼)
         const content = `
-    <div style="
-        box-sizing: border-box;
-        padding: 10px;
-        width: 230px;              /* 🔹 고정 폭으로 맞추기 */
-        white-space: normal;
-        word-break: break-all;      /* 🔹 영어/긴 단어도 강제 줄바꿈 */
-    ">
-        <div style="font-weight:600; margin-bottom:6px; font-size:14px;">
-            ${stadium.name}
-        </div>
-        <div style="font-size:12px; color:#555; margin-bottom:10px;">
-            ${stadium.address}
-        </div>
-        <button
-            style="
-                padding: 8px 10px;
-                font-size: 12px;
-                border: none;
-                border-radius: 4px;
-                background-color:#6c5ce7;
-                color:#fff;
-                cursor:pointer;
-            "
-            onclick="location.href='/stadium/detail?id=${stadium.stadiumId}'"
-        >
-            상세보기
-        </button>
-    </div>
-`;
+            <div style="box-sizing:border-box;padding:10px;width:230px;white-space:normal;word-break:break-all;">
+                <div style="font-weight:600;margin-bottom:6px;font-size:14px;">${stadium.name}</div>
+                <div style="font-size:12px;color:#555;margin-bottom:10px;">${stadium.address}</div>
+                <button
+                    style="padding:8px 10px;font-size:12px;border:none;border-radius:4px;background-color:#6c5ce7;color:#fff;cursor:pointer;"
+                    onclick="location.href='/stadium/detail?id=${stadium.stadiumId}'"
+                >
+                    상세보기
+                </button>
+            </div>
+        `;
 
-
-
-        kakaoInfoWindow = new kakao.maps.InfoWindow({
-            content: content
-        });
-
+        kakaoInfoWindow = new kakao.maps.InfoWindow({ content });
         kakaoInfoWindow.open(kakaoMap, marker);
         kakaoMap.panTo(marker.getPosition());
     }
@@ -201,7 +198,6 @@
     function updateMapMarkers(list) {
         if (!kakaoMap) return;
 
-        // 기존 마커 제거 및 정보 초기화
         kakaoMarkers.forEach(m => m.setMap(null));
         kakaoMarkers = [];
         markerInfoById.clear();
@@ -218,37 +214,26 @@
             const pos = new kakao.maps.LatLng(s.latitude, s.longitude);
             const marker = new kakao.maps.Marker({ position: pos, map: kakaoMap });
 
-            // 마커 클릭 시 인포윈도우 + 지도 이동
-            kakao.maps.event.addListener(marker, 'click', () => {
-                showStadiumInfo(marker, s);
-            });
+            kakao.maps.event.addListener(marker, 'click', () => showStadiumInfo(marker, s));
 
             kakaoMarkers.push(marker);
             bounds.extend(pos);
 
-            // stadiumId 기준으로 marker / 데이터 저장
             const id = s.stadiumId || s.id || s.stadium_id;
-            if (id != null) {
-                markerInfoById.set(String(id), { marker, data: s });
-            }
+            if (id != null) markerInfoById.set(String(id), { marker, data: s });
         });
 
-        if (kakaoMarkers.length > 0) {
-            kakaoMap.setBounds(bounds);
-        }
+        if (kakaoMarkers.length > 0) kakaoMap.setBounds(bounds);
     }
 
-    // ⭐ renderFieldList: 카드 클릭 시 지도 이동 + 인포윈도우 열기
     function renderFieldList(fields, updateMap = true) {
         const list = document.getElementById("field-list");
         const noMsg = document.getElementById("no-results-message");
-        let initialMsg = document.getElementById("initial-message");
 
         list.innerHTML = "";
 
         if (!fields || fields.length === 0) {
             noMsg.style.display = "block";
-            // 검색 결과가 없을 때는 지도의 마커도 지웁니다.
             updateMapMarkers([]);
             return;
         }
@@ -258,9 +243,7 @@
         fields.forEach(field => {
             const card = document.createElement("div");
             card.className = "field-card";
-            card.innerHTML = `
-                <h3>${field.name}</h3>
-            `;
+            card.innerHTML = `<h3>${field.name}</h3>`;
 
             card.addEventListener('click', () => {
                 const id = field.stadiumId || field.id || field.stadium_id;
@@ -268,25 +251,18 @@
 
                 const info = markerInfoById.get(String(id));
                 if (info && info.marker) {
-                    // 지도 이동 + 인포윈도우 표시
                     showStadiumInfo(info.marker, info.data);
                 } else {
-                    // 혹시 아직 마커가 없으면 마커를 새로 그림
                     updateMapMarkers([field]);
                     const info2 = markerInfoById.get(String(id));
-                    if (info2 && info2.marker) {
-                        showStadiumInfo(info2.marker, info2.data);
-                    }
+                    if (info2 && info2.marker) showStadiumInfo(info2.marker, info2.data);
                 }
             });
 
             list.appendChild(card);
         });
 
-        // 검색 버튼 눌렀을 때만 마커 업데이트
-        if (updateMap) {
-            updateMapMarkers(fields);
-        }
+        if (updateMap) updateMapMarkers(fields);
     }
 
     async function fetchStadiums(keyword) {
@@ -295,25 +271,21 @@
             : `/api/stadiums`;
 
         try {
-            const response = await fetch(url);
-            if (!response.ok) throw new Error("API 호출 실패");
-            return await response.json();
+            const res = await fetch(url);
+            if (!res.ok) throw new Error("API 호출 실패");
+            return await res.json();
         } catch (e) {
-            console.error("데이터 로드 중 오류 발생:", e);
+            console.error("데이터 로드 중 오류:", e);
             return [];
         }
     }
 
     async function performSearch() {
         const keyword = document.getElementById("search-keyword").value.trim();
-
-        // 키워드가 비어 있으면 전체 목록을 다시 로드
         const stadiums = await fetchStadiums(keyword);
 
-        // 검색 버튼을 눌렀을 때는 반드시 마커를 업데이트해야 합니다.
         renderFieldList(stadiums, true);
 
-        // 검색 결과가 없을 경우 지도를 서울 중심으로 리셋
         if (stadiums.length === 0 && kakaoMap) {
             updateMapMarkers([]);
             kakaoMap.setCenter(new kakao.maps.LatLng(37.5665, 126.9780));

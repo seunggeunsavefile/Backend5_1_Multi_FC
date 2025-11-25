@@ -7,96 +7,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700;900&family=Noto+Sans+KR:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 
-    <style>
-        /* 기존 main.html 내의 스타일을 IAMGROUND 스타일에 맞게 정리 */
-
-        .main-content {
-            /* 이 클래스는 전체 페이지 레이아웃을 위해 그대로 사용 */
-            min-height: 100vh;
-            /* Hero 섹션 아래 콘텐츠들이 body 배경 위로 올라오도록 투명하게 설정 */
-            background: transparent;
-            padding: 0;
-        }
-
-        /* Hero 섹션 아래 콘텐츠들이 body 배경 위로 올라오도록 투명하게 설정 */
-        #upcoming-schedule-section, #review-notification-section {
-            position: relative;
-            z-index: 10; /* 비디오 배경 위에 오도록 */
-        }
-
-        /* ⭐⭐⭐ [추가] 알림 배너 닫기 버튼 스타일 ⭐⭐⭐ */
-        #review-notification-section {
-            /* 기존 스타일 유지: flex를 사용했다는 가정 하에 padding을 조정 */
-            position: relative;
-            padding-right: 40px; /* 닫기 버튼 공간 확보 */
-        }
-        .close-review-btn {
-            position: absolute;
-            top: 5px;
-            right: 5px;
-            background: none;
-            border: none;
-            color: white;
-            font-size: 16px;
-            cursor: pointer;
-            padding: 5px;
-            opacity: 0.6;
-            transition: opacity 0.2s;
-            line-height: 1;
-            z-index: 20;
-        }
-        .close-review-btn:hover {
-            opacity: 1;
-        }
-        /* ⭐⭐⭐ [추가 끝] ⭐⭐⭐ */
-
-        /* 비회원 로그인 유도 버튼은 hero 섹션 아래에 배치되도록 조정 */
-        .login-prompt-button {
-            z-index: 50;
-            display: inline-block;
-            margin: 10px 5px 0 5px;
-            padding: 10px 20px;
-            font-size: 16px;
-            font-weight: 600;
-            color: white;
-            background: #6c5ce7;
-            border-radius: 25px;
-            text-decoration: none;
-            transition: background 0.3s;
-        }
-
-        /* ⭐⭐⭐ 슬라이더 아이템 스타일 (이전 요청의 최종 수정 내용 유지) ⭐⭐⭐ */
-        .schedule-item {
-            background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(240, 240, 240, 0.95)) !important;
-            color: #2c3e50 !important;
-            border: 1px solid rgba(0,0,0,0.1);
-            text-align: left;
-        }
-        .schedule-item strong {
-            font-size: 17px;
-            color: #2c3e50;
-            display: block;
-            margin-bottom: 5px;
-        }
-        .schedule-item .item-location {
-            font-size: 14px;
-            color: #555;
-            display: flex;
-            align-items: center;
-        }
-        .schedule-item .item-location i {
-            margin-right: 5px;
-            color: #8e44ad;
-        }
-        .schedule-item .item-type {
-            font-size: 13px;
-            font-weight: 700;
-            color: #e74c3c;
-            margin-bottom: 5px;
-        }
-        /* ⭐⭐⭐ 슬라이더 아이템 스타일 끝 ⭐⭐⭐ */
-
-    </style>
 </head>
 <body>
 
@@ -128,6 +38,7 @@
             <li><a href="/fields"><i class="fas fa-search"></i> 구장검색</a></li>
             <li><a href="/community"><i class="fas fa-users"></i> 커뮤니티</a></li>
             <li id="nav-chat-link-li"><a href="/chat" id="nav-chat-link"><i class="fas fa-comments"></i> 실시간채팅</a></li>
+            <li><a href="/schedule?stadium"><i class="fas fa-calendar-check"></i> 경기 일정</a></li>
             <li><a href="/login" id="nav-login-link"><i class="fas fa-sign-in-alt"></i> 로그인</a></li>
             <li><a href="#" id="nav-logout-link"><i class="fas fa-sign-out-alt"></i> 로그아웃</a></li>
         </ul>
@@ -185,83 +96,68 @@
     <section class="value-section">
         <h2 style="font-size: 30px; font-weight: 800; margin-bottom: 50px;">서비스 핵심 가치</h2>
         <div class="value-grid">
-
-            <div class="value-card">
-                <i class="fas fa-bolt"></i>
-                <h3>초고속 매칭</h3>
-                <p>최적화된 알고리즘으로 대기 시간 없이 즉시 팀원을 찾고 경기를 확정합니다.</p>
-            </div>
-
             <div class="value-card">
                 <i class="fas fa-shield-alt"></i>
-                <h3>매너 시스템</h3>
-                <p>평점 기반의 엄격한 매너 관리로 불쾌한 경험 없는 깨끗한 풋살 환경을 제공합니다.</p>
+                <h3>공정하고 안전한 환경</h3>
+                <p>운영진의 관리와 시스템을 통해 모두가 즐길 수 있는 깨끗한 풋살 환경을 제공합니다.</p>
             </div>
-
             <div class="value-card">
                 <i class="fas fa-sync-alt"></i>
                 <h3>실시간 동기화</h3>
                 <p>일정 변경, 채팅, 참여 현황 등 모든 정보가 실시간으로 동기화되어 즉각적인 대응이 가능합니다.</p>
             </div>
-
             <div class="value-card">
                 <i class="fas fa-map-marker-alt"></i>
                 <h3>지도 기반 검색</h3>
                 <p>현재 위치와 활동 반경에 맞춘 정교한 구장 검색으로 이동 시간을 최소화합니다.</p>
             </div>
         </div>
-    </section>
-
-    <section class="chat-promo-section">
-        <h2><i class="fas fa-comments" style="color:#2ecc71; margin-right: 10px;"></i> 실시간 소통 채널</h2>
-        <div class="chat-promo-box">
-            <p>
-                현재 진행 중인 매칭방, 팀원 모집방, 자유 수다방에서<br>
-                다른 유저들과 실시간으로 소통하고 정보를 교환하세요.
-            </p>
-            <a id="chat-promo-link" href="/chat" class="chat-action-link">
-                채팅 참여하기
-            </a>
-        </div>
-    </section>
+    </section>  <!-- ✅ value-section 닫기 -->
 
     <section id="features-section">
-        <h2 style="font-size: 36px; color: #2c3e50; margin-bottom: 60px; font-weight:900;">Multi FC, 주요 서비스</h2> <div class="features-grid">
+        <h2 style="font-size: 36px; margin-bottom: 60px; font-weight:900;">
+            MULTI FC, 주요 서비스
+        </h2>
 
-        <div class="feature-card">
-            <div class="icon-wrapper">
-                <i class="fas fa-map-marked-alt"></i>
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="icon-wrapper">
+                    <i class="fas fa-map-marked-alt"></i>
+                </div>
+                <h3>최적의 구장 검색</h3>
+                <p>위치, 인원, 시간대별 맞춤형 필터로 주변 풋살장을 빠르게 찾아보세요.<br>지도 연동으로 접근성을 높입니다.</p>
+                <a href="/fields" class="card-link">구장 찾기</a>
             </div>
-            <h3>최적의 구장 검색</h3>
-            <p>위치, 인원, 시간대별 맞춤형 필터로 주변 풋살장을 빠르게 찾아보세요. 지도 연동으로 접근성을 높입니다.</p>
-            <a href="/fields" class="card-link">구장 찾기</a>
-        </div>
 
-        <div class="feature-card">
-            <div class="icon-wrapper">
-                <i class="fas fa-calendar-alt"></i>
+            <div class="feature-card">
+                <div class="icon-wrapper">
+                    <i class="fas fa-calendar-alt"></i>
+                </div>
+                <h3>실시간 매칭방</h3>
+                <p>경기 개설 또는 참여 신청을 하고,<br>남은 인원을 확인하세요.<br>경기일정 탭을 통헤 일정을 확인합니다.</p>
+                <a href="/schedule" class="card-link">일정 확인</a>
             </div>
-            <h3>실시간 매치 스케줄</h3>
-            <p>팀 또는 개인 매치 일정을 등록하고, 남은 인원을 확인하세요. 모든 참여자는 알림을 통해 일정을 관리합니다.</p>
-            <a href="/schedule" class="card-link">일정 확인</a>
-        </div>
 
-        <div class="feature-card">
-            <div class="icon-wrapper">
-                <i class="fas fa-users"></i>
+            <div class="feature-card">
+                <div class="icon-wrapper">
+                    <i class="fas fa-users"></i>
+                </div>
+                <h3>커뮤니티 소통</h3>
+                <p>자유게시판을 통해 정보를 공유해보세요. 다른 사용자와 활발하게 소통합니다.</p>
+                <a href="/community" class="card-link">커뮤니티 바로가기</a>
             </div>
-            <h3>매너 기반 커뮤니티</h3>
-            <p>매치 후 팀원을 평가하여 신뢰도를 쌓으세요. 실시간 채팅과 자유게시판을 통해 활발하게 소통합니다.</p>
-            <a href="/community" class="card-link">커뮤니티 바로가기</a>
+
+            <!-- ✅ 실시간 소통 채널을 4번째 카드로 -->
+            <div class="feature-card">
+                <div class="icon-wrapper">
+                    <i class="fas fa-comments"></i>
+                </div>
+                <h3>실시간 채팅</h3>
+                <p>1:1 또는 그룹 채팅으로 다른 유저들과<br>실시간으로 소통합니다.</p>
+                <a href="/chat" class="card-link">실시간 채팅 바로가기</a>
+            </div>
         </div>
-    </div>
     </section>
-
-    <section class="global-cta-section" id="global-cta-register">
-        <h2>지금 바로 당신의 풋살 팀을 찾으세요!</h2>
-        <a href="/register" class="login-button" style="width: 300px; margin: 0 auto; text-decoration: none;">계정 생성하고 시작하기</a>
-    </section>
-
 </main>
 
 <footer class="project-footer">

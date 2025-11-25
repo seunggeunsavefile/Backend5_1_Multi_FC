@@ -17,7 +17,7 @@
 <header class="quick-menu">
     <div class="logo"><a href="/">Multi FC</a></div>
     <div class="header-icons">
-        <button id="profile-menu-toggle" class="profile-icon" style="position: relative; display: none;">
+        <button id="profile-menu-toggle" class="profile-icon" style="position: relative;">
             <i class="fas fa-user-circle"></i>
             <span id="notification-badge" class="notification-badge"></span>
         </button>
@@ -35,13 +35,14 @@
         </div>
         <button id="menu-toggle" class="menu-toggle-btn"><i class="fas fa-bars"></i></button>
     </div>
+
     <nav id="main-menu" class="main-nav">
         <ul>
-            <li><a href="/"><i class="fas fa-home"></i> 메인 (Home)</a></li>
+            <li><a href="/" class="active"><i class="fas fa-home"></i> 메인 (Home)</a></li>
             <li><a href="/fields"><i class="fas fa-search"></i> 구장검색</a></li>
-            <li><a href="/community" class="active"><i class="fas fa-users"></i> 커뮤니티</a></li>
-            <li><a href="/chat"><i class="fas fa-comments"></i> 실시간채팅</a></li>
-            <li><a href="/schedule"><i class="fas fa-calendar-alt"></i> 일정</a></li>
+            <li><a href="/community"><i class="fas fa-users"></i> 커뮤니티</a></li>
+            <li id="nav-chat-link-li"><a href="/chat" id="nav-chat-link"><i class="fas fa-comments"></i> 실시간채팅</a></li>
+            <li><a href="/schedule?stadium"><i class="fas fa-calendar-check"></i> 경기 일정</a></li>
             <li><a href="/login" id="nav-login-link"><i class="fas fa-sign-in-alt"></i> 로그인</a></li>
             <li><a href="#" id="nav-logout-link"><i class="fas fa-sign-out-alt"></i> 로그아웃</a></li>
         </ul>
