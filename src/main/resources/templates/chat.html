@@ -592,7 +592,7 @@
 </head>
 <body>
 
-<div th:replace="header :: siteHeader"></div>
+<div th:replace="~{fragments/header :: siteHeader}"></div>
 
 <div id="connection-status">
     WebSocket 연결 중... 서버가 준비되면 자동으로 연결됩니다.
