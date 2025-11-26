@@ -12,6 +12,7 @@ public class MatchRoomCreateReq {
     private Long hostId;      // 생성자(Host)
     private String matchDate;
     private String matchTime;
+    private String endTime;
     private Integer maxPlayers;
     private String level;
 }

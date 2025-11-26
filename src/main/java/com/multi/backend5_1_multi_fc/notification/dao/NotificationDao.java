@@ -33,4 +33,8 @@ public interface NotificationDao {
 
     //알림 삭제
     void delete(long notificationId);
+
+    //미읽음 댓글 알림 찾기
+    NotificationDto findUnreadCommentNotification(@Param("userId") Long userId,
+                                                  @Param("postId") Long postId);
 }

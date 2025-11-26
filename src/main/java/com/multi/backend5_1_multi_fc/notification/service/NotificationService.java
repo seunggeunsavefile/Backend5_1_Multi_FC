@@ -118,4 +118,93 @@ public class NotificationService {
     public void deleteNotification(Long notificationId){
         notificationDao.delete(notificationId);
     }
+
+    //게시글에 새 댓글이 달렸을 때 알림
+    public void createOrUpdatePostCommentNotification(Long userId,
+                                                      Long postId,
+                                                      Long lastCheckedCommentId,
+                                                      Long currentCommentId) {
+
+        // 마지막 확인 기준으로 새 댓글 없으면 알림 안 보냄
+        if (currentCommentId == null
+                || (lastCheckedCommentId != null && currentCommentId <= lastCheckedCommentId)) {
+            return;
+        }
+
+        // 기존 미읽음 댓글 알림 있는지 조회
+        NotificationDto existing =
+                notificationDao.findUnreadCommentNotification(userId, postId);
+
+        if (existing != null) {
+            // 기존 알림 내용에서 "댓글 N건" 부분 숫자 증가
+            int count = extractCommentCount(existing.getContent());
+            int newCount = count + 1;
+
+            String updatedContent = "내 게시글에 새로운 댓글 " + newCount + "건";
+            existing.setContent(updatedContent);
+
+            notificationDao.updateContent(existing.getNotificationId(), updatedContent);
+
+            // WebSocket으로 다시 전송
+            simpMessagingTemplate.convertAndSendToUser(
+                    String.valueOf(userId),
+                    "/queue/notifications",
+                    existing
+            );
+        } else {
+            // 새 알림 생성
+            NotificationDto notification = NotificationDto.builder()
+                    .userId(userId)
+                    .type("댓글")           // 프론트 notif.type === '댓글'
+                    .referenceId(postId)    // 게시글 상세로 이동할 postId
+                    .content("내 게시글에 새로운 댓글 1건")
+                    .isRead(false)
+                    .createdAt(LocalDateTime.now())
+                    .build();
+
+            notificationDao.insert(notification);
+
+            simpMessagingTemplate.convertAndSendToUser(
+                    String.valueOf(userId),
+                    "/queue/notifications",
+                    notification
+            );
+        }
+    }
+
+    // 대댓글 알림: “내 댓글에 대댓글 1건” 정도로 단순하게
+    public void createReplyNotification(Long userId, Long postId) {
+        NotificationDto notification = NotificationDto.builder()
+                .userId(userId)
+                .type("대댓글")          // 프론트 notif.type === '대댓글'
+                .referenceId(postId)
+                .content("내 댓글에 새로운 대댓글이 달렸습니다.")
+                .isRead(false)
+                .createdAt(LocalDateTime.now())
+                .build();
+
+        notificationDao.insert(notification);
+
+        simpMessagingTemplate.convertAndSendToUser(
+                String.valueOf(userId),
+                "/queue/notifications",
+                notification
+        );
+    }
+
+    // "댓글 N건" 형태에서 N 뽑아내기
+    private int extractCommentCount(String content) {
+        try {
+            // 예: "내 게시글에 새로운 댓글 3건"
+            String[] parts = content.split(" ");
+            for (String part : parts) {
+                if (part.endsWith("건")) {
+                    return Integer.parseInt(part.replace("건", ""));
+                }
+            }
+        } catch (Exception e) {
+            // 파싱 안 되면 1로 기본값
+        }
+        return 1;
+    }
 }

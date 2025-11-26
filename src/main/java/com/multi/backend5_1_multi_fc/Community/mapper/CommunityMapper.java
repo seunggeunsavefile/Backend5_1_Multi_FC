@@ -37,4 +37,21 @@ public interface CommunityMapper {
 
     // 조회수 증가
     void increaseViewCount(@Param("postId") Long postId);
+
+    // 게시글 작성자 찾기
+    Long findWriterIdByPostId(@Param("postId") Long postId);
+
+    // current_comment_id 업데이트
+    void updatePostCurrentCommentId(@Param("postId") Long postId,
+                                    @Param("commentId") Long commentId);
+
+    // last_checked_comment_id 조회
+    Long findLastCheckedCommentId(@Param("postId") Long postId);
+
+    // current_comment_id 조회
+    Long findCurrentCommentId(@Param("postId") Long postId);
+
+    // last_checked_comment_id 갱신
+    void updateLastCheckedCommentId(@Param("postId") Long postId,
+                                    @Param("commentId") Long commentId);
 }

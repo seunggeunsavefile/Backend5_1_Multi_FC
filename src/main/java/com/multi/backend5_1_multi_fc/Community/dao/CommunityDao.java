@@ -72,4 +72,32 @@ public class CommunityDao {
     public List<CommunityDto.CommentResponse> findCommentByPostId(Long postId) {
         return commentMapper.findCommentByPostId(postId);
     }
+
+    public Long findWriterIdByPostId(Long postId) {
+        return communityMapper.findWriterIdByPostId(postId);
+    }
+
+    public Long findWriterIdByCommentId(Long commentId) {
+        return commentMapper.findWriterIdByCommentId(commentId);
+    }
+
+    public void updatePostCurrentCommentId(Long postId, Long commentId) {
+        communityMapper.updatePostCurrentCommentId(postId, commentId);
+    }
+
+    public Long findLastCheckedCommentId(Long postId) {
+        return communityMapper.findLastCheckedCommentId(postId);
+    }
+
+    public Long findCurrentCommentId(Long postId) {
+        return communityMapper.findCurrentCommentId(postId);
+    }
+
+    public void updateLastCheckedCommentId(Long postId, Long commentId) {
+        communityMapper.updateLastCheckedCommentId(postId, commentId);
+    }
+
+    public Long findLastInsertedCommentId() {
+        return commentMapper.findLastInsertedCommentId();
+    }
 }

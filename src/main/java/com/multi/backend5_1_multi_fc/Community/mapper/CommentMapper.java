@@ -26,4 +26,10 @@ public interface CommentMapper {
     // 특정 게시글의 전체 댓글 조회
     List<CommunityDto.CommentResponse> findCommentByPostId(@Param("postId") Long postId);
 
+    // 댓글 작성자 찾기
+    Long findWriterIdByCommentId(@Param("commentId") Long commentId);
+
+    // 마지막 생성된 comment_id
+    Long findLastInsertedCommentId();
+
 }

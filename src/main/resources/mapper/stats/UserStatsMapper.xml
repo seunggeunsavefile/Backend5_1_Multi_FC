@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.multi.backend5_1_multi_fc.stats.mapper.UserStatsMapper">
+
+    <!-- username -> user_id -->
+    <select id="findUserIdByUsername" resultType="long">
+        SELECT user_id
+        FROM User
+        WHERE username = #{username}
+            LIMIT 1
+    </select>
+
+    <!-- 매칭률: 올해 신청한 경기 중 '승인' 비율 -->
+    <resultMap id="MatchingRateRawMap"
+               type="com.multi.backend5_1_multi_fc.stats.dto.UserStatsDto$MatchingRateRaw">
+        <result property="approved" column="approved"/>
+        <result property="total"    column="total"/>
+    </resultMap>
+
+    <select id="findMatchingRate"
+            resultMap="MatchingRateRawMap">
+        SELECT
+        IFNULL(SUM(CASE WHEN mp.status = '승인' THEN 1 ELSE 0 END), 0) AS approved,
+        COUNT(*) AS total
+        FROM Match_Participant mp
+        JOIN Match_Room mr ON mp.room_id = mr.room_id
+        WHERE mp.user_id = #{userId}
+        <!-- 전체 기간 기준이면 윗 줄 YEAR 조건 지우면 됨 -->
+    </select>
+
+</mapper>

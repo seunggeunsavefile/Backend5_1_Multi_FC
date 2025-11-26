@@ -14,7 +14,9 @@ public class MatchRoomDto {
     private Long stadiumId;
     private Long hostId;
     private String matchDate;
-    private String matchTime;
+    private String matchTime; // 시작 시간
+    private String endTime;   // ✨ 종료 시간 추가
+
     private Integer maxPlayers;
     private String level;
     private String status;

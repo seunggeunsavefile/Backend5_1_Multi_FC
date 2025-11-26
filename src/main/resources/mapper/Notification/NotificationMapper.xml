@@ -3,11 +3,21 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="com.multi.backend5_1_multi_fc.notification.dao.NotificationDao">
+
+    <resultMap id="NotificationResultMap" type="com.multi.backend5_1_multi_fc.notification.dto.NotificationDto">
+        <id column="notification_id" property="notificationId"/>
+        <result column="user_id" property="userId"/>
+        <result column="type" property="type"/>
+        <result column="reference_id" property="referenceId"/>
+        <result column="content" property="content"/>
+        <result column="is_read" property="isRead"/>
+        <result column="created_at" property="createdAt"/>
+    </resultMap>
     <insert id="insert" parameterType="NotificationDto" useGeneratedKeys="true" keyProperty="notificationId">
         INSERT INTO Notification (
-            user_id, content, type, is_read, created_at, redirect_url, related_id
+            user_id, content, type, is_read, created_at, reference_id
         ) values (
-                     #{userId}, #{content}, #{type}, #{isRead}, NOW(), #{redirectUrl}, #{relatedId}
+                     #{userId}, #{content}, #{type}, #{isRead}, NOW(), #{referenceId}
                  )
     </insert>
 
