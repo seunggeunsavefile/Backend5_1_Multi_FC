@@ -237,38 +237,7 @@
 </head>
 <body>
 
-<header class="quick-menu">
-    <div class="logo"><a href="/">Multi FC</a></div>
-    <div class="header-icons">
-        <button id="profile-menu-toggle" class="profile-icon" style="position: relative;">
-            <i class="fas fa-user-circle"></i>
-            <span id="notification-badge" class="notification-badge"></span>
-        </button>
-        <div id="profile-menu" class="user-menu">
-            <div class="user-info">
-                <strong><span id="user-menu-username">사용자</span>님</strong>
-                <p>환영합니다!</p>
-            </div>
-            <ul>
-                <li><a href="/notifications" id="nav-notifications-link"><i class="fas fa-bell"></i> 알림 목록</a></li>
-                <li><a href="/mypage"><i class="fas fa-user"></i> 마이페이지</a></li>
-                <li><a href="/profile/edit"><i class="fas fa-user-edit"></i> 프로필 수정</a></li>
-                <li><a href="#" id="logout-button"><i class="fas fa-sign-out-alt"></i> 로그아웃</a></li>
-            </ul>
-        </div>
-        <button id="menu-toggle" class="menu-toggle-btn"><i class="fas fa-bars"></i></button>
-    </div>
-
-    <nav id="main-menu" class="main-nav">
-        <ul>
-            <li><a href="/" ><i class="fas fa-home"></i> 메인 (Home)</a></li>
-            <li><a href="/fields"><i class="fas fa-search"></i> 구장검색</a></li>
-            <li><a href="/community"><i class="fas fa-users"></i> 커뮤니티</a></li>
-            <li id="nav-chat-link-li"><a href="/chat" id="nav-chat-link"><i class="fas fa-comments"></i> 실시간채팅</a></li>
-            <li><a href="/schedule?stadium" class="active"><i class="fas fa-calendar-check"></i> 경기 일정</a></li>
-        </ul>
-    </nav>
-</header>
+<div th:replace="~{fragments/header :: siteHeader}"></div>
 
 <main class="schedule-search-main">
     <div class="search-container">
@@ -330,101 +299,6 @@
 </main>
 
 <script>
-    // --- 공통 메뉴 토글 로직 ---
-    const menuToggle = document.getElementById('menu-toggle');
-    const mainMenu = document.getElementById('main-menu');
-    const profileMenuToggle = document.getElementById('profile-menu-toggle');
-    const profileMenu = document.getElementById('profile-menu');
-    const logoutButton = document.getElementById('logout-button');
-    const navNotificationsLink = document.getElementById('nav-notifications-link');
-    const navChatLinkElement = document.getElementById('nav-chat-link-li');
-    const navLoginLink = document.getElementById('nav-login-link');
-    const navLogoutLink = document.getElementById('nav-logout-link');
-
-    if (menuToggle) {
-        menuToggle.addEventListener('click', () => {
-            mainMenu.classList.toggle('show');
-            profileMenu.classList.remove('show');
-        });
-    }
-    if (profileMenuToggle) {
-        profileMenuToggle.addEventListener('click', () => {
-            profileMenu.classList.toggle('show');
-            mainMenu.classList.remove('show');
-        });
-    }
-    document.addEventListener('click', (event) => {
-        if (!mainMenu.contains(event.target) && !menuToggle.contains(event.target) &&
-            !profileMenu.contains(event.target) && !profileMenuToggle.contains(event.target)) {
-            mainMenu.classList.remove('show');
-            profileMenu.classList.remove('show');
-        }
-    });
-    if (logoutButton) {
-        logoutButton.addEventListener('click', (e) => {
-            e.preventDefault();
-            localStorage.removeItem('accessToken');
-            localStorage.removeItem('hasReadReviews');
-            localStorage.removeItem('hasReadSchedules');
-            window.location.href = '/login';
-        });
-    }
-    if (navNotificationsLink) {
-        navNotificationsLink.addEventListener('click', (e) => {
-            e.preventDefault();
-            localStorage.setItem('hasReadReviews', 'true');
-            localStorage.setItem('hasReadSchedules', 'true');
-            window.location.href = '/notifications';
-        });
-    }
-    if (navLogoutLink) {
-        navLogoutLink.addEventListener('click', (e) => {
-            e.preventDefault();
-            localStorage.removeItem('accessToken');
-            localStorage.removeItem('hasReadReviews');
-            localStorage.removeItem('hasReadSchedules');
-            window.location.href = '/login';
-        });
-    }
-
-    const badge = document.getElementById('notification-badge');
-    let hasReviewNotif = false;
-    let hasScheduleNotif = false;
-
-    function updateGlobalBadge() {
-        if (hasReviewNotif || hasScheduleNotif) {
-            if (badge) badge.style.display = 'block';
-        } else {
-            if (badge) badge.style.display = 'none';
-        }
-    }
-    async function checkPendingReviews() {
-        if (localStorage.getItem('hasReadReviews') === 'true') {
-            hasReviewNotif = false;
-            return;
-        }
-        try {
-            await new Promise(r => setTimeout(r, 200));
-            const mockReviews = { "count": 1 };
-            if (mockReviews.count > 0) {
-                hasReviewNotif = true;
-            }
-        } catch (error) { console.error("후기 알림 요청 중 오류:", error); }
-    }
-    async function checkUpcomingSchedules() {
-        if (localStorage.getItem('hasReadSchedules') === 'true') {
-            hasScheduleNotif = false;
-            return;
-        }
-        try {
-            await new Promise(r => setTimeout(r, 500));
-            const mockSchedules = [ { id: 1, date: "2025-11-01" } ];
-            if (mockSchedules.length > 0) {
-                hasScheduleNotif = true;
-            }
-        } catch (error) { console.error("일정 요청 중 오류 발생:", error); }
-    }
-
     let allMySchedules = [];
     let currentUserId = null;
     let currentUserName = null;
@@ -690,6 +564,7 @@
         const accessToken = localStorage.getItem('accessToken');
         const currentPath = window.location.pathname;
 
+        // 🔒 로그인 체크
         if (!accessToken) {
             alert("❌ 회원 전용 페이지입니다.\n로그인 후에 이용하실 수 있습니다.");
             localStorage.setItem('redirectAfterLogin', currentPath);
@@ -697,30 +572,28 @@
             return;
         }
 
-        // ✅ 프로필 닉네임 세팅 (localStorage 사용)
+        // ✅ 헤더 닉네임 ("사용자님" 대신)
         const userMenuName = document.getElementById('user-menu-username');
         if (userMenuName) {
             const nickname =
-                localStorage.getItem('username') ||
                 localStorage.getItem('userNickname') ||
+                localStorage.getItem('username') ||
                 '회원';
             userMenuName.textContent = nickname;
         }
 
-        if (accessToken) {
-            if (profileMenuToggle) profileMenuToggle.style.display = 'block';
-
-            if (navLoginLink && navLoginLink.parentElement) navLoginLink.parentElement.style.display = 'none';
-            if (navLogoutLink && navLogoutLink.parentElement) navLogoutLink.parentElement.style.display = 'list-item';
-
-            await checkPendingReviews();
-            await checkUpcomingSchedules();
-            updateGlobalBadge();
-        } else {
-            if (navLoginLink && navLoginLink.parentElement) navLoginLink.parentElement.style.display = 'list-item';
-            if (navLogoutLink && navLogoutLink.parentElement) navLogoutLink.parentElement.style.display = 'none';
+        // 🔴 헤더에 정의된 전역 알림 함수가 있으면 호출 → 빨간 배지 갱신
+        if (typeof checkPendingReviews === 'function') {
+            try { await checkPendingReviews(); } catch (e) { console.error(e); }
+        }
+        if (typeof checkUpcomingSchedules === 'function') {
+            try { await checkUpcomingSchedules(); } catch (e) { console.error(e); }
+        }
+        if (typeof updateGlobalBadge === 'function') {
+            try { updateGlobalBadge(); } catch (e) { console.error(e); }
         }
 
+        // 📅 나의 일정 불러오기
         const schedules = await fetchMySchedules();
 
         const dateRangeInput = document.getElementById('filter-date-range');

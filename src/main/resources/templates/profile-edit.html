@@ -7,43 +7,11 @@
     <link rel="stylesheet" th:href="@{/css/style.css?v=219}">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700;900&family=Noto+Sans+KR:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
 </head>
 <body>
 
-<header class="quick-menu">
-    <div class="logo"><a href="/">Multi FC</a></div>
-    <div class="header-icons">
-        <button id="profile-menu-toggle" class="profile-icon" style="position: relative;">
-            <i class="fas fa-user-circle"></i>
-            <span id="notification-badge" class="notification-badge"></span>
-        </button>
-        <div id="profile-menu" class="user-menu">
-            <div class="user-info">
-                <strong><span id="user-menu-username">사용자</span>님</strong>
-                <p>환영합니다!</p>
-            </div>
-            <ul>
-                <li><a href="/notifications" id="nav-notifications-link"><i class="fas fa-bell"></i> 알림 목록</a></li>
-                <li><a href="/mypage"><i class="fas fa-user"></i> 마이페이지</a></li>
-                <li><a href="/profile/edit" class="active"><i class="fas fa-user-edit"></i> 프로필 수정</a></li>
-                <li><a href="#" id="logout-button"><i class="fas fa-sign-out-alt"></i> 로그아웃</a></li>
-            </ul>
-        </div>
-        <button id="menu-toggle" class="menu-toggle-btn"><i class="fas fa-bars"></i></button>
-    </div>
-
-    <nav id="main-menu" class="main-nav">
-        <ul>
-            <li><a href="/" ><i class="fas fa-home"></i> 메인 (Home)</a></li>
-            <li><a href="/fields"><i class="fas fa-search"></i> 구장검색</a></li>
-            <li><a href="/community"><i class="fas fa-users"></i> 커뮤니티</a></li>
-            <li id="nav-chat-link-li"><a href="/chat" id="nav-chat-link"><i class="fas fa-comments"></i> 실시간채팅</a></li>
-            <li><a href="/schedule?stadium"><i class="fas fa-calendar-check"></i> 경기 일정</a></li>
-            <li><a href="/login" id="nav-login-link"><i class="fas fa-sign-in-alt"></i> 로그인</a></li>
-            <li><a href="#" id="nav-logout-link"><i class="fas fa-sign-out-alt"></i> 로그아웃</a></li>
-        </ul>
-    </nav>
-</header>
+<div th:replace="~{fragments/header :: siteHeader}"></div>
 
 <main class="login-page-main">
     <div class="main-wrapper">
@@ -78,7 +46,7 @@
 
                     <form id="profile-update-form" enctype="multipart/form-data">
 
-                        <!-- 🔹 이메일 수정 추가 -->
+                        <!-- 이메일 -->
                         <div class="input-group">
                             <label for="email">이메일</label>
                             <input type="email"
@@ -108,7 +76,7 @@
                             </select>
                         </div>
 
-                        <!-- 🔹 실력 레벨 수정 추가 -->
+                        <!-- 실력 레벨 -->
                         <div class="input-group">
                             <label for="skill-level">나의 실력 레벨</label>
                             <select id="skill-level" name="skillLevel" required
@@ -121,11 +89,24 @@
                             </select>
                         </div>
 
+                        <!-- 활동 장소 (주소 + 상세주소) -->
+                        <div class="input-group address-group">
+                            <div class="input-wrapper">
+                                <label for="address">활동 장소 설정</label>
+                                <input type="text"
+                                       id="address"
+                                       name="address"
+                                       placeholder="주소 검색 버튼을 눌러주세요"
+                                       required
+                                       readonly>
+                            </div>
+                            <button type="button" onclick="searchAddress()">주소 찾기</button>
+                        </div>
 
-                        <!-- 활동 장소 -->
                         <div class="input-group">
-                            <label for="location">활동 장소 설정</label>
-                            <input type="text" id="location" name="location" placeholder="예: 서울시 강남구" required>
+                            <input type="text"
+                                   id="address-detail"
+                                   placeholder="상세 주소를 입력하세요 (예: 101동 1004호)">
                         </div>
 
                         <!-- 프로필 사진 -->
@@ -170,6 +151,11 @@
                             </div>
                         </div>
                         <button type="submit" class="login-button" style="margin-top: 15px;">비밀번호 변경</button>
+
+                        <button id="delete-account-btn"
+                                style="margin-top: 40px; background:#ff4b4b; color:#fff; padding:12px; border:none; border-radius:8px; cursor:pointer;">
+                            회원탈퇴
+                        </button>
                     </form>
                 </div>
             </div>
@@ -178,137 +164,75 @@
 </main>
 
 <script>
-    // --- (★공통★) 메뉴 토글 및 로그아웃 로직 ---
-    const menuToggle = document.getElementById('menu-toggle');
-    const mainMenu = document.getElementById('main-menu');
-    const profileMenuToggle = document.getElementById('profile-menu-toggle');
-    const profileMenu = document.getElementById('profile-menu');
-    const logoutButton = document.getElementById('logout-button');
-    const navNotificationsLink = document.getElementById('nav-notifications-link');
+    // --- 주소 검색 함수 (다음 우편번호 API) ---
+    function searchAddress() {
+        new daum.Postcode({
+            oncomplete: function(data) {
+                const addressInput = document.getElementById("address");
+                const detailInput = document.getElementById("address-detail");
 
-    const navLoginLink = document.getElementById('nav-login-link');
-    const navLogoutLink = document.getElementById('nav-logout-link');
-
-    if (menuToggle) {
-        menuToggle.addEventListener('click', () => {
-            mainMenu.classList.toggle('show');
-            profileMenu.classList.remove('show');
-        });
-    }
-    if (profileMenuToggle) {
-        profileMenuToggle.addEventListener('click', () => {
-            profileMenu.classList.toggle('show');
-            mainMenu.classList.remove('show');
-        });
-    }
-    document.addEventListener('click', (event) => {
-        if (!mainMenu.contains(event.target) && !menuToggle.contains(event.target) &&
-            !profileMenu.contains(event.target) && !profileMenuToggle.contains(event.target)) {
-            mainMenu.classList.remove('show');
-            profileMenu.classList.remove('show');
-        }
-    });
-
-    if (logoutButton) {
-        logoutButton.addEventListener('click', (e) => {
-            e.preventDefault();
-            localStorage.removeItem('accessToken');
-            localStorage.removeItem('hasReadReviews');
-            localStorage.removeItem('hasReadSchedules');
-            window.location.href = '/login';
-        });
-    }
-    if (navLogoutLink) {
-        navLogoutLink.addEventListener('click', (e) => {
-            e.preventDefault();
-            localStorage.removeItem('accessToken');
-            localStorage.removeItem('hasReadReviews');
-            localStorage.removeItem('hasReadSchedules');
-            window.location.href = '/login';
-        });
-    }
-
-    if (navNotificationsLink) {
-        navNotificationsLink.addEventListener('click', (e) => {
-            e.preventDefault();
-            localStorage.setItem('hasReadReviews', 'true');
-            localStorage.setItem('hasReadSchedules', 'true');
-            window.location.href = '/notifications';
-        });
-    }
-
-    // --- (★공통★) 알림 배지 로드 함수 ---
-    const badge = document.getElementById('notification-badge');
-    let hasReviewNotif = false;
-    let hasScheduleNotif = false;
-
-    function updateGlobalBadge() {
-        if (hasReviewNotif || hasScheduleNotif) {
-            if (badge) badge.style.display = 'block';
-        } else {
-            if (badge) badge.style.display = 'none';
-        }
-    }
-    async function checkPendingReviews() {
-        if (localStorage.getItem('hasReadReviews') === 'true') {
-            hasReviewNotif = false;
-            return;
-        }
-        try {
-            await new Promise(r => setTimeout(r, 200));
-            const mockReviews = { "count": 1 };
-            if (mockReviews.count > 0) {
-                hasReviewNotif = true;
+                addressInput.value = data.roadAddress || data.jibunAddress;
+                detailInput.focus();
+                addressInput.dispatchEvent(new Event('change'));
             }
-        } catch (error) { console.error("후기 알림 요청 중 오류:", error); }
-    }
-    async function checkUpcomingSchedules() {
-        if (localStorage.getItem('hasReadSchedules') === 'true') {
-            hasScheduleNotif = false;
-            return;
-        }
-        try {
-            await new Promise(r => setTimeout(r, 500));
-            const mockSchedules = [ { id: 1, date: "2025-11-01" } ];
-            if (mockSchedules.length > 0) {
-                hasScheduleNotif = true;
-            }
-        } catch (error) { console.error("일정 요청 중 오류 발생:", error); }
+        }).open();
     }
 
-    // --- (★페이지별★) 로직 실행 ---
+    // ✅ 헤더 메뉴에 실제 닉네임 세팅 (사용자님 방지)
+    async function fetchAndSetUserMenuNickname() {
+        const token = localStorage.getItem('accessToken');
+        if (!token) return;
+
+        try {
+            const res = await fetch('/api/mypage/me', {
+                method: 'GET',
+                headers: { 'Authorization': 'Bearer ' + token }
+            });
+            if (!res.ok) return;
+
+            const myInfo = await res.json();
+            const usernameSpan = document.getElementById('user-menu-username');
+            if (usernameSpan) {
+                usernameSpan.textContent = myInfo.nickname || myInfo.username || '사용자';
+            }
+
+            // 다른 페이지에서도 쓰도록 저장
+            localStorage.setItem('username', myInfo.nickname || myInfo.username || '');
+        } catch (e) {
+            console.error("메뉴 닉네임 로드 실패:", e);
+        }
+    }
+
+    // --- (페이지 공통 진입) ---
     document.addEventListener('DOMContentLoaded', async () => {
         const accessToken = localStorage.getItem('accessToken');
 
-        if (accessToken) {
-            // [회원일 때]
-            if (profileMenuToggle) profileMenuToggle.style.display = 'block';
-            if (navLoginLink) navLoginLink.parentElement.style.display = 'none';
-            if (navLogoutLink) navLogoutLink.parentElement.style.display = 'list-item';
-
-            // (★) 글로벌 알림 배지 체크
-            await checkPendingReviews();
-            await checkUpcomingSchedules();
-            updateGlobalBadge();
-
-            // (★) profile-edit.html 고유 로직은
-            // 비밀번호 확인(confirmForm) 성공 시 fetchMyEditInfo() 호출로 실행됩니다.
-
-        } else {
-            // [비회원일 때]
-            if (profileMenuToggle) profileMenuToggle.style.display = 'none';
-            if (navLoginLink) navLoginLink.parentElement.style.display = 'list-item';
-            if (navLogoutLink) navLogoutLink.parentElement.style.display = 'none';
-
-            // (페이지 접근 제어)
+        if (!accessToken) {
             alert("로그인이 필요한 페이지입니다. 로그인 페이지로 이동합니다.");
             window.location.href = '/login';
+            return;
+        }
+
+        // 헤더에 닉네임 반영
+        await fetchAndSetUserMenuNickname();
+
+        // 🔴 빨간 배지 갱신 (메인/헤더 쪽에 정의되어 있을 때만 실행)
+        try {
+            if (typeof window.checkPendingReviews === 'function') {
+                await window.checkPendingReviews();
+            }
+            if (typeof window.checkUpcomingSchedules === 'function') {
+                await window.checkUpcomingSchedules();
+            }
+            if (typeof window.updateGlobalBadge === 'function') {
+                window.updateGlobalBadge();
+            }
+        } catch (e) {
+            console.error('배지 업데이트 중 오류:', e);
         }
     });
 
-    // --- (★페이지별★) profile-edit.html 고유 함수들 ---
-
-    // (비밀번호 토글 - 동일)
+    // --- 비밀번호 토글 ---
     document.querySelectorAll('.toggle-password').forEach(icon => {
         icon.addEventListener('click', function() {
             const passwordInput = this.parentElement.querySelector('input[type="password"], input[type="text"]');
@@ -319,7 +243,7 @@
         });
     });
 
-    // (프로필 사진 미리보기 - 동일)
+    // --- 프로필 사진 미리보기 ---
     const profilePicInput = document.getElementById('profile-pic');
     const profilePreview = document.getElementById('profile-preview');
     if(profilePicInput) {
@@ -334,7 +258,7 @@
         });
     }
 
-    // (비밀번호 확인 폼 - 동일)
+    // --- 비밀번호 재확인 로직 ---
     const confirmForm = document.getElementById('password-confirm-form');
     const confirmButton = confirmForm.querySelector('button[type="submit"]');
     const confirmPasswordInput = document.getElementById('current-password-confirm');
@@ -362,20 +286,11 @@
         confirmButton.textContent = '확인 중...';
 
         try {
-            // const response = await fetch('/profile/confirm-password', {
-            //     method: 'POST',
-            //     headers: {
-            //         'Content-Type': 'application/json',
-            //         'Authorization': 'Bearer ' + localStorage.getItem('accessToken')
-            //     },
-            //     body: JSON.stringify({ currentPassword: password })
-            // });
             const response = await fetch('/api/mypage/confirm-password', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': 'Bearer ' + localStorage.getItem('accessToken')
-
                 },
                 body: JSON.stringify({ currentPassword: password })
             });
@@ -383,7 +298,7 @@
             if (response.ok) {
                 confirmWrapper.style.display = 'none';
                 editWrapper.style.display = 'block';
-                fetchMyEditInfo(); // (★) 성공 시 실제 내 정보 불러오기
+                fetchMyEditInfo(); // 실제 내 정보 로딩
             } else {
                 attemptCount++;
                 const data = await response.json();
@@ -419,7 +334,6 @@
     const profileForm = document.getElementById('profile-update-form');
     const profileSuccessMsg = document.getElementById('profile-success-message');
 
-    // 🔹 새로 추가된 요소: 이메일, 실력 레벨
     const emailInput = document.getElementById('email');
     const skillLevelSelect = document.getElementById('skill-level');
 
@@ -437,46 +351,49 @@
         try {
             const response = await fetch('/api/mypage/me', {
                 method: 'GET',
-                headers: {
-                    'Authorization': 'Bearer ' + token
-                }
+                headers: { 'Authorization': 'Bearer ' + token }
             });
 
-            if (!response.ok) {
-                throw new Error('내 정보 조회 실패');
-            }
+            if (!response.ok) throw new Error('내 정보 조회 실패');
 
-            const myInfo = await response.json(); // MyPageDto
+            const myInfo = await response.json();
 
-            // 🔹 폼에 데이터 채우기
             emailInput.value = myInfo.email || '';
             nicknameInput.value = myInfo.nickname || '';
             document.getElementById('position').value = myInfo.position || '전체 (ALL)';
-            document.getElementById('location').value = myInfo.address || '';
 
-            // level 매핑
-            if (myInfo.level === '초급')      skillLevelSelect.value = 'beginner';
-            else if (myInfo.level === '중급') skillLevelSelect.value = 'intermediate';
-            else if (myInfo.level === '고급') skillLevelSelect.value = 'advanced';
-            else                             skillLevelSelect.value = '';
+            const addressInput = document.getElementById('address');
+            const addressDetailInput = document.getElementById('address-detail');
+            const fullAddress = myInfo.address || myInfo.location || '';
+            addressInput.value = fullAddress;
+            addressDetailInput.value = '';
+
+            if (myInfo.level === '초급')           skillLevelSelect.value = '초급';
+            else if (myInfo.level === '중급')      skillLevelSelect.value = '중급';
+            else if (myInfo.level === '고급')      skillLevelSelect.value = '고급';
+            else if (myInfo.level === '미기입')    skillLevelSelect.value = '미기입';
+            else                                   skillLevelSelect.value = '';
 
             if (myInfo.profileImage) {
                 profilePreview.src = myInfo.profileImage;
-                currentProfileImage = myInfo.profileImage;
             }
 
             originalNickname = myInfo.nickname || '';
+
+            // 헤더 텍스트/로컬스토리지 동기화
+            const usernameSpan = document.getElementById('user-menu-username');
+            if (usernameSpan) usernameSpan.textContent = originalNickname || '사용자';
+            localStorage.setItem('username', originalNickname || myInfo.username || '');
+
             isNicknameChecked = true;
             profileSubmitBtn.disabled = false;
             profileSubmitBtn.textContent = '정보 저장';
-
         } catch (err) {
             console.error(err);
             alert('내 정보 조회 중 오류가 발생했습니다.');
         }
     }
 
-    // 닉네임 입력 시 상태 변경
     nicknameInput.addEventListener('input', () => {
         nicknameMsg.style.display = 'none';
         if (nicknameInput.value === originalNickname) {
@@ -494,7 +411,6 @@
         }
     });
 
-    // 닉네임 중복 확인 버튼 클릭
     checkNicknameBtn.addEventListener('click', async () => {
         profileErrorMsg.style.display = 'none';
         const nickname = nicknameInput.value.trim();
@@ -506,7 +422,7 @@
         }
         try {
             await new Promise(resolve => setTimeout(resolve, 500));
-            const isDuplicate = (nickname === 'futsal'); // 더미
+            const isDuplicate = (nickname === 'futsal'); // TODO: 실제 API로 교체
             if (isDuplicate) {
                 nicknameMsg.textContent = '❌ 이미 사용 중인 닉네임입니다.';
                 nicknameMsg.className = 'error-message';
@@ -528,7 +444,6 @@
         }
     });
 
-    // --- 프로필 정보 수정 폼 제출 (백엔드 MyPage 연동 버전) ---
     profileForm.addEventListener('submit', async function(e) {
         e.preventDefault();
         profileSuccessMsg.style.display = 'none';
@@ -548,13 +463,16 @@
         }
 
         const formData = new FormData();
+        const addressInput = document.getElementById('address');
+        const addressDetailInput = document.getElementById('address-detail');
+        const fullLocation = `${addressInput.value} ${addressDetailInput.value}`.trim();
+
         formData.append('email', emailInput.value);
         formData.append('nickname', nicknameInput.value);
         formData.append('position', document.getElementById('position').value);
-        formData.append('skillLevel', skillLevelSelect.value);  // 지금 사용 중인 값 그대로
-        formData.append('location', document.getElementById('location').value);
+        formData.append('skillLevel', skillLevelSelect.value);
+        formData.append('location', fullLocation);
 
-        //  파일이 있으면 같이 전송
         if (profilePicInput.files && profilePicInput.files[0]) {
             formData.append('profilePic', profilePicInput.files[0]);
         }
@@ -562,9 +480,7 @@
         try {
             const response = await fetch('/api/mypage/update', {
                 method: 'PUT',
-                headers: {
-                    'Authorization': 'Bearer ' + token
-                },
+                headers: { 'Authorization': 'Bearer ' + token },
                 body: formData
             });
 
@@ -574,13 +490,17 @@
                 profileSuccessMsg.textContent = '✅ ' + (data.message || '프로필이 성공적으로 수정되었습니다.');
                 profileSuccessMsg.style.display = 'block';
 
-                // 🔽 1~1.5초 뒤 마이페이지로 이동
+                // 닉네임/로컬스토리지/헤더 갱신
+                originalNickname = nicknameInput.value;
+                localStorage.setItem('username', originalNickname);
+                const usernameSpan = document.getElementById('user-menu-username');
+                if (usernameSpan) usernameSpan.textContent = originalNickname;
+
+                checkNicknameBtn.disabled = true;
+
                 setTimeout(() => {
                     window.location.href = "/mypage";
                 }, 100);
-
-                originalNickname = nicknameInput.value;
-                checkNicknameBtn.disabled = true;
             } else {
                 profileErrorMsg.textContent = '❌ ' + (data.message || '프로필 수정 중 오류가 발생했습니다.');
                 profileErrorMsg.style.display = 'block';
@@ -592,7 +512,7 @@
         }
     });
 
-    // --- 비밀번호 변경 폼 로직 ---
+    // --- 비밀번호 변경 로직 ---
     const passwordForm = document.getElementById('password-change-form');
     const passwordSuccessMsg = document.getElementById('password-success-message');
     const passwordErrorMsg = document.getElementById('password-error-message');
@@ -629,11 +549,10 @@
                 passwordSuccessMsg.style.display = 'block';
                 passwordForm.reset();
 
-                // 🔽 1초 후 마이페이지 이동
                 setTimeout(() => {
                     window.location.href = "/mypage";
                 }, 100);
-            }else {
+            } else {
                 passwordErrorMsg.textContent = '❌ ' + data.message;
                 passwordErrorMsg.style.display = 'block';
             }
@@ -642,6 +561,32 @@
             passwordErrorMsg.style.display = 'block';
         }
     });
+
+    // --- 회원 탈퇴 ---
+    const deleteBtn = document.getElementById('delete-account-btn');
+    if (deleteBtn) {
+        deleteBtn.addEventListener('click', async () => {
+            if (!confirm("정말 탈퇴하시겠습니까? 모든 정보가 삭제됩니다.")) return;
+
+            const token = localStorage.getItem('accessToken');
+            try {
+                const response = await fetch('/api/mypage/delete', {
+                    method: 'DELETE',
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+                const data = await response.json();
+                if (response.ok) {
+                    alert("회원탈퇴가 완료되었습니다.");
+                    localStorage.clear();
+                    window.location.href = "/";
+                } else {
+                    alert("❌ " + data.message);
+                }
+            } catch (error) {
+                alert("❌ 요청 중 오류가 발생했습니다.");
+            }
+        });
+    }
 </script>
 </body>
 </html>

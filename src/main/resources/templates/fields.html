@@ -17,52 +17,7 @@
 
 <body>
 
-<!-- ✅ 전역 헤더 그대로 사용 -->
-<header class="quick-menu">
-    <div class="logo"><a href="/">MULTI FC</a></div>
-
-    <div class="header-icons">
-        <!-- ✅ inline style 제거 -->
-        <a href="/login" id="nav-login-btn">로그인</a>
-
-        <!-- ✅ inline style 제거 (display:none은 JS에서 제어하므로 최소만) -->
-        <button id="profile-menu-toggle" class="profile-icon" style="display:none;">
-            <i class="fas fa-user-circle"></i>
-            <span id="notification-badge" class="notification-badge"></span>
-        </button>
-
-        <!-- ✅ 전역 user-menu 톤 그대로 적용 -->
-        <div id="profile-menu" class="user-menu">
-            <div class="user-info">
-                <strong><span id="user-menu-username">회원</span>님</strong>
-                <p>환영합니다!</p>
-            </div>
-            <ul>
-                <li><a href="/notifications"><i class="fas fa-bell"></i> 알림 목록</a></li>
-                <li><a href="/mypage"><i class="fas fa-user"></i> 마이페이지</a></li>
-                <li><a href="/mypage/profile"><i class="fas fa-user-edit"></i> 프로필 수정</a></li>
-                <li><a href="#" id="logout-button"><i class="fas fa-sign-out-alt"></i> 로그아웃</a></li>
-            </ul>
-        </div>
-
-        <!-- ✅ inline style 제거 -->
-        <button id="menu-toggle" class="menu-toggle-btn">
-            <i class="fas fa-bars"></i>
-        </button>
-    </div>
-
-    <nav id="main-menu" class="main-nav">
-        <ul>
-            <li><a href="/"><i class="fas fa-home"></i> 메인 (Home)</a></li>
-            <li><a href="/fields" class="active"><i class="fas fa-search"></i> 구장검색</a></li>
-            <li><a href="/community"><i class="fas fa-users"></i> 커뮤니티</a></li>
-            <li><a href="/chat"><i class="fas fa-comments"></i> 실시간채팅</a></li>
-            <li><a href="/schedule"><i class="fas fa-calendar-alt"></i> 경기 일정</a></li>
-
-        </ul>
-    </nav>
-</header>
-
+<div th:replace="~{fragments/header :: siteHeader}"></div>
 
 <main class="field-search-main">
     <div class="search-container">
@@ -87,77 +42,59 @@
     </div>
 </main>
 
-
 <script>
     document.addEventListener("DOMContentLoaded", async () => {
-        // 1) 로그인 상태에 따른 헤더 표시
-        const token = localStorage.getItem('accessToken');
-        const nickname = localStorage.getItem('userNickname');
+        const accessToken = localStorage.getItem('accessToken');
 
-        const loginBtn = document.getElementById('nav-login-btn');
-        const profileIcon = document.getElementById('profile-menu-toggle');
+        // 로그인 사용자 이름 설정 (헤더용)
+        const nickname = localStorage.getItem('username');
         const userSpan = document.getElementById('user-menu-username');
-
-        if (token) {
-            if (loginBtn) loginBtn.style.display = 'none';
-            if (profileIcon) profileIcon.style.display = 'block';
-            if (userSpan) userSpan.textContent = nickname || '회원';
-        } else {
-            if (loginBtn) loginBtn.style.display = 'block';
-            if (profileIcon) profileIcon.style.display = 'none';
+        if (nickname && userSpan) {
+            userSpan.textContent = nickname;
         }
 
-        // 2) 메뉴 토글
-        const profileMenu = document.getElementById('profile-menu');
-        if (profileIcon) {
-            profileIcon.addEventListener('click', (e) => {
-                e.stopPropagation();
+        // 🔥 알림/일정 배지 갱신 (로그인 상태일 때만)
+        if (accessToken) {
+            // userId가 없는 경우를 대비해서 한 번 더 me 호출해도 괜찮음(선택)
+            if (!localStorage.getItem('userId')) {
+                try {
+                    const res = await fetch('/api/users/me', {
+                        headers: { 'Authorization': 'Bearer ' + accessToken }
+                    });
+                    if (res.ok) {
+                        const user = await res.json();
+                        localStorage.setItem('userId', user.userId);
+                        localStorage.setItem('username', user.nickname);
+                        if (userSpan) userSpan.textContent = user.nickname;
+                    }
+                } catch (e) {
+                    console.error('사용자 정보 조회 실패:', e);
+                }
+            }
 
-                // ✅ 프로필 메뉴 열기 전 메인 메뉴는 닫기
-                if (mainMenu) mainMenu.classList.remove('show');
-
-                profileMenu.classList.toggle('show');
-            });
+            // header / main 쪽에서 전역으로 노출한 함수들 호출
+            if (typeof window.checkPendingReviews === 'function') {
+                await window.checkPendingReviews();
+            }
+            if (typeof window.checkUpcomingSchedules === 'function') {
+                await window.checkUpcomingSchedules();
+            }
+            if (typeof window.updateGlobalBadge === 'function') {
+                window.updateGlobalBadge();
+            }
         }
 
-        const menuToggle = document.getElementById('menu-toggle');
-        const mainMenu = document.getElementById('main-menu');
-        if (menuToggle) {
-            menuToggle.addEventListener('click', (e) => {
-                e.stopPropagation();
-
-                // ✅ 메인 메뉴 열기 전 프로필 메뉴는 닫기
-                if (profileMenu) profileMenu.classList.remove('show');
-
-                mainMenu.classList.toggle('show');
-            });
-        }
-
-        // 바깥 클릭 시 메뉴 닫기
-        document.addEventListener('click', () => {
-            if (profileMenu) profileMenu.classList.remove('show');
-            if (mainMenu) mainMenu.classList.remove('show');
-        });
-
-        // 3) 로그아웃
-        const logoutBtn = document.getElementById('logout-button');
-        if (logoutBtn) {
-            logoutBtn.addEventListener('click', (e) => {
-                e.preventDefault();
-                localStorage.removeItem('accessToken');
-                localStorage.removeItem('userId');
-                localStorage.removeItem('userNickname');
-                window.location.href = '/login';
-            });
-        }
-
-        // 4) 지도 초기화 + 초기 목록 (마커 없이)
+        // 지도 초기화 + 첫 목록 로드
         initMap();
         const list = await fetchStadiums("");
         renderFieldList(list, false);
 
         document.getElementById("search-btn").addEventListener("click", performSearch);
     });
+
+    /* -------------------------------
+     *   🔥 이하 구장 검색 전용 코드
+     * ------------------------------- */
 
     let kakaoMap = null;
     let kakaoMarkers = [];

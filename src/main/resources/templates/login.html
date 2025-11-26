@@ -10,40 +10,7 @@
 </head>
 <body>
 
-<header class="quick-menu">
-    <div class="logo"><a href="/">Multi FC</a></div>
-    <div class="header-icons">
-        <button id="profile-menu-toggle" class="profile-icon" style="position: relative;">
-            <i class="fas fa-user-circle"></i>
-            <span id="notification-badge" class="notification-badge"></span>
-        </button>
-        <div id="profile-menu" class="user-menu">
-            <div class="user-info">
-                <strong><span id="user-menu-username">사용자</span>님</strong>
-                <p>환영합니다!</p>
-            </div>
-            <ul>
-                <li><a href="/notifications" id="nav-notifications-link"><i class="fas fa-bell"></i> 알림 목록</a></li>
-                <li><a href="/mypage"><i class="fas fa-user"></i> 마이페이지</a></li>
-                <li><a href="/profile/edit"><i class="fas fa-user-edit"></i> 프로필 수정</a></li>
-                <li><a href="#" id="logout-button"><i class="fas fa-sign-out-alt"></i> 로그아웃</a></li>
-            </ul>
-        </div>
-        <button id="menu-toggle" class="menu-toggle-btn"><i class="fas fa-bars"></i></button>
-    </div>
-
-    <nav id="main-menu" class="main-nav">
-        <ul>
-            <li><a href="/" class="active"><i class="fas fa-home"></i> 메인 (Home)</a></li>
-            <li><a href="/fields"><i class="fas fa-search"></i> 구장검색</a></li>
-            <li><a href="/community"><i class="fas fa-users"></i> 커뮤니티</a></li>
-            <li id="nav-chat-link-li"><a href="/chat" id="nav-chat-link"><i class="fas fa-comments"></i> 실시간채팅</a></li>
-            <li><a href="/schedule?stadium"><i class="fas fa-calendar-check"></i> 경기 일정</a></li>
-            <li><a href="/login" id="nav-login-link"><i class="fas fa-sign-in-alt"></i> 로그인</a></li>
-            <li><a href="#" id="nav-logout-link"><i class="fas fa-sign-out-alt"></i> 로그아웃</a></li>
-        </ul>
-    </nav>
-</header>
+<div th:replace="~{fragments/header :: siteHeader}"></div>
 
 <main class="login-page-main">
     <div class="main-wrapper">
@@ -107,60 +74,9 @@
         <button id="modal-confirm-btn" class="login-button" style="margin-top: 10px;">확인</button>
     </div>
 </div>
+
 <script>
-    // --- (★공통★) 메뉴 토글 및 로그아웃 로직 (기존 유지) ---
-    const menuToggle = document.getElementById('menu-toggle');
-    const mainMenu = document.getElementById('main-menu');
-    const profileMenuToggle = document.getElementById('profile-menu-toggle');
-    const profileMenu = document.getElementById('profile-menu');
-    const logoutButton = document.getElementById('logout-button');
-    const navNotificationsLink = document.getElementById('nav-notifications-link');
-    const navLoginLink = document.getElementById('nav-login-link');
-    const navLogoutLink = document.getElementById('nav-logout-link');
-
-    if (menuToggle) {
-        menuToggle.addEventListener('click', () => {
-            mainMenu.classList.toggle('show');
-            if (profileMenu) profileMenu.classList.remove('show');
-        });
-    }
-    if (profileMenuToggle) {
-        profileMenuToggle.addEventListener('click', () => {
-            profileMenu.classList.toggle('show');
-            if (mainMenu) mainMenu.classList.remove('show');
-        });
-    }
-    document.addEventListener('click', (event) => {
-        const header = document.querySelector('header');
-        if (header && !header.contains(event.target)) {
-            mainMenu.classList.remove('show');
-            if (profileMenu) profileMenu.classList.remove('show');
-        }
-    });
-    if (logoutButton) {
-        logoutButton.addEventListener('click', (e) => {
-            e.preventDefault();
-            localStorage.removeItem('accessToken');
-            localStorage.removeItem('username');
-            localStorage.removeItem('userId');        // 추가
-            localStorage.removeItem('userNickname');  // 추가
-            window.location.href = '/login';
-        });
-    }
-    if (navLogoutLink) {
-        navLogoutLink.addEventListener('click', (e) => {
-            e.preventDefault();
-            localStorage.removeItem('accessToken');
-            localStorage.removeItem('username');
-            localStorage.removeItem('userId');        // 추가
-            localStorage.removeItem('userNickname');  // 추가
-            window.location.href = '/login';
-        });
-    }
-
-
-    // (★페이지별★) 로그인 상태 확인 (기존 유지)
-    // (★페이지별★) 로그인 상태 확인 및 리다이렉션 및 메뉴 표시 제어
+    // ✅ 로그인 페이지 전용: 저장된 아이디/토큰 처리만
     document.addEventListener('DOMContentLoaded', () => {
         // 1. 저장된 아이디(username)가 있는지 확인
         const savedUsername = localStorage.getItem('saved_username');
@@ -168,7 +84,6 @@
         const rememberMeCheckbox = document.getElementById('remember-me');
 
         if (savedUsername && usernameInput && rememberMeCheckbox) {
-            // 2. 아이디가 있으면, 입력창에 채우고 체크박스도 체크
             usernameInput.value = savedUsername;
             rememberMeCheckbox.checked = true;
         }
@@ -177,12 +92,8 @@
         if (accessToken) {
             // 이미 로그인했으면 메인으로 이동
             window.location.href = '/';
-        } else {
-            // [비회원일 때]
-            // (생략)
         }
     });
-
 
     // 비밀번호 토글 로직
     document.querySelectorAll('.toggle-password').forEach(icon => {
@@ -221,51 +132,41 @@
             });
 
             if (response.ok) {
-                // --- 로그인 성공
                 const data = await response.json(); // { "accessToken": "...", "user": {...} }
 
                 if (data.accessToken) {
-
-                    // "Remember me" 체크박스 상태 확인
+                    // Remember me
                     const rememberMeCheckbox = document.getElementById('remember-me');
                     if (rememberMeCheckbox.checked) {
-                        // 1. 체크됨: 아이디(username) 저장
                         localStorage.setItem('saved_username', username);
                     } else {
-                        // 2. 체크 안됨: 저장된 아이디 삭제
                         localStorage.removeItem('saved_username');
                     }
 
-                    // 토큰 저장
+                    // 토큰 & 유저 정보 저장
                     localStorage.setItem('accessToken', data.accessToken);
-
-                    // localStorage에 토큰과 닉네임 저장 (로그인 상태 유지)
                     if (data.user) {
-                        localStorage.setItem('userId', data.user.userId);         // 숫자 ID
-                        localStorage.setItem('userNickname', data.user.nickname); // 닉네임
+                        localStorage.setItem('userId', data.user.userId);
+                        localStorage.setItem('userNickname', data.user.nickname);
+                    }
+                    // 기존 username 키에는 닉네임 저장 (헤더에서 씀)
+                    if (data.user && data.user.nickname) {
+                        localStorage.setItem('username', data.user.nickname);
                     }
 
-                    // 필요하면 기존 username 키도 유지
-                    localStorage.setItem('username', data.user.nickname);
-
-                    // 성공 모달 띄우기
+                    // 성공 모달 표시
                     successModal.style.display = 'flex';
-
-                    // [수정] 'modal' -> 'successModal'
                     document.getElementById('modal-confirm-btn').onclick = function() {
                         successModal.style.display = 'none';
-                        window.location.href = '/'; // 메인 페이지로 이동
+                        window.location.href = '/';
                     };
                 } else {
                     throw new Error('로그인에 성공했으나 토큰을 받지 못했습니다.');
                 }
             } else {
-                // --- 로그인 실패 (버그 1 수정) ---
-                let errorMessage = '❌ 아이디 또는 비밀번호가 올바르지 않습니다.'; // 기본 메시지
+                let errorMessage = '❌ 아이디 또는 비밀번호가 올바르지 않습니다.';
                 try {
-                    // [수정] 응답 본문을 텍스트로 먼저 1번만 읽음
                     const errorText = await response.text();
-
                     if (errorText) {
                         errorMessage = `❌ ${errorText}`;
                     }

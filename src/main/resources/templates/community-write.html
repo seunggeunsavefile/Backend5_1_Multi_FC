@@ -18,7 +18,7 @@
 <main class="community-main">
     <div class="board-container">
 
-        <!-- ✅ 작성/수정 폼 -->
+        <!-- 작성/수정 폼 -->
         <p id="post-success-message" class="info-message" style="display:none;"></p>
         <p id="post-error-message" class="error-message" style="display:none;"></p>
 
@@ -34,7 +34,6 @@
             <div class="write-form">
                 <div class="input-group">
                     <label for="category">카테고리 선택</label>
-                    <!-- DB ENUM(공지 / 자유게시판)에 맞춤 -->
                     <select id="category" name="category" required>
                         <option value="공지">공지사항</option>
                         <option value="자유게시판">자유게시판</option>
@@ -46,7 +45,6 @@
                     <input type="text" id="title" name="title" placeholder="제목을 입력하세요" required>
                 </div>
 
-                <!-- 이미지 업로드 -->
                 <div class="input-group">
                     <label for="image">이미지(선택)</label>
                     <input type="file" id="image" name="image" accept="image/*">
@@ -65,12 +63,12 @@
 <script>
     let quill;
 
-    // 🔥 페이지 초기화: 로그인 체크 + 헤더 닉네임 세팅 + Quill + 수정모드 처리
+    // 🔥 페이지 초기화: 로그인 체크 + 닉네임 세팅 + 알림배지 + 수정모드 적용
     document.addEventListener('DOMContentLoaded', async () => {
         const accessToken = localStorage.getItem('accessToken');
         const currentPath = window.location.pathname;
 
-        // 로그인 안 되어 있으면 로그인으로
+        // 로그인 필요
         if (!accessToken) {
             alert("로그인이 필요한 페이지입니다.");
             localStorage.setItem('redirectAfterLogin', currentPath);
@@ -78,11 +76,22 @@
             return;
         }
 
-        // ✅ 헤더에 닉네임만 세팅 (기본 '사용자님' 같은 거 안 씀)
-        const storedName   = (localStorage.getItem('username') || '').trim();
+        // 헤더 닉네임 표시
+        const storedName = (localStorage.getItem('username') || '').trim();
         const userMenuName = document.getElementById('user-menu-username');
         if (storedName && userMenuName) {
             userMenuName.textContent = storedName;
+        }
+
+        // 🔥 알림/일정 배지 갱신
+        if (typeof window.checkPendingReviews === 'function') {
+            await window.checkPendingReviews();
+        }
+        if (typeof window.checkUpcomingSchedules === 'function') {
+            await window.checkUpcomingSchedules();
+        }
+        if (typeof window.updateGlobalBadge === 'function') {
+            window.updateGlobalBadge();
         }
 
         // 1. Quill 에디터 초기화
@@ -103,43 +112,33 @@
             }
         });
 
-        // 2. 수정 모드 여부 체크 (?edit= or ?id=)
-        const urlParams  = new URLSearchParams(window.location.search);
+        // 2. 수정 모드 체크
+        const urlParams = new URLSearchParams(window.location.search);
         const editPostId = urlParams.get('id') || urlParams.get('edit');
 
         if (editPostId) {
             await loadPostForEdit(editPostId);
         } else {
-            const headerTitle = document.querySelector('.write-header h1');
-            const submitBtn   = document.querySelector('.write-btn-save');
-
-            if (headerTitle) headerTitle.textContent = '새 게시글 작성';
-            if (submitBtn)   submitBtn.textContent   = '등록';
+            document.querySelector('.write-header h1').textContent = '새 게시글 작성';
+            document.querySelector('.write-btn-save').textContent = '등록';
         }
     });
 
-    // --- 수정 모드일 때 기존 게시글 불러오기 ---
+    // --- 수정 모드 기존 글 불러오기 ---
     async function loadPostForEdit(postId) {
         try {
             const res = await fetch(`/api/community/posts/${postId}`);
-            if (!res.ok) {
-                throw new Error('게시글 정보를 불러오지 못했습니다.');
-            }
+            if (!res.ok) throw new Error('게시글 정보를 불러오지 못했습니다.');
+
             const post = await res.json();
 
-            const headerTitle = document.querySelector('.write-header h1');
-            const submitBtn   = document.querySelector('.write-btn-save');
+            document.querySelector('.write-header h1').textContent = '게시글 수정';
+            document.querySelector('.write-btn-save').textContent = '수정';
 
-            if (headerTitle) headerTitle.textContent = '게시글 수정';
-            if (submitBtn)   submitBtn.textContent   = '수정';
+            document.getElementById('category').value = post.category;
+            document.getElementById('title').value = post.title;
 
-            document.getElementById('category').value = post.category || '자유게시판';
-            document.getElementById('title').value    = post.title    || '';
-
-            const quillEditor = Quill.find(document.querySelector('#editor-container'));
-            if (quillEditor) {
-                quillEditor.setText(post.content || '');
-            }
+            quill.setText(post.content || '');
 
             writeForm.dataset.postId = postId;
         } catch (e) {
@@ -149,32 +148,24 @@
         }
     }
 
-    // --- 작성/수정 제출 로직 ---
-    const writeForm            = document.getElementById('write-form');
-    const postContentHtmlInput = document.getElementById('post-content-html');
-    const successMsg           = document.getElementById('post-success-message');
-    const errorMsg             = document.getElementById('post-error-message');
+    // --- 작성/수정 제출 ---
+    const writeForm = document.getElementById('write-form');
+    const successMsg = document.getElementById('post-success-message');
+    const errorMsg = document.getElementById('post-error-message');
 
-    writeForm.addEventListener('submit', async function (e) {
+    writeForm.addEventListener('submit', async (e) => {
         e.preventDefault();
+
         successMsg.style.display = 'none';
-        errorMsg.style.display   = 'none';
+        errorMsg.style.display = 'none';
 
         const accessToken = localStorage.getItem('accessToken');
-        if (!accessToken) {
-            alert('로그인 후 글을 작성할 수 있습니다.');
-            localStorage.setItem('redirectAfterLogin', window.location.pathname);
-            window.location.href = '/login';
-            return;
-        }
+        const category = document.getElementById('category').value;
+        const title = document.getElementById('title').value.trim();
+        const content = quill.getText().trim();
+        const imageInput = document.getElementById('image');
 
-        const category    = document.getElementById('category').value;
-        const title       = document.getElementById('title').value.trim();
-        const quillEditor = Quill.find(document.querySelector('#editor-container'));
-        const contentText = quillEditor.getText().trim();
-        const imageInput  = document.getElementById('image');
-
-        if (!title || contentText.length === 0) {
+        if (!title || !content) {
             errorMsg.textContent = '❌ 제목과 내용을 모두 입력해주세요.';
             errorMsg.style.display = 'block';
             return;
@@ -187,42 +178,24 @@
             let res;
 
             if (isEdit) {
-                // 수정
-                const updateDto = {
-                    title:   title,
-                    content: contentText
-                };
-
                 res = await fetch(`/api/community/posts/${postId}`, {
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json',
                         'Authorization': `Bearer ${accessToken}`
                     },
-                    body: JSON.stringify(updateDto)
+                    body: JSON.stringify({ title, content })
                 });
             } else {
-                // 등록
-                const postDto = {
-                    category: category,
-                    title:    title,
-                    content:  contentText
-                };
-
                 const formData = new FormData();
-                formData.append(
-                    'post',
-                    new Blob([JSON.stringify(postDto)], { type: 'application/json' })
-                );
-                if (imageInput && imageInput.files[0]) {
+                formData.append('post', new Blob([JSON.stringify({ category, title, content })], { type: 'application/json' }));
+                if (imageInput.files[0]) {
                     formData.append('image', imageInput.files[0]);
                 }
 
                 res = await fetch('/api/community/posts', {
                     method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${accessToken}`
-                    },
+                    headers: { 'Authorization': `Bearer ${accessToken}` },
                     body: formData
                 });
             }
@@ -231,8 +204,7 @@
                 alert(isEdit ? '게시글이 수정되었습니다.' : '게시글이 등록되었습니다.');
                 window.location.href = '/community';
             } else {
-                const msg = await res.text();
-                errorMsg.textContent = (isEdit ? '수정 실패: ' : '등록 실패: ') + msg;
+                errorMsg.textContent = (isEdit ? '수정 실패: ' : '등록 실패: ') + await res.text();
                 errorMsg.style.display = 'block';
             }
         } catch (err) {
@@ -244,5 +216,6 @@
         }
     });
 </script>
+
 </body>
 </html>

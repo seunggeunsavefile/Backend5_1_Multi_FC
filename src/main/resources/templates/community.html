@@ -8,7 +8,6 @@
     <link rel="stylesheet" th:href="@{/css/style.css}">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700;900&family=Noto+Sans+KR:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-
 </head>
 <body>
 
@@ -36,12 +35,14 @@
             <input type="text" id="search-keyword" placeholder="검색어를 입력하세요">
             <button id="search-exec-btn"><i class="fas fa-search"></i> 검색</button>
         </div>
+
         <table class="post-table">
             <thead>
             <tr>
                 <th style="width: 8%;">번호</th>
                 <th style="width: 10%;">카테고리</th>
-                <th style="width: 45%;">제목</th> <th style="width: 10%;"><i class="fas fa-comment-dots" title="댓글 수"></i></th>
+                <th style="width: 45%;">제목</th>
+                <th style="width: 10%;"><i class="fas fa-comment-dots" title="댓글 수"></i></th>
                 <th style="width: 12%;">작성자</th>
                 <th style="width: 15%;">날짜</th>
                 <th style="width: 7%;"><i class="fas fa-eye"></i></th>
@@ -51,8 +52,7 @@
             </tbody>
         </table>
 
-        <div class="pagination" id="community-pagination">
-        </div>
+        <div class="pagination" id="community-pagination"></div>
     </div>
 </main>
 
@@ -221,37 +221,7 @@
 
     // 초기화
     document.addEventListener('DOMContentLoaded', () => {
-        // 🔹 헤더(닉네임/로그인 메뉴) 최소 초기화
         const accessToken = localStorage.getItem('accessToken');
-        const profileIcon = document.getElementById('profile-menu-toggle');
-        const userMenuName = document.getElementById('user-menu-username');
-        const navLoginLink = document.getElementById('nav-login-link');
-        const navLogoutLink = document.getElementById('nav-logout-link');
-
-        if (accessToken) {
-            // 로그인 상태
-            const nickname = localStorage.getItem('username') || '사용자';
-            if (profileIcon) profileIcon.style.display = 'flex';
-            if (userMenuName) userMenuName.textContent = nickname;
-
-            if (navLoginLink && navLoginLink.parentElement) {
-                navLoginLink.parentElement.style.display = 'none';
-            }
-            if (navLogoutLink && navLogoutLink.parentElement) {
-                navLogoutLink.parentElement.style.display = 'list-item';
-            }
-        } else {
-            // 비로그인 상태
-            if (profileIcon) profileIcon.style.display = 'none';
-            if (userMenuName) userMenuName.textContent = '게스트';
-
-            if (navLoginLink && navLoginLink.parentElement) {
-                navLoginLink.parentElement.style.display = 'list-item';
-            }
-            if (navLogoutLink && navLogoutLink.parentElement) {
-                navLogoutLink.parentElement.style.display = 'none';
-            }
-        }
 
         // 🔹 커뮤니티 탭/리스트 초기화
         const tabs = tabsContainer.querySelectorAll('button');
@@ -277,9 +247,33 @@
                 }
             });
         });
+
+        // 🔹 로그인 상태라면 알림/일정 정보 불러와서 헤더 배지 갱신
+        if (accessToken) {
+            (async () => {
+                // userId가 안 들어있을 수도 있으니 한 번 보강
+                if (!localStorage.getItem('userId')) {
+                    try {
+                        const res = await fetch('/api/users/me', {
+                            headers: { 'Authorization': 'Bearer ' + accessToken }
+                        });
+                        if (res.ok) {
+                            const user = await res.json();
+                            localStorage.setItem('userId', user.userId);
+                            localStorage.setItem('username', user.nickname);
+                        }
+                    } catch (e) {
+                        console.error('사용자 정보 조회 실패:', e);
+                    }
+                }
+
+                if (window.checkPendingReviews) await window.checkPendingReviews();
+                if (window.checkUpcomingSchedules) await window.checkUpcomingSchedules();
+                if (window.updateGlobalBadge) window.updateGlobalBadge();
+            })();
+        }
     });
 </script>
-
 
 </body>
 </html>

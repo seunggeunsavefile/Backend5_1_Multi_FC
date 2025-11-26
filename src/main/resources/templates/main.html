@@ -391,6 +391,7 @@
                 if (response.ok) {
                     const userData = await response.json();
                     localStorage.setItem('username', userData.nickname);
+                    // 🔥 리뷰 조회에서 쓰니까 여기서 userId도 저장
                     localStorage.setItem('userId', userData.username);
                 }
             } catch (e) { console.error(e); }
@@ -418,11 +419,12 @@
             const userMenuUsername = document.getElementById('user-menu-username');
             if (userMenuUsername) userMenuUsername.textContent = loggedInUsername;
 
-            await checkPendingReviews();
-            await checkUpcomingSchedules();
-            updateGlobalBadge();
+            // ⭐⭐⭐ 여기서 헤더에 정의된 전역 함수 호출 ⭐⭐⭐
+            if (window.checkPendingReviews) await window.checkPendingReviews();
+            if (window.checkUpcomingSchedules) await window.checkUpcomingSchedules();
+            if (window.updateGlobalBadge) window.updateGlobalBadge();
 
-            // ✅ 여기서 일정 렌더링 호출
+            // 일정 렌더링 (upcomingSchedules 전역 데이터 사용)
             renderUpcomingSchedules();
 
             if (chatPromoLink) {
@@ -430,17 +432,18 @@
                 chatPromoLink.textContent = "실시간 채팅 바로가기";
             }
 
+            // 🔥 여기서 pendingReviewStadiumIds를 보고 섹션 내용 채우기
             if (reviewSection && pendingReviewStadiumIds.length > 0) {
                 const stadiumId = pendingReviewStadiumIds[0];
                 const count = pendingReviewStadiumIds.length;
 
                 reviewSection.innerHTML = `
-                    <div class="review-notification-text">
-                        <i class="fas fa-bell"></i> 작성하지 않은 경기 후기가 <strong>${count}건</strong> 있습니다.
-                    </div>
-                    <a href="/reviews/write?stadiumId=${stadiumId}" class="review-notification-link">후기 작성하기</a>
-                    <button class="close-review-btn" onclick="closeReviewNotification()">&times;</button>
-                `;
+                <div class="review-notification-text">
+                    <i class="fas fa-bell"></i> 작성하지 않은 경기 후기가 <strong>${count}건</strong> 있습니다.
+                </div>
+                <a href="/reviews/write?stadiumId=${stadiumId}" class="review-notification-link">후기 작성하기</a>
+                <button class="close-review-btn" onclick="closeReviewNotification()">&times;</button>
+            `;
                 reviewSection.style.display = 'flex';
             }
 
@@ -464,6 +467,7 @@
             }
         }
     });
+
 </script>
 
 

@@ -1,3 +1,4 @@
+<!-- fragments/header.html -->
 <div th:fragment="siteHeader">
     <header class="quick-menu">
         <div class="logo"><a href="/">Multi FC</a></div>
@@ -15,7 +16,9 @@
                     <li><a href="/notifications" id="nav-notifications-link"><i class="fas fa-bell"></i> 알림 목록</a></li>
                     <li><a href="/mypage"><i class="fas fa-user"></i> 마이페이지</a></li>
                     <li><a href="/profile/edit"><i class="fas fa-user-edit"></i> 프로필 수정</a></li>
-                    <li><a href="#" id="logout-button"><i class="fas fa-sign-out-alt"></i> 로그아웃</a></li>
+                    <li id="nav-logout-li" style="display:none;">
+                        <a href="#" id="nav-logout-link"><i class="fas fa-sign-out-alt"></i> 로그아웃</a>
+                    </li>
                 </ul>
             </div>
             <button id="menu-toggle" class="menu-toggle-btn"><i class="fas fa-bars"></i></button>
@@ -32,9 +35,17 @@
         </nav>
     </header>
 
-    <!-- ✅ 헤더용 JS를 fragment 안에서 로드 -->
+    <!-- 🔥 로그아웃 글자 빨간색 적용 -->
+    <style>
+        #nav-logout-li a {
+            color: #e74c3c !important;
+            font-weight: 700;
+        }
+    </style>
+
+    <!-- ✅ 헤더용 JS (알림/배지 공용 함수 + 메뉴 컨트롤) -->
     <script>
-        // === 전역 알림 상태 ===
+        // === 전역 알림 상태 (여러 페이지에서 공유) ===
         window.hasReviewNotif = window.hasReviewNotif || false;
         window.hasScheduleNotif = window.hasScheduleNotif || false;
         window.pendingReviewStadiumIds = window.pendingReviewStadiumIds || [];
@@ -45,13 +56,14 @@
             const mainMenu = document.getElementById('main-menu');
             const profileMenuToggle = document.getElementById('profile-menu-toggle');
             const profileMenu = document.getElementById('profile-menu');
-            const logoutButton = document.getElementById('logout-button');
+            const logoutButton = document.getElementById('logout-button'); // 없으면 무시
             const navNotificationsLink = document.getElementById('nav-notifications-link');
             const navLogoutLink = document.getElementById('nav-logout-link');
+            const navLoginLink = document.getElementById('nav-login-link');
             const navChatLinkElement = document.getElementById('nav-chat-link');
             const badge = document.getElementById('notification-badge');
 
-            // --- 공용 함수 정의만! (여기서 호출 X) ---
+            // === 1) 알림/배지 전역 함수 정의 (여기서 "정의만" 하고 호출은 각 페이지에서) ===
             window.updateGlobalBadge = function () {
                 if (!badge) return;
 
@@ -100,7 +112,7 @@
                         upcomingSchedules = data.map(item => ({
                             id: item.scheduleId,
                             matchId: item.matchId,
-                            type: item.scheduleType,
+                            type: item.scheduleType,   // "경기" / "개인"
                             date: item.scheduleDate,
                             time: item.scheduleTime,
                             title: item.title
@@ -112,15 +124,13 @@
                 }
             };
 
-            // --- 나머지: 메뉴 · 로그아웃 · 채팅 링크 · 알림 이동 ---
-
+            // === 2) 헤더 메뉴 / 프로필 드롭다운 ===
             if (menuToggle) {
                 menuToggle.addEventListener('click', () => {
                     mainMenu.classList.toggle('show');
                     profileMenu.classList.remove('show');
                 });
             }
-
             if (profileMenuToggle) {
                 profileMenuToggle.addEventListener('click', () => {
                     profileMenu.classList.toggle('show');
@@ -142,27 +152,48 @@
                 }
             });
 
-            if (logoutButton) {
-                logoutButton.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    localStorage.removeItem('accessToken');
-                    localStorage.removeItem('username');
-                    localStorage.removeItem('hasReadReviews');
-                    localStorage.removeItem('hasReadSchedules');
-                    window.location.href = '/login';
-                });
+            // === 3) 로그인/로그아웃 UI 기본 처리 (옵션) ===
+            const accessToken = localStorage.getItem('accessToken');
+            const profileIcon = document.getElementById('profile-menu-toggle');
+            const userMenuName = document.getElementById('user-menu-username');
+
+            if (accessToken) {
+                const nickname = localStorage.getItem('username') || '사용자';
+                if (profileIcon) profileIcon.style.display = 'flex';
+                if (userMenuName) userMenuName.textContent = nickname;
+
+                if (navLoginLink && navLoginLink.parentElement) {
+                    navLoginLink.parentElement.style.display = 'none';
+                }
+                if (navLogoutLink && navLogoutLink.parentElement) {
+                    navLogoutLink.parentElement.style.display = 'list-item';
+                }
+            } else {
+                if (profileIcon) profileIcon.style.display = 'none';
+                if (userMenuName) userMenuName.textContent = '게스트';
+
+                if (navLoginLink && navLoginLink.parentElement) {
+                    navLoginLink.parentElement.style.display = 'list-item';
+                }
+                if (navLogoutLink && navLogoutLink.parentElement) {
+                    navLogoutLink.parentElement.style.display = 'none';
+                }
             }
 
+            // 로그아웃 처리
             if (navLogoutLink) {
                 navLogoutLink.addEventListener('click', (e) => {
                     e.preventDefault();
                     localStorage.removeItem('accessToken');
+                    localStorage.removeItem('username');
+                    localStorage.removeItem('userId');
                     localStorage.removeItem('hasReadReviews');
                     localStorage.removeItem('hasReadSchedules');
                     window.location.href = '/login';
                 });
             }
 
+            // 채팅 메뉴: 비로그인 시 로그인 유도
             if (navChatLinkElement) {
                 navChatLinkElement.addEventListener('click', function (e) {
                     const accessToken = localStorage.getItem('accessToken');
@@ -174,15 +205,14 @@
                 });
             }
 
+            // 알림 목록 클릭 시 읽음 처리
             if (navNotificationsLink) {
                 navNotificationsLink.addEventListener('click', () => {
                     localStorage.setItem('hasReadReviews', 'true');
                     localStorage.setItem('hasReadSchedules', 'true');
-                    // href 로 이동
+                    // 실제 페이지 이동은 a 태그 href로 진행
                 });
             }
         });
     </script>
-
-
 </div>

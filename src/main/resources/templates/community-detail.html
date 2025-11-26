@@ -65,7 +65,7 @@
     // 대댓글용: 어떤 댓글에 답글 중인지
     let CURRENT_PARENT_COMMENT_ID = null;
 
-    // ===== 초기화 (헤더 닉네임 + 게시글 상세) =====
+    // ===== 초기화 (헤더 닉네임 + 게시글 상세 + 알림 배지) =====
     document.addEventListener('DOMContentLoaded', () => {
         const storedName = (localStorage.getItem('username') || '').trim();
         const accessToken = localStorage.getItem('accessToken');
@@ -104,6 +104,33 @@
             if (navLogoutLink && navLogoutLink.parentElement) {
                 navLogoutLink.parentElement.style.display = 'none';
             }
+        }
+
+        // 🔹 로그인 상태라면 알림/일정 정보 불러와서 헤더 배지 갱신
+        if (accessToken) {
+            (async () => {
+                // userId가 없으면 보강용으로 한 번 더 가져오기
+                if (!localStorage.getItem('userId')) {
+                    try {
+                        const res = await fetch('/api/users/me', {
+                            headers: { 'Authorization': 'Bearer ' + accessToken }
+                        });
+                        if (res.ok) {
+                            const user = await res.json();
+                            localStorage.setItem('userId', user.userId);
+                            localStorage.setItem('username', user.nickname);
+                            CURRENT_USER_NICKNAME = user.nickname;
+                            if (userMenuName) userMenuName.textContent = user.nickname;
+                        }
+                    } catch (e) {
+                        console.error('사용자 정보 조회 실패:', e);
+                    }
+                }
+
+                if (window.checkPendingReviews) await window.checkPendingReviews();
+                if (window.checkUpcomingSchedules) await window.checkUpcomingSchedules();
+                if (window.updateGlobalBadge) window.updateGlobalBadge();
+            })();
         }
 
         // URL 에서 postId 추출 후 상세 조회

@@ -865,6 +865,11 @@
                 currentNickname = user.nickname;
                 myUserId = user.userId;
                 myUsername = user.nickname;
+
+                // 🔥 메인과 동일하게 localStorage에도 userId 저장
+                localStorage.setItem('userId', user.userId);
+                localStorage.setItem('username', user.nickname);
+
                 console.log('현재 사용자:', { userId: currentUserId, nickname: currentNickname });
 
                 connect();
@@ -873,8 +878,17 @@
                 const activeTab = document.querySelector(`[data-type="public"]`);
                 if (activeTab) activeTab.classList.add('active');
                 loadRoomList(defaultType);
+
+                // 🔥 여기서도 전역 알림 함수 호출해 배지 갱신
+                if (window.checkPendingReviews) window.checkPendingReviews().then(() => {
+                    if (window.updateGlobalBadge) window.updateGlobalBadge();
+                });
+                if (window.checkUpcomingSchedules) window.checkUpcomingSchedules().then(() => {
+                    if (window.updateGlobalBadge) window.updateGlobalBadge();
+                });
             })
-            .catch(error => {
+
+                .catch(error => {
                 console.error('사용자 정보 로드 실패:', error);
                 alert('사용자 정보를 불러올 수 없습니다.');
                 window.location.href = "/login";
@@ -2026,6 +2040,7 @@
             }
         });
     }
+
 
     window.addEventListener('beforeunload', () => {
         console.log('🔄 페이지 언로드, WebSocket 정리');
