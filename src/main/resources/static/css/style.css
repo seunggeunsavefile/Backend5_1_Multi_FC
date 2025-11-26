@@ -1773,25 +1773,6 @@ body, html {
     font-weight: 600;
 }
 
-.action-button-group {
-    text-align: center;
-    grid-column: 1 / 2;
-    display: flex;
-    justify-content: center;
-    gap: 15px;
-}
-.action-button-group a {
-    display: inline-block;
-    padding: 14px 28px;
-    font-weight: 700;
-    border-radius: 30px;
-    text-decoration: none;
-    transition: all 0.3s ease;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-    font-size: 16px;
-    flex-grow: 0;
-    flex-shrink: 0;
-}
 .btn-schedule {
     background-color: #333;
     color: white;
@@ -1801,16 +1782,6 @@ body, html {
     background-color: #1a1a1a;
     transform: translateY(-2px);
     box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
-}
-.btn-create-match {
-    background-color: #e74c3c;
-    color: white;
-    border: 2px solid #c0392b;
-}
-.btn-create-match:hover {
-    background-color: #c0392b;
-    transform: translateY(-2px);
-    box-shadow: 0 6px 12px rgba(231, 76, 60, 0.3);
 }
 
 .review-right-column h2 {
@@ -1934,66 +1905,6 @@ body, html {
     display: block;
 }
 
-/* ✅ 경기 개설 모달 */
-.stadium-modal-overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.5);
-    display: none;
-    align-items: center;
-    justify-content: center;
-    z-index: 999;
-}
-.stadium-modal-overlay.show {
-    display: flex;
-}
-.stadium-modal-content {
-    background: #fff;
-    border-radius: 15px;
-    padding: 25px 25px 20px;
-    width: 90%;
-    max-width: 600px;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.25);
-}
-.stadium-modal-content h2 {
-    font-size: 24px;
-    margin-bottom: 15px;
-    font-weight: 800;
-    color: #2c3e50;
-}
-.stadium-modal-content label {
-    display: block;
-    font-size: 15px;
-    font-weight: 700;
-    color: #34495e;
-    margin-top: 10px;
-    margin-bottom: 6px;
-}
-.stadium-modal-content input[type="text"],
-.stadium-modal-content input[type="date"],
-.stadium-modal-content select {
-    width: 100%;
-    padding: 10px 12px;
-    font-size: 15px;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    box-sizing: border-box;
-    background-color: #f9f9f9;
-    color: #333;
-}
-.stadium-modal-content input[type="text"]:focus,
-.stadium-modal-content input[type="date"]:focus,
-.stadium-modal-content select:focus {
-    border-color: #6c5ce7;
-    outline: none;
-    box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.2);
-}
-.stadium-modal-content input[type="text"][readonly] {
-    background-color: #e9ecef;
-    color: #495057;
-    font-weight: 600;
-    border: 1px solid #ced4da;
-}
 .time-select-group {
     display: flex;
     gap: 10px;
@@ -2008,12 +1919,7 @@ body, html {
     color: #555;
     font-weight: 600;
 }
-.stadium-modal-actions {
-    display: flex;
-    justify-content: flex-end;
-    gap: 10px;
-    margin-top: 20px;
-}
+
 .stadium-btn-cancel,
 .stadium-btn-create {
     padding: 8px 16px;
@@ -3411,9 +3317,7 @@ body, html {
 .invite-friend-item:hover {
     background-color: #fafafa;
 }
-.invite-friend-item.selected {
-    background-color: #e6e6ff;
-}
+
 .invite-friend-item span {
     font-size: 15px;
     color: #333;
@@ -3679,13 +3583,6 @@ body, html {
     margin-top: 20px;
 }
 
-.chat-modal-actions button,
-.modal-actions button {
-    padding: 10px 20px;
-    border-radius: 8px;
-    font-weight: 600;
-    cursor: pointer;
-}
 
 /* 새 채팅 모달 내부 인풋/셀렉트 */
 #new-chat-modal .chat-modal-content input,
@@ -5028,16 +4925,7 @@ body, html {
     border: none;
     cursor: pointer;
 }
-.btn-schedule {
-    background-color: #333;
-    color: white;
-    border: 2px solid #1a1a1a;
-}
-.btn-schedule:hover {
-    background-color: #1a1a1a;
-    transform: translateY(-2px);
-    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
-}
+
 .btn-create-match {
     background-color: #e74c3c;
     color: white;
@@ -5387,3 +5275,11 @@ body, html {
     font-size: 16px;
     color: #2c3e50;
 }
+
+.btn-create {
+    background: #6c5ce7;
+    color: white;
+    border: none;
+    width: 100%;
+}
+
