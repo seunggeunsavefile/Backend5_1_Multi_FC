@@ -34,25 +34,93 @@
 
     <!-- ✅ 헤더용 JS를 fragment 안에서 로드 -->
     <script>
+        // === 전역 알림 상태 ===
+        window.hasReviewNotif = window.hasReviewNotif || false;
+        window.hasScheduleNotif = window.hasScheduleNotif || false;
+        window.pendingReviewStadiumIds = window.pendingReviewStadiumIds || [];
+        window.upcomingSchedules = window.upcomingSchedules || [];
+
         document.addEventListener('DOMContentLoaded', () => {
-            // 헤더 관련 요소들
             const menuToggle = document.getElementById('menu-toggle');
             const mainMenu = document.getElementById('main-menu');
             const profileMenuToggle = document.getElementById('profile-menu-toggle');
             const profileMenu = document.getElementById('profile-menu');
             const logoutButton = document.getElementById('logout-button');
             const navNotificationsLink = document.getElementById('nav-notifications-link');
-            const navLogoutLink = document.getElementById('nav-logout-link');   // 있으면 동작, 없으면 무시
+            const navLogoutLink = document.getElementById('nav-logout-link');
             const navChatLinkElement = document.getElementById('nav-chat-link');
             const badge = document.getElementById('notification-badge');
 
-            // 메뉴 토글
+            // --- 공용 함수 정의만! (여기서 호출 X) ---
+            window.updateGlobalBadge = function () {
+                if (!badge) return;
+
+                if (pendingReviewStadiumIds.length > 0 || hasScheduleNotif) {
+                    if (localStorage.getItem('hasReadReviews') !== 'true') {
+                        badge.style.display = 'block';
+                    } else {
+                        badge.style.display = 'none';
+                    }
+                } else {
+                    badge.style.display = 'none';
+                }
+            };
+
+            window.checkPendingReviews = async function () {
+                const currentUserId = localStorage.getItem('userId');
+                if (!currentUserId) return;
+
+                try {
+                    const response = await fetch(`/api/reviews/pending-stadiums?userId=${currentUserId}`);
+                    if (response.ok) {
+                        const ids = await response.json();
+                        pendingReviewStadiumIds = ids;
+                        hasReviewNotif = ids && ids.length > 0;
+                    }
+                } catch (error) {
+                    console.error("후기 알림 요청 중 오류:", error);
+                }
+            };
+
+            window.checkUpcomingSchedules = async function () {
+                if (localStorage.getItem('hasReadSchedules') === 'true') {
+                    hasScheduleNotif = false;
+                    return;
+                }
+                const accessToken = localStorage.getItem('accessToken');
+                if (!accessToken) return;
+
+                try {
+                    const response = await fetch(`/api/schedule/upcoming`, {
+                        headers: { 'Authorization': 'Bearer ' + accessToken }
+                    });
+
+                    if (response.ok) {
+                        const data = await response.json();
+                        upcomingSchedules = data.map(item => ({
+                            id: item.scheduleId,
+                            matchId: item.matchId,
+                            type: item.scheduleType,
+                            date: item.scheduleDate,
+                            time: item.scheduleTime,
+                            title: item.title
+                        }));
+                        hasScheduleNotif = upcomingSchedules.length > 0;
+                    }
+                } catch (error) {
+                    console.error("일정 요청 중 오류:", error);
+                }
+            };
+
+            // --- 나머지: 메뉴 · 로그아웃 · 채팅 링크 · 알림 이동 ---
+
             if (menuToggle) {
                 menuToggle.addEventListener('click', () => {
                     mainMenu.classList.toggle('show');
                     profileMenu.classList.remove('show');
                 });
             }
+
             if (profileMenuToggle) {
                 profileMenuToggle.addEventListener('click', () => {
                     profileMenu.classList.toggle('show');
@@ -60,7 +128,6 @@
                 });
             }
 
-            // 바깥 클릭 시 닫기
             document.addEventListener('click', (event) => {
                 if (
                     mainMenu &&
@@ -75,7 +142,6 @@
                 }
             });
 
-            // 로그아웃 (드롭다운 안의 버튼)
             if (logoutButton) {
                 logoutButton.addEventListener('click', (e) => {
                     e.preventDefault();
@@ -87,7 +153,6 @@
                 });
             }
 
-            // (만약 상단 어딘가에 nav-logout-link가 따로 있다면)
             if (navLogoutLink) {
                 navLogoutLink.addEventListener('click', (e) => {
                     e.preventDefault();
@@ -98,7 +163,6 @@
                 });
             }
 
-            // 채팅 메뉴: 비로그인 시 로그인 유도
             if (navChatLinkElement) {
                 navChatLinkElement.addEventListener('click', function (e) {
                     const accessToken = localStorage.getItem('accessToken');
@@ -110,7 +174,15 @@
                 });
             }
 
-            // badge 변수는 여기서만 쓰면 됨 (전역 공유 안 해도 되면 이 안에서만 사용)
+            if (navNotificationsLink) {
+                navNotificationsLink.addEventListener('click', () => {
+                    localStorage.setItem('hasReadReviews', 'true');
+                    localStorage.setItem('hasReadSchedules', 'true');
+                    // href 로 이동
+                });
+            }
         });
     </script>
+
+
 </div>
