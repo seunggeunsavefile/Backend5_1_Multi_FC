@@ -12,40 +12,7 @@
 </head>
 <body class="community-page">
 
-<header class="quick-menu">
-    <div class="logo"><a href="/">Multi FC</a></div>
-    <div class="header-icons">
-        <button id="profile-menu-toggle" class="profile-icon" style="position: relative;">
-            <i class="fas fa-user-circle"></i>
-            <span id="notification-badge" class="notification-badge"></span>
-        </button>
-        <div id="profile-menu" class="user-menu">
-            <div class="user-info">
-                <strong><span id="user-menu-username">사용자</span>님</strong>
-                <p>환영합니다!</p>
-            </div>
-            <ul>
-                <li><a href="/notifications" id="nav-notifications-link"><i class="fas fa-bell"></i> 알림 목록</a></li>
-                <li><a href="/mypage"><i class="fas fa-user"></i> 마이페이지</a></li>
-                <li><a href="/profile/edit"><i class="fas fa-user-edit"></i> 프로필 수정</a></li>
-                <li><a href="#" id="logout-button"><i class="fas fa-sign-out-alt"></i> 로그아웃</a></li>
-            </ul>
-        </div>
-        <button id="menu-toggle" class="menu-toggle-btn"><i class="fas fa-bars"></i></button>
-    </div>
-
-    <nav id="main-menu" class="main-nav">
-        <ul>
-            <li><a href="/" class="active"><i class="fas fa-home"></i> 메인 (Home)</a></li>
-            <li><a href="/fields"><i class="fas fa-search"></i> 구장검색</a></li>
-            <li><a href="/community"><i class="fas fa-users"></i> 커뮤니티</a></li>
-            <li id="nav-chat-link-li"><a href="/chat" id="nav-chat-link"><i class="fas fa-comments"></i> 실시간채팅</a></li>
-            <li><a href="/schedule?stadium"><i class="fas fa-calendar-check"></i> 경기 일정</a></li>
-            <li><a href="/login" id="nav-login-link"><i class="fas fa-sign-in-alt"></i> 로그인</a></li>
-            <li><a href="#" id="nav-logout-link"><i class="fas fa-sign-out-alt"></i> 로그아웃</a></li>
-        </ul>
-    </nav>
-</header>
+<div th:replace="~{fragments/header :: siteHeader}"></div>
 
 <main class="community-main">
     <div class="board-container">
@@ -64,7 +31,6 @@
         </div>
 
         <div class="post-actions">
-
             <div class="detail-controls">
                 <a href="/community" class="btn-list" style="background-color: #f0f0f0; color: #555;">목록으로</a>
             </div>
@@ -76,7 +42,9 @@
         </div>
 
         <div class="comments-section">
-            <h3 style="font-size: 20px; color: #2c3e50; margin-bottom: 15px;">댓글 (<span id="comment-count">0</span>)</h3>
+            <h3 style="font-size: 20px; color: #2c3e50; margin-bottom: 15px;">
+                댓글 (<span id="comment-count">0</span>)
+            </h3>
 
             <div class="comment-form">
                 <textarea id="comment-input" placeholder="댓글을 입력하세요..." required></textarea>
@@ -84,81 +52,58 @@
                 <div style="clear: both;"></div>
             </div>
 
-            <div id="comments-list">
-            </div>
+            <div id="comments-list"></div>
         </div>
     </div>
 </main>
 
 <script>
-    // [수정] 더 이상 MOCK_POSTS / community_posts 를 쓰지 않고,
-    // 서버에서 받아온 닉네임 + 댓글 정보만 사용
+    // 현재 로그인한 사용자 닉네임 (댓글 "(나)" 표시, 수정/삭제 권한 체크용)
     let CURRENT_USER_NICKNAME = '';
     let POST_DATA = null;
 
-    // [대댓글] 현재 어떤 댓글에 답글을 달고 있는지 (null이면 일반 댓글)
+    // 대댓글용: 어떤 댓글에 답글 중인지
     let CURRENT_PARENT_COMMENT_ID = null;
 
-    // ===== 공통 메뉴/로그아웃 =====
+    // ===== 초기화 (헤더 닉네임 + 게시글 상세) =====
     document.addEventListener('DOMContentLoaded', () => {
-        const menuToggle = document.getElementById('menu-toggle');
-        const mainMenu = document.getElementById('main-menu');
-        const profileMenuToggle = document.getElementById('profile-menu-toggle');
-        const profileMenu = document.getElementById('profile-menu');
-        const logoutButton = document.getElementById('logout-button');
-        const userMenuName = document.getElementById('user-menu-username');
-
+        const storedName = (localStorage.getItem('username') || '').trim();
         const accessToken = localStorage.getItem('accessToken');
 
-        // ✅ 로그인 때 저장해 둔 값만 사용 (로그인 페이지에서 localStorage.setItem('username', data.user.nickname))
-        const storedName = (localStorage.getItem('username') || '').trim();
-        if (storedName) {
-            CURRENT_USER_NICKNAME = storedName;
-            if (userMenuName) {
-                userMenuName.textContent = storedName;
+        const userMenuName      = document.getElementById('user-menu-username');
+        const profileMenuToggle = document.getElementById('profile-menu-toggle');
+        const navLoginLink      = document.getElementById('nav-login-link');
+        const navLogoutLink     = document.getElementById('nav-logout-link');
+
+        // ✅ 로그인 상태일 때 헤더에 닉네임 / 메뉴 표시
+        if (accessToken) {
+            if (storedName) {
+                CURRENT_USER_NICKNAME = storedName;
+                if (userMenuName) {
+                    userMenuName.textContent = storedName;   // "사용자님" 대신 실제 닉네임
+                }
+            }
+
+            if (profileMenuToggle) {
+                profileMenuToggle.style.display = 'flex';
+            }
+            if (navLoginLink && navLoginLink.parentElement) {
+                navLoginLink.parentElement.style.display = 'none';
+            }
+            if (navLogoutLink && navLogoutLink.parentElement) {
+                navLogoutLink.parentElement.style.display = 'list-item';
             }
         } else {
-            // 저장된 게 없으면 기본값
-            if (userMenuName) {
-                userMenuName.textContent = '사용자';
+            // 비로그인
+            if (profileMenuToggle) {
+                profileMenuToggle.style.display = 'none';
             }
-        }
-
-        // 프로필 아이콘/메뉴 토글, 로그아웃 처리 등 기존 코드 그대로
-        if (menuToggle) {
-            menuToggle.addEventListener('click', (event) => {
-                event.stopPropagation();
-                if (mainMenu) mainMenu.classList.toggle('show');
-                if (profileMenu) profileMenu.classList.remove('show');
-            });
-        }
-        if (profileMenuToggle) {
-            profileMenuToggle.addEventListener('click', (event) => {
-                event.stopPropagation();
-                if (profileMenu) profileMenu.classList.toggle('show');
-                if (mainMenu) mainMenu.classList.remove('show');
-            });
-        }
-        document.addEventListener('click', (event) => {
-            const header = document.querySelector('header');
-            if (header && !header.contains(event.target)) {
-                if (mainMenu) mainMenu.classList.remove('show');
-                if (profileMenu) profileMenu.classList.remove('show');
+            if (navLoginLink && navLoginLink.parentElement) {
+                navLoginLink.parentElement.style.display = 'list-item';
             }
-        });
-        if (logoutButton) {
-            logoutButton.addEventListener('click', (e) => {
-                e.preventDefault();
-                localStorage.removeItem('accessToken');
-                localStorage.removeItem('hasReadReviews');
-                localStorage.removeItem('hasReadSchedules');
-                localStorage.removeItem('username');
-                window.location.href = '/login';
-            });
-        }
-
-        if (accessToken && profileMenuToggle) {
-            profileMenuToggle.style.display = 'flex';
+            if (navLogoutLink && navLogoutLink.parentElement) {
+                navLogoutLink.parentElement.style.display = 'none';
+            }
         }
 
         // URL 에서 postId 추출 후 상세 조회
@@ -167,7 +112,7 @@
         loadPostDetail(postId);
     });
 
-    // ===== 상세 조회 =====
+    // ===== 게시글 상세 조회 =====
     async function loadPostDetail(postId) {
         try {
             const res = await fetch(`/api/community/posts/${postId}`);
@@ -185,23 +130,22 @@
 
             const contentDiv = document.getElementById('post-content');
 
-            // [수정] 이미지가 있으면 상단에 이미지 태그를 먼저 붙이고, 그 아래에 본문(content) 출력
             let html = '';
 
             if (post.imageUrl) {
                 html += `
-                <div class="post-image-wrapper">
-                    <img src="${post.imageUrl}"
-                         alt="게시글 이미지"
-                         style="max-width:100%; height:auto; display:block; margin-bottom:16px; border-radius:8px;">
-                </div>
-            `;
+                    <div class="post-image-wrapper">
+                        <img src="${post.imageUrl}"
+                             alt="게시글 이미지"
+                             style="max-width:100%; height:auto; display:block; margin-bottom:16px; border-radius:8px;">
+                    </div>
+                `;
             }
-            // XSS 방어
-            let safeContent = post.content || '';
-            safeContent = safeContent.replace(/\n/g, '<br>'); // 줄바꿈만 처리
 
+            let safeContent = post.content || '';
+            safeContent = safeContent.replace(/\n/g, '<br>');
             html += safeContent;
+
             contentDiv.innerHTML = html;
 
             document.getElementById('comment-count').textContent = post.commentCount ?? 0;
@@ -236,18 +180,21 @@
 
     async function handleDeletePost() {
         if (!confirm('정말 이 게시글을 삭제하시겠습니까?')) return;
+
         const token = localStorage.getItem('accessToken');
         if (!token) {
             alert('로그인이 필요합니다.');
             window.location.href = '/login';
             return;
         }
+
         const res = await fetch(`/api/community/posts/${POST_DATA.postId}`, {
             method: 'DELETE',
             headers: {
                 'Authorization': `Bearer ${token}`
             }
         });
+
         if (res.ok) {
             alert('게시글이 삭제되었습니다.');
             window.location.href = '/community';
@@ -267,7 +214,6 @@
             return;
         }
 
-        // 1) 부모별로 children 모으기 (null/undefined 는 0으로 통일해서 최상위로 사용)
         const childrenMap = {};
         comments.forEach(c => {
             const parentKey = (c.parentCommentId === null || c.parentCommentId === undefined)
@@ -280,12 +226,10 @@
             childrenMap[parentKey].push(c);
         });
 
-        // (선택) 정렬: commentId 기준으로 오래된 순서대로
         Object.values(childrenMap).forEach(list => {
             list.sort((a, b) => a.commentId - b.commentId);
         });
 
-        // 2) 공통 렌더 함수 (depth 로 들여쓰기)
         function renderTree(parentId, depth) {
             const list = childrenMap[parentId] || [];
             list.forEach(c => {
@@ -293,7 +237,6 @@
                 item.className = depth > 0 ? 'comment-item reply' : 'comment-item';
                 item.dataset.commentId = c.commentId;
 
-                // depth 에 따라 들여쓰기 조금씩 증가
                 if (depth > 0) {
                     item.style.marginLeft = (depth * 20) + 'px';
                 }
@@ -301,78 +244,62 @@
                 const writerNick = (c.commentWriterNickname || '').trim();
                 const isMine = CURRENT_USER_NICKNAME !== '' && writerNick === CURRENT_USER_NICKNAME;
 
-                // 디버그: 여기 안에서만 사용해야 함
-                console.log(
-                    'CURRENT_USER_NICKNAME=', CURRENT_USER_NICKNAME,
-                    'writerNick=', writerNick,
-                    'isMine=', isMine,
-                    'commentId=', c.commentId
-                );
-
-                // XSS 방어
                 let safeContent = c.content || '';
                 safeContent = safeContent.replace(/\n/g, '<br>');
 
                 let actionsHtml = '';
 
-                // 로그인 되어 있으면 누구나 "답글" 버튼
                 if (localStorage.getItem('accessToken')) {
                     const safeWriterNickname = (c.commentWriterNickname || '').replace(/'/g, "\\'");
                     actionsHtml += `
-                    <button type="button"
-                            class="reply"
-                            onclick="prepareReply(${c.commentId}, '${safeWriterNickname}')">
-                        답글
-                    </button>
-                `;
+                        <button type="button"
+                                class="reply"
+                                onclick="prepareReply(${c.commentId}, '${safeWriterNickname}')">
+                            답글
+                        </button>
+                    `;
                 }
 
-                // 내 댓글이면 수정/삭제 버튼
                 if (isMine) {
                     const escapedContent = (c.content || '')
                         .replace(/'/g, "\\'")
                         .replace(/\n/g, '\\n');
 
                     actionsHtml += `
-                    <button type="button"
-                            onclick="editComment(${c.commentId}, '${escapedContent}')">
-                        수정
-                    </button>
-                    <button type="button"
-                            class="delete"
-                            onclick="deleteComment(${c.commentId})">
-                        삭제
-                    </button>
-                `;
+                        <button type="button"
+                                onclick="editComment(${c.commentId}, '${escapedContent}')">
+                            수정
+                        </button>
+                        <button type="button"
+                                class="delete"
+                                onclick="deleteComment(${c.commentId})">
+                            삭제
+                        </button>
+                    `;
                 }
 
                 item.innerHTML = `
-                <div class="comment-header-row">
-                    <div class="comment-meta">
-                        <span class="comment-writer">
-                            ${c.commentWriterNickname}${isMine ? ' (나)' : ''}
-                        </span>
-                        <span class="comment-date">${c.createdAt ?? ''}</span>
+                    <div class="comment-header-row">
+                        <div class="comment-meta">
+                            <span class="comment-writer">
+                                ${c.commentWriterNickname}${isMine ? ' (나)' : ''}
+                            </span>
+                            <span class="comment-date">${c.createdAt ?? ''}</span>
+                        </div>
+                        <div class="comment-actions">
+                            ${actionsHtml}
+                        </div>
                     </div>
-                    <div class="comment-actions">
-                        ${actionsHtml}
-                    </div>
-                </div>
-                <div class="comment-content">${safeContent}</div>
-            `;
+                    <div class="comment-content">${safeContent}</div>
+                `;
 
                 commentsList.appendChild(item);
-                // 🔁 이 댓글의 자식(대댓글들) 재귀 렌더링
                 renderTree(c.commentId, depth + 1);
             });
         }
 
-        // parentId = 0 인 최상위 댓글부터 시작
         renderTree(0, 0);
     }
-
-
-
 
     async function submitComment() {
         const content = document.getElementById('comment-input').value.trim();
@@ -402,9 +329,8 @@
 
         if (res.ok) {
             document.getElementById('comment-input').value = '';
-            // [대댓글] 한 번 보내고 나면 다시 일반 댓글 모드로 초기화
             CURRENT_PARENT_COMMENT_ID = null;
-            await loadPostDetail(POST_DATA.postId); // 새로고침 대신 재로딩
+            await loadPostDetail(POST_DATA.postId);
         } else {
             const msg = await res.text();
             alert('댓글 등록 실패: ' + msg);
@@ -412,9 +338,9 @@
     }
 
     function prepareReply(parentCommentId, writerNickname) {
-        CURRENT_PARENT_COMMENT_ID = parentCommentId;  // 이제부터 이 댓글의 대댓글로 저장
+        CURRENT_PARENT_COMMENT_ID = parentCommentId;
         const input = document.getElementById('comment-input');
-        input.value = `@${writerNickname} `;         // 선택: 멘션 느낌
+        input.value = `@${writerNickname} `;
         input.focus();
     }
 
@@ -466,8 +392,7 @@
             alert('댓글 삭제 실패');
         }
     }
-
-
 </script>
+
 </body>
 </html>
