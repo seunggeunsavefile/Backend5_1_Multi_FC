@@ -10,40 +10,7 @@
 </head>
 <body>
 
-<header class="quick-menu">
-    <div class="logo"><a href="/">Multi FC</a></div>
-    <div class="header-icons">
-        <button id="profile-menu-toggle" class="profile-icon" style="position: relative;">
-            <i class="fas fa-user-circle"></i>
-            <span id="notification-badge" class="notification-badge"></span>
-        </button>
-        <div id="profile-menu" class="user-menu">
-            <div class="user-info">
-                <strong><span id="user-menu-username">사용자</span>님</strong>
-                <p>환영합니다!</p>
-            </div>
-            <ul>
-                <li><a href="/notifications" id="nav-notifications-link"><i class="fas fa-bell"></i> 알림 목록</a></li>
-                <li><a href="/mypage"><i class="fas fa-user"></i> 마이페이지</a></li>
-                <li><a href="/profile/edit"><i class="fas fa-user-edit"></i> 프로필 수정</a></li>
-                <li><a href="#" id="logout-button"><i class="fas fa-sign-out-alt"></i> 로그아웃</a></li>
-            </ul>
-        </div>
-        <button id="menu-toggle" class="menu-toggle-btn"><i class="fas fa-bars"></i></button>
-    </div>
-
-    <nav id="main-menu" class="main-nav">
-        <ul>
-            <li><a href="/" class="active"><i class="fas fa-home"></i> 메인 (Home)</a></li>
-            <li><a href="/fields"><i class="fas fa-search"></i> 구장검색</a></li>
-            <li><a href="/community"><i class="fas fa-users"></i> 커뮤니티</a></li>
-            <li id="nav-chat-link-li"><a href="/chat" id="nav-chat-link"><i class="fas fa-comments"></i> 실시간채팅</a></li>
-            <li><a href="/schedule?stadium"><i class="fas fa-calendar-check"></i> 경기 일정</a></li>
-            <li><a href="/login" id="nav-login-link"><i class="fas fa-sign-in-alt"></i> 로그인</a></li>
-            <li><a href="#" id="nav-logout-link"><i class="fas fa-sign-out-alt"></i> 로그아웃</a></li>
-        </ul>
-    </nav>
-</header>
+<div th:replace="~{fragments/header :: siteHeader}"></div>
 
 <div class="video-background">
     <video poster="" autoplay muted loop>
@@ -112,52 +79,49 @@
                 <p>현재 위치와 활동 반경에 맞춘 정교한 구장 검색으로 이동 시간을 최소화합니다.</p>
             </div>
         </div>
-    </section>  <!-- ✅ value-section 닫기 -->
+    </section>  <section id="features-section">
+    <h2 style="font-size: 36px; margin-bottom: 60px; font-weight:900;">
+        MULTI FC, 주요 서비스
+    </h2>
 
-    <section id="features-section">
-        <h2 style="font-size: 36px; margin-bottom: 60px; font-weight:900;">
-            MULTI FC, 주요 서비스
-        </h2>
-
-        <div class="features-grid">
-            <div class="feature-card">
-                <div class="icon-wrapper">
-                    <i class="fas fa-map-marked-alt"></i>
-                </div>
-                <h3>최적의 구장 검색</h3>
-                <p>위치, 인원, 시간대별 맞춤형 필터로 주변 풋살장을 빠르게 찾아보세요.<br>지도 연동으로 접근성을 높입니다.</p>
-                <a href="/fields" class="card-link">구장 찾기</a>
+    <div class="features-grid">
+        <div class="feature-card">
+            <div class="icon-wrapper">
+                <i class="fas fa-map-marked-alt"></i>
             </div>
-
-            <div class="feature-card">
-                <div class="icon-wrapper">
-                    <i class="fas fa-calendar-alt"></i>
-                </div>
-                <h3>실시간 매칭방</h3>
-                <p>경기 개설 또는 참여 신청을 하고,<br>남은 인원을 확인하세요.<br>경기일정 탭을 통헤 일정을 확인합니다.</p>
-                <a href="/schedule" class="card-link">일정 확인</a>
-            </div>
-
-            <div class="feature-card">
-                <div class="icon-wrapper">
-                    <i class="fas fa-users"></i>
-                </div>
-                <h3>커뮤니티 소통</h3>
-                <p>자유게시판을 통해 정보를 공유해보세요. 다른 사용자와 활발하게 소통합니다.</p>
-                <a href="/community" class="card-link">커뮤니티 바로가기</a>
-            </div>
-
-            <!-- ✅ 실시간 소통 채널을 4번째 카드로 -->
-            <div class="feature-card">
-                <div class="icon-wrapper">
-                    <i class="fas fa-comments"></i>
-                </div>
-                <h3>실시간 채팅</h3>
-                <p>1:1 또는 그룹 채팅으로 다른 유저들과<br>실시간으로 소통합니다.</p>
-                <a href="/chat" class="card-link">실시간 채팅 바로가기</a>
-            </div>
+            <h3>최적의 구장 검색</h3>
+            <p>위치, 인원, 시간대별 맞춤형 필터로 주변 풋살장을 빠르게 찾아보세요.<br>지도 연동으로 접근성을 높입니다.</p>
+            <a href="/fields" class="card-link">구장 찾기</a>
         </div>
-    </section>
+
+        <div class="feature-card">
+            <div class="icon-wrapper">
+                <i class="fas fa-calendar-alt"></i>
+            </div>
+            <h3>실시간 매칭방</h3>
+            <p>경기 개설 또는 참여 신청을 하고,<br>남은 인원을 확인하세요.<br>경기일정 탭을 통헤 일정을 확인합니다.</p>
+            <a href="/schedule" class="card-link">일정 확인</a>
+        </div>
+
+        <div class="feature-card">
+            <div class="icon-wrapper">
+                <i class="fas fa-users"></i>
+            </div>
+            <h3>커뮤니티 소통</h3>
+            <p>자유게시판을 통해 정보를 공유해보세요. 다른 사용자와 활발하게 소통합니다.</p>
+            <a href="/community" class="card-link">커뮤니티 바로가기</a>
+        </div>
+
+        <div class="feature-card">
+            <div class="icon-wrapper">
+                <i class="fas fa-comments"></i>
+            </div>
+            <h3>실시간 채팅</h3>
+            <p>1:1 또는 그룹 채팅으로 다른 유저들과<br>실시간으로 소통합니다.</p>
+            <a href="/chat" class="card-link">실시간 채팅 바로가기</a>
+        </div>
+    </div>
+</section>
 </main>
 
 <footer class="project-footer">
@@ -171,57 +135,28 @@
     </div>
 </footer>
 <script>
-    // --- (★공통★) 메뉴 토글 및 로그아웃 로직 ---
-    const menuToggle = document.getElementById('menu-toggle');
-    const mainMenu = document.getElementById('main-menu');
-    const profileMenuToggle = document.getElementById('profile-menu-toggle');
-    const profileMenu = document.getElementById('profile-menu');
-    const logoutButton = document.getElementById('logout-button');
+    // ----------------------
+    // (알림 / 일정 전용 스크립트)
+    // ----------------------
     const navNotificationsLink = document.getElementById('nav-notifications-link');
-    const navLoginLink = document.getElementById('nav-login-link');
-    const navLogoutLink = document.getElementById('nav-logout-link');
+    const badge = document.getElementById('notification-badge');
 
-    // ⭐⭐ 추가된 선택자: 메뉴바의 채팅 링크 ⭐⭐
-    const navChatLinkElement = document.getElementById('nav-chat-link');
+    let hasReviewNotif = false;
+    let hasScheduleNotif = false;
 
-    if (menuToggle) {
-        menuToggle.addEventListener('click', () => {
-            mainMenu.classList.toggle('show');
-            profileMenu.classList.remove('show');
-        });
-    }
-    if (profileMenuToggle) {
-        profileMenuToggle.addEventListener('click', () => {
-            profileMenu.classList.toggle('show');
-            mainMenu.classList.remove('show');
-        });
-    }
-    document.addEventListener('click', (event) => {
-        if (!mainMenu.contains(event.target) && !menuToggle.contains(event.target) &&
-            !profileMenu.contains(event.target) && !profileMenuToggle.contains(event.target)) {
-            mainMenu.classList.remove('show');
-            profileMenu.classList.remove('show');
+    let pendingReviewStadiumIds = [];
+    let upcomingSchedules = [];
+
+    function updateGlobalBadge() {
+        if (pendingReviewStadiumIds.length > 0 || hasScheduleNotif) {
+            if (localStorage.getItem('hasReadReviews') !== 'true') {
+                if (badge) badge.style.display = 'block';
+            } else {
+                if (badge) badge.style.display = 'none';
+            }
+        } else {
+            if (badge) badge.style.display = 'none';
         }
-    });
-
-    if (logoutButton) {
-        logoutButton.addEventListener('click', (e) => {
-            e.preventDefault();
-            localStorage.removeItem('accessToken');
-            localStorage.removeItem('username'); //
-            localStorage.removeItem('hasReadReviews');
-            localStorage.removeItem('hasReadSchedules');
-            window.location.href = '/login';
-        });
-    }
-    if (navLogoutLink) {
-        navLogoutLink.addEventListener('click', (e) => {
-            e.preventDefault();
-            localStorage.removeItem('accessToken');
-            localStorage.removeItem('hasReadReviews');
-            localStorage.removeItem('hasReadSchedules');
-            window.location.href = '/login';
-        });
     }
 
     if (navNotificationsLink) {
@@ -233,51 +168,19 @@
         });
     }
 
-    // --- (★공통★) 알림 배지 로드 함수 ---
-    const badge = document.getElementById('notification-badge');
-    let hasReviewNotif = false;
-    let hasScheduleNotif = false;
-
-    // ⭐ [수정] 후기 작성이 필요한 구장 ID 목록 (동적으로 가져옴)
-    let pendingReviewStadiumIds = [];
-
-    // ⭐ [추가] 다가오는 일정 데이터 (실제 API 응답 저장용)
-    let upcomingSchedules = [];
-
-    function updateGlobalBadge() {
-        if (pendingReviewStadiumIds.length > 0 || hasScheduleNotif) {
-            if (badge) badge.style.display = 'block';
-        } else {
-            if (badge) badge.style.display = 'none';
-        }
-    }
-
     async function checkPendingReviews() {
-        if (localStorage.getItem('hasReadReviews') === 'true') {
-            hasReviewNotif = false;
-            return;
-        }
-
         const currentUserId = localStorage.getItem('userId');
-        if (!currentUserId) return; // 로그인 안 했으면 통과
+        if (!currentUserId) return;
 
         try {
-            // ⭐ [수정] 새로운 API 호출: 로그인된 사용자가 후기 작성이 필요한 구장 ID 목록을 가져옴
             const response = await fetch(`/api/reviews/pending-stadiums?userId=${currentUserId}`);
-
             if (response.ok) {
                 const ids = await response.json();
                 pendingReviewStadiumIds = ids;
-
-                if (ids && ids.length > 0) {
-                    hasReviewNotif = true;
-                } else {
-                    hasReviewNotif = false;
-                }
+                hasReviewNotif = ids && ids.length > 0;
             }
         } catch (error) {
             console.error("후기 알림 요청 중 오류:", error);
-            hasReviewNotif = false;
         }
     }
 
@@ -286,144 +189,84 @@
             hasScheduleNotif = false;
             return;
         }
-
         const accessToken = localStorage.getItem('accessToken');
-        if (!accessToken) {
-            hasScheduleNotif = false;
-            return;
-        }
+        if (!accessToken) return;
 
         try {
             const response = await fetch(`/api/schedule/upcoming`, {
-                headers: {
-                    'Authorization': 'Bearer ' + accessToken,
-                    'Content-Type': 'application/json'
-                }
+                headers: { 'Authorization': 'Bearer ' + accessToken }
             });
 
             if (response.ok) {
                 const data = await response.json();
-
                 upcomingSchedules = data.map(item => ({
                     id: item.scheduleId,
                     matchId: item.matchId,
-                    type: item.scheduleType,    // "경기" / "개인"
+                    type: item.scheduleType,   // "경기" / "개인"
                     date: item.scheduleDate,
                     time: item.scheduleTime,
                     title: item.title
                 }));
 
                 hasScheduleNotif = upcomingSchedules.length > 0;
-            } else {
-                console.error("다가오는 일정 조회 실패:", response.status);
-                hasScheduleNotif = false;
-                upcomingSchedules = [];
             }
         } catch (error) {
-            console.error("일정 요청 중 오류 발생:", error);
-            hasScheduleNotif = false;
-            upcomingSchedules = [];
+            console.error("일정 요청 중 오류:", error);
         }
     }
 
-
-    // ⭐⭐ [추가] 알림 닫기 로직: 리뷰 알림 배너 숨기기 ⭐⭐
+    // 리뷰 알림 닫기 버튼
     function closeReviewNotification() {
         const reviewSection = document.getElementById('review-notification-section');
-        if (reviewSection) {
-            reviewSection.style.display = 'none';
+        if (reviewSection) reviewSection.style.display = 'none';
+    }
+
+    // ----------------------
+    // 7일 이내 일정 슬라이더 렌더링용 코드
+    // ----------------------
+    let currentIndex = 0;
+    let totalSlides = 0;
+
+    const sliderTrack = document.getElementById('schedule-list-items');
+    const prevBtn = document.getElementById('schedule-prev');
+    const nextBtn = document.getElementById('schedule-next');
+    const paginationContainer = document.getElementById('schedule-pagination');
+    const sliderContainer = document.querySelector('.schedule-slider-container');
+    const noScheduleView = document.getElementById('no-schedule-view');
+
+    function moveSlider() {
+        if (sliderTrack && sliderTrack.querySelector('.schedule-item')) {
+            const itemWidth = sliderTrack.querySelector('.schedule-item').offsetWidth + 20;
+            sliderTrack.style.transform = `translateX(-${currentIndex * itemWidth}px)`;
         }
     }
-    // ⭐⭐ [추가 끝] ⭐⭐
 
-
-    // --- (★페이지별★) 로직 실행 ---
-    document.addEventListener('DOMContentLoaded', async () => {
-
-        // ⭐️ 1. SSO 로그인 후 처리 (토큰 저장 + 내 정보 가져오기) ⭐️
-        const urlParams = new URLSearchParams(window.location.search);
-        const token = urlParams.get('token');
-
-        if (token) {
-            // (1) 토큰 저장
-            localStorage.setItem('accessToken', token);
-
-            // (2) URL 정리
-            window.history.replaceState({}, document.title, "/");
-
-            // (3) 내 정보(닉네임) 가져오기 API 호출
-            try {
-                const response = await fetch('/api/users/me', {
-                    headers: { 'Authorization': 'Bearer ' + token }
-                });
-
-                if (response.ok) {
-                    const userData = await response.json();
-                    // 닉네임과 아이디를 저장 (화면 표시에 사용됨)
-                    localStorage.setItem('username', userData.nickname);
-                    localStorage.setItem('userId', userData.username);
-                }
-            } catch (e) {
-                console.error("사용자 정보 가져오기 실패", e);
+    function updatePaginationDots() {
+        if (!paginationContainer) return;
+        const dots = paginationContainer.querySelectorAll('.dot');
+        dots.forEach((dot, index) => {
+            if (index === currentIndex) {
+                dot.classList.add('active');
+            } else {
+                dot.classList.remove('active');
             }
+        });
+    }
 
+    function updateSliderControls() {
+        if (!prevBtn || !nextBtn || !sliderContainer) return;
+
+        if (totalSlides > 1) {
+            prevBtn.style.display = (currentIndex === 0) ? 'none' : 'block';
+            nextBtn.style.display = (currentIndex === totalSlides - 1) ? 'none' : 'block';
+        } else {
+            prevBtn.style.display = 'none';
+            nextBtn.style.display = 'none';
         }
+    }
 
-        const accessToken = localStorage.getItem('accessToken');
-        const loggedInUsername = localStorage.getItem('username'); //
-        const mainLoginLink = document.getElementById('main-login-link');
-        const heroSection = document.querySelector('.hero-section');
-        const memberContentArea = document.getElementById('member-content-area');
-        const noScheduleViewHero = document.getElementById('no-schedule-view-hero');
-        const chatPromoLink = document.getElementById('chat-promo-link');
-        const globalCtaRegister = document.getElementById('global-cta-register'); // ⭐ 추가된 CTA 섹션 ID ⭐
-
-
-        const scheduleSection = document.getElementById('upcoming-schedule-section');
-        const reviewSection = document.getElementById('review-notification-section');
-
-        // 슬라이더 로직 변수
-        let currentIndex = 0;
-        let totalSlides = 0;
-        const sliderTrack = document.getElementById('schedule-list-items');
-        const prevBtn = document.getElementById('schedule-prev');
-        const nextBtn = document.getElementById('schedule-next');
-        const noScheduleView = document.getElementById('no-schedule-view');
-        const sliderContainer = document.querySelector('.schedule-slider-container');
-        const paginationContainer = document.getElementById('schedule-pagination');
-
-        function moveSlider() {
-            if (sliderTrack && sliderTrack.querySelector('.schedule-item')) {
-                // 아이템 하나 너비(500px + 좌우 마진 20px)를 계산하여 이동
-                const itemWidth = sliderTrack.querySelector('.schedule-item').offsetWidth + 20;
-                sliderTrack.style.transform = `translateX(-${currentIndex * itemWidth}px)`;
-            }
-        }
-        function updatePaginationDots() {
-            if (paginationContainer) {
-                const dots = paginationContainer.querySelectorAll('.dot');
-                dots.forEach((dot, index) => {
-                    if (index === currentIndex) {
-                        dot.classList.add('active');
-                    } else {
-                        dot.classList.remove('active');
-                    }
-                });
-            }
-        }
-        function updateSliderControls() {
-            if (prevBtn && nextBtn && sliderContainer) {
-                // 아이템이 1개 초과일 때만 컨트롤 표시
-                if (totalSlides > 1) {
-                    prevBtn.style.display = (currentIndex === 0) ? 'none' : 'block';
-                    nextBtn.style.display = (currentIndex === totalSlides - 1) ? 'none' : 'block';
-                } else {
-                    prevBtn.style.display = 'none';
-                    nextBtn.style.display = 'none';
-                }
-            }
-        }
-        if(nextBtn) nextBtn.addEventListener('click', () => {
+    if (nextBtn) {
+        nextBtn.addEventListener('click', () => {
             if (currentIndex < totalSlides - 1) {
                 currentIndex++;
                 moveSlider();
@@ -431,7 +274,10 @@
                 updatePaginationDots();
             }
         });
-        if(prevBtn) prevBtn.addEventListener('click', () => {
+    }
+
+    if (prevBtn) {
+        prevBtn.addEventListener('click', () => {
             if (currentIndex > 0) {
                 currentIndex--;
                 moveSlider();
@@ -439,203 +285,187 @@
                 updatePaginationDots();
             }
         });
+    }
 
-        // 페이지네이션 점 클릭 이벤트 리스너 추가
-        if(paginationContainer) {
-            paginationContainer.addEventListener('click', (e) => {
-                if (e.target.classList.contains('dot')) {
-                    currentIndex = parseInt(e.target.dataset.index);
-                    moveSlider();
-                    updateSliderControls();
-                    updatePaginationDots();
-                }
-            });
+    if (paginationContainer) {
+        paginationContainer.addEventListener('click', (e) => {
+            if (e.target.classList.contains('dot')) {
+                currentIndex = parseInt(e.target.dataset.index);
+                moveSlider();
+                updateSliderControls();
+                updatePaginationDots();
+            }
+        });
+    }
+
+    function renderUpcomingSchedules() {
+        const scheduleSection = document.getElementById('upcoming-schedule-section');
+        if (!scheduleSection) return;
+
+        if (!upcomingSchedules || upcomingSchedules.length === 0) {
+            // 일정 없음
+            if (noScheduleView) {
+                noScheduleView.innerHTML =
+                    '<p class="no-schedule-message" style="color:white; text-shadow: 0 0 3px black;">아직 7일 이내의 일정이 없습니다. 😥</p>';
+                noScheduleView.style.display = 'block';
+            }
+            if (sliderContainer) sliderContainer.style.display = 'none';
+            return;
         }
 
+        // 일정 있음
+        if (sliderTrack) sliderTrack.innerHTML = '';
+        if (paginationContainer) paginationContainer.innerHTML = '';
 
-        // (★수정★) 로그인 상태 확인
-        if (accessToken) {
-            // [회원일 때] - Hero 섹션에 일정/알림 표시
-            if (profileMenuToggle) profileMenuToggle.style.display = 'block';
-            if (navLoginLink) navLoginLink.parentElement.style.display = 'none';
-            if (navLogoutLink) navLogoutLink.parentElement.style.display = 'list-item';
+        upcomingSchedules.forEach((schedule, index) => {
+            const item = document.createElement('div');
+            item.className = 'schedule-item';
 
-            const userMenuUsername = document.getElementById('user-menu-username');
-            if (userMenuUsername) {
-                console.log("✅ [main.html] 현재 localStorage 닉네임 값:", loggedInUsername);
-                userMenuUsername.textContent = loggedInUsername; // 헤더 닉네임 변경
+            const isMatch = schedule.type === '경기';
+
+            if (isMatch) {
+                const targetMatchId = schedule.matchId;
+                item.innerHTML = `
+                    <div class="item-info-wrapper">
+                        <div class="item-type type-match">경기 일정</div>
+                        <strong>${schedule.title || ''}</strong>
+                        <div class="item-location">
+                            <i class="fas fa-clock"></i>
+                            ${schedule.date || ''} ${schedule.time ? `(${schedule.time})` : ''}
+                        </div>
+                    </div>
+                    <a href="/schedule/detail/${targetMatchId}" class="schedule-item-link">상세보기</a>
+                `;
+            } else {
+                item.innerHTML = `
+                    <div class="item-info-wrapper">
+                        <div class="item-type type-personal">개인 일정</div>
+                        <strong>${schedule.title || '(제목 없는 일정)'}</strong>
+                        <div class="item-location">
+                            <i class="fas fa-calendar-alt"></i>
+                            ${schedule.date || ''} ${schedule.time ? `(${schedule.time})` : ''}
+                        </div>
+                    </div>
+                    <a href="/mypage?tab=calendar&date=${schedule.date}&scheduleId=${schedule.id}" class="schedule-item-link">
+                        달력에서 보기
+                    </a>
+                `;
             }
 
-            // Hero 섹션 하단의 로그인 유도 텍스트 숨김
+            if (sliderTrack) sliderTrack.appendChild(item);
+
+            if (paginationContainer) {
+                const dot = document.createElement('span');
+                dot.className = 'dot';
+                dot.dataset.index = index;
+                paginationContainer.appendChild(dot);
+            }
+        });
+
+        totalSlides = upcomingSchedules.length;
+        currentIndex = 0;
+
+        updateSliderControls();
+        updatePaginationDots();
+
+        if (sliderContainer) sliderContainer.style.display = 'block';
+        if (noScheduleView) noScheduleView.style.display = 'none';
+    }
+
+    // ----------------------
+    // 페이지 로드 후 실행
+    // ----------------------
+    document.addEventListener('DOMContentLoaded', async () => {
+
+        // SSO 처리
+        const urlParams = new URLSearchParams(window.location.search);
+        const token = urlParams.get('token');
+        if (token) {
+            localStorage.setItem('accessToken', token);
+            window.history.replaceState({}, document.title, "/");
+
+            try {
+                const response = await fetch('/api/users/me', {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+                if (response.ok) {
+                    const userData = await response.json();
+                    localStorage.setItem('username', userData.nickname);
+                    localStorage.setItem('userId', userData.username);
+                }
+            } catch (e) { console.error(e); }
+        }
+
+        const accessToken = localStorage.getItem('accessToken');
+        const loggedInUsername = localStorage.getItem('username');
+
+        const mainLoginLink = document.getElementById('main-login-link');
+        const noScheduleViewHero = document.getElementById('no-schedule-view-hero');
+        const memberContentArea = document.getElementById('member-content-area');
+        const chatPromoLink = document.getElementById('chat-promo-link');
+        const globalCtaRegister = document.getElementById('global-cta-register');
+
+        const scheduleSection = document.getElementById('upcoming-schedule-section');
+        const reviewSection = document.getElementById('review-notification-section');
+
+        // 로그인 상태
+        if (accessToken) {
             if (mainLoginLink) mainLoginLink.style.display = 'none';
             if (noScheduleViewHero) noScheduleViewHero.style.display = 'none';
-
-            // 일정/알림 영역만 표시 준비
             if (memberContentArea) memberContentArea.style.display = 'block';
+            if (globalCtaRegister) globalCtaRegister.style.display = 'none';
 
-            // ⭐⭐⭐ 수정: 회원일 때 하단 CTA 숨김 ⭐⭐⭐
-            if (globalCtaRegister) {
-                globalCtaRegister.style.display = 'none';
-            }
-            // ⭐⭐⭐
+            const userMenuUsername = document.getElementById('user-menu-username');
+            if (userMenuUsername) userMenuUsername.textContent = loggedInUsername;
 
             await checkPendingReviews();
             await checkUpcomingSchedules();
             updateGlobalBadge();
 
-            // (★) 실시간 채팅 링크 설정 (회원: 바로 페이지 이동)
+            // ✅ 여기서 일정 렌더링 호출
+            renderUpcomingSchedules();
+
             if (chatPromoLink) {
                 chatPromoLink.href = "/chat";
                 chatPromoLink.textContent = "실시간 채팅 바로가기";
             }
 
-            // (★) 후기 알림 배너 표시 로직 (링크에 stadiumId 추가)
             if (reviewSection && pendingReviewStadiumIds.length > 0) {
-                // ⭐⭐ [수정됨] 후기 작성 링크에 첫 번째 stadiumId 파라미터 추가 ⭐⭐
-                const targetStadiumId = pendingReviewStadiumIds[0];
-                const reviewLinkUrl = `/reviews/write?stadiumId=${targetStadiumId}`;
+                const stadiumId = pendingReviewStadiumIds[0];
                 const count = pendingReviewStadiumIds.length;
 
                 reviewSection.innerHTML = `
                     <div class="review-notification-text">
                         <i class="fas fa-bell"></i> 작성하지 않은 경기 후기가 <strong>${count}건</strong> 있습니다.
                     </div>
-                    <a href="${reviewLinkUrl}" id="main-review-link" class="review-notification-link">후기 작성하기</a>
+                    <a href="/reviews/write?stadiumId=${stadiumId}" class="review-notification-link">후기 작성하기</a>
                     <button class="close-review-btn" onclick="closeReviewNotification()">&times;</button>
                 `;
                 reviewSection.style.display = 'flex';
-
-                const mainReviewLink = document.getElementById('main-review-link');
-                mainReviewLink.addEventListener('click', (e) => {
-                    localStorage.setItem('hasReadReviews', 'true');
-                    reviewSection.style.display = 'none';
-                    // 알림을 읽었으므로 배열 초기화
-                    pendingReviewStadiumIds = [];
-                    updateGlobalBadge();
-                });
-
-            } else if (reviewSection) {
-                reviewSection.style.display = 'none';
             }
 
-            // (★) 다가오는 일정 슬라이더 로직
-            if (scheduleSection) {
-                scheduleSection.style.display = 'block';
-                const noScheduleView = document.getElementById('no-schedule-view');
-
-                // ✔ checkUpcomingSchedules()에서 채워준 값 사용
-                const list = upcomingSchedules;
-
-                if (list && list.length > 0) {
-                    sliderTrack.innerHTML = '';
-                    paginationContainer.innerHTML = '';
-
-                    list.forEach((schedule, index) => {
-                        const item = document.createElement('div');
-                        item.className = 'schedule-item';
-
-                        const isMatch = schedule.type === '경기';   // 경기 일정인지 여부
-
-                        if (isMatch) {
-                            const targetMatchId = schedule.matchId;
-                            // ⭐ 경기 일정 카드
-                            item.innerHTML = `
-                                <div class="item-info-wrapper">
-                                    <div class="item-type type-match">경기 일정</div>
-                                    <strong>${schedule.title || ''}</strong>
-                                    <div class="item-location">
-                                        <i class="fas fa-clock"></i>
-                                        ${schedule.date || ''} ${schedule.time ? `(${schedule.time})` : ''}
-                                    </div>
-                                </div>
-                                 <a href="/schedule/detail/${targetMatchId}" class="schedule-item-link">상세보기</a>
-                            `;
-                        } else {
-                            // ⭐ 개인 일정 카드
-                            item.innerHTML = `
-                                <div class="item-info-wrapper">
-                                    <div class="item-type type-personal">개인 일정</div>
-                                    <strong>${schedule.title || '(제목 없는 일정)'}</strong>
-                                    <div class="item-location">
-                                        <i class="fas fa-calendar-alt"></i>
-                                        ${schedule.date || ''} ${schedule.time ? `(${schedule.time})` : ''}
-                                    </div>
-                                </div>
-                                <a href="/mypage?tab=calendar&date=${schedule.date}&scheduleId=${schedule.id}" class="schedule-item-link">
-                                달력에서 보기</a>
-                            `;
-                        }
-
-                        sliderTrack.appendChild(item);
-
-                        const dot = document.createElement('span');
-                        dot.className = 'dot';
-                        dot.dataset.index = index;
-                        paginationContainer.appendChild(dot);
-                    });
-
-                    totalSlides = list.length;
-                    currentIndex = 0;
-
-                    updateSliderControls();
-                    updatePaginationDots();
-
-                    if (document.querySelector('.schedule-slider-container')) {
-                        document.querySelector('.schedule-slider-container').style.display = 'block';
-                    }
-                    if (noScheduleView) noScheduleView.style.display = 'none';
-
-                } else if (noScheduleView) {
-                    noScheduleView.innerHTML =
-                        '<p class="no-schedule-message" style="color:white; text-shadow: 0 0 3px black;">아직 7일 이내의 일정이 없습니다. 😥</p>';
-                    noScheduleView.style.display = 'block';
-                    if (document.querySelector('.schedule-slider-container')) {
-                        document.querySelector('.schedule-slider-container').style.display = 'none';
-                    }
-                }
-            }
         } else {
-            // [비회원일 때] - Hero 섹션에 로그인 유도 메시지 표시
-            if (profileMenuToggle) profileMenuToggle.style.display = 'none';
-            if (navLoginLink) navLoginLink.parentElement.style.display = 'list-item';
-            if (navLogoutLink) navLogoutLink.parentElement.style.display = 'none';
-
-            // Hero 섹션 하단의 로그인 유도 텍스트 표시
+            // 비로그인
             if (mainLoginLink) mainLoginLink.style.display = 'none';
             if (noScheduleViewHero) noScheduleViewHero.style.display = 'block';
             if (memberContentArea) memberContentArea.style.display = 'none';
-
-            // 기존 일정/알림 영역 숨김
             if (scheduleSection) scheduleSection.style.display = 'none';
             if (reviewSection) reviewSection.style.display = 'none';
+            if (globalCtaRegister) globalCtaRegister.style.display = 'block';
 
-            // ⭐⭐⭐ 수정: 비회원일 때 하단 CTA 표시 ⭐⭐⭐
-            if (globalCtaRegister) {
-                globalCtaRegister.style.display = 'block';
-            }
-            // ⭐⭐⭐
-
-            // (★) 실시간 채팅 링크 설정 (비회원: 로그인 유도)
             if (chatPromoLink) {
                 chatPromoLink.href = "/login";
                 chatPromoLink.textContent = "로그인 후 이용 가능";
-                // 메인 페이지의 CTA 링크는 자체적으로 경고를 띄웁니다.
-                chatPromoLink.onclick = function(e) {
+                chatPromoLink.onclick = function (e) {
                     e.preventDefault();
                     alert("실시간 채팅은 로그인 후 이용 가능합니다.");
                     window.location.href = "/login";
                 };
             }
-
-            if (navChatLinkElement) {
-                // ✅ 수정됨: 요소를 바로 사용
-                navChatLinkElement.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    // alert("❌ 실시간 채팅은 회원만 이용할 수 없습니다."); // (메시지가 좀 어색해서 수정 제안)
-                    alert("로그인이 필요한 서비스입니다.");
-                    window.location.href = '/login';
-                });
-            }
         }
     });
 </script>
+
+
+</body>
+</html>
