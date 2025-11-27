@@ -626,9 +626,7 @@ body, html {
     .background-image-section .overlay-content {
         display: none;
     }
-    .quick-menu {
-        padding: 10px 20px;
-    }
+
     .main-nav {
         right: 10px;
     }
@@ -2986,6 +2984,10 @@ body, html {
     transition: all 0.3s ease-in-out;
 }
 
+.chat-main.sidebar-open {
+    margin-right: 280px;
+}
+
 .chat-sidebar {
     width: 300px;
     background: white;
@@ -3129,12 +3131,58 @@ body, html {
     background-color: #8e44ad;
 }
 
+.message-wrapper {
+    margin: 12px 0;
+    display: flex;
+    flex-direction: column;
+}
+
+/* 정렬 */
+.message-wrapper.other {
+    align-items: flex-start;
+}
+
+.message-wrapper.mine {
+    align-items: flex-end;
+}
+
+.message-nickname {
+    font-size: 13px;
+    color: #444;
+    margin-bottom: 3px;
+    margin-left: 4px;
+    font-weight: 600;
+}
+
+.bubble-row {
+    display: flex;
+    align-items: flex-end;
+    gap: 6px;
+}
+
+.bubble-row.other {
+    justify-content: flex-start;
+}
+
+.bubble-row.mine {
+    justify-content: flex-end;
+}
+
 .message-bubble {
+    max-width: 250px;
+    padding: 9px 12px;
+    border-radius: 18px;
+    line-height: 1.4;
+    font-size: 14px;
+    word-break: break-word;
     margin-bottom: 15px;
     display: flex;
     align-items: flex-start;
 }
+
 .message-bubble.mine {
+    background: #d2e4fc;
+    color: #111;
     justify-content: flex-end;
 }
 .message-bubble.mine .message-content {
@@ -3143,6 +3191,9 @@ body, html {
     border-radius: 15px 15px 0 15px;
 }
 .message-bubble.other {
+    background: #ffffff;
+    border: 1px solid #ddd;
+    color: #222;
     justify-content: flex-start;
 }
 .message-bubble.other .message-content {
@@ -3164,6 +3215,13 @@ body, html {
     align-self: flex-end;
     margin: 0 5px;
 }
+
+.message-time {
+    font-size: 11px;
+    color: #777;
+    margin-bottom: 15px;
+}
+
 #chat-welcome-message {
     display: flex;
     justify-content: center;
@@ -3295,11 +3353,7 @@ body, html {
     }
 }
 
-.chat-btn-cancel {
-    background: #f0f0f0;
-    color: #555;
-    border: 1px solid #ddd;
-}
+
 .chat-btn-create {
     background: #6c5ce7;
     color: white;
@@ -3437,10 +3491,12 @@ body, html {
     color: white;
     font-size: 11px;
     font-weight: 700;
-    border-radius: 10px;
+    border-radius: 40px;
     padding: 3px 8px;
     flex-shrink: 0;
+    display: inline-block;
     min-width: 24px;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.07);
     text-align: center;
 }
 .invite-action-btn {
@@ -3453,6 +3509,23 @@ body, html {
 .invite-action-btn:hover {
     transform: translateY(-1px);
     background-color: #27ae60 !important;
+}
+
+/* 🔥 친구 초대 모달 X 버튼 스타일 */
+.modal-close-x {
+    position: absolute;
+    top: 12px;
+    right: 16px;
+    background: none;
+    border: none;
+    font-size: 24px;
+    color: #666;
+    cursor: pointer;
+    line-height: 1;
+    padding: 0;
+}
+.modal-close-x:hover {
+    color: #e74c3c;
 }
 
 #upcoming-schedule-section, #review-notification-section {
