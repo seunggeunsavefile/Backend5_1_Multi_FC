@@ -617,12 +617,7 @@ body, html {
         max-width: none;
         width: 100%;
     }
-    .schedule-item {
-        width: 90vw;
-        max-width: 400px;
-        margin: 0 10px;
-        padding: 15px;
-    }
+
     .slider-arrow.prev { left: 0px; }
     .slider-arrow.next { right: 0px; }
 }
@@ -894,7 +889,6 @@ body, html {
     font-size: 15px;
     font-weight: 500;
     position: relative;
-    padding-right: 40px;
     font-family: 'Noto Sans KR', sans-serif;
 }
 #review-notification-section .review-notification-text strong {
@@ -914,25 +908,6 @@ body, html {
 }
 .review-notification-link:hover {
     background-color: #c0392b;
-}
-.close-review-btn {
-    position: absolute;
-    top: 5px;
-    right: 5px;
-    background: none;
-    border: none;
-    color: rgba(255, 255, 255, 0.8);
-    font-size: 16px;
-    cursor: pointer;
-    padding: 5px;
-    opacity: 0.6;
-    transition: opacity 0.2s;
-    line-height: 1;
-    z-index: 20;
-}
-.close-review-btn:hover {
-    opacity: 1;
-    color: white;
 }
 /* 일정 타이틀 스타일 */
 .schedule-title {
@@ -974,6 +949,11 @@ body, html {
 }
 /* ⭐⭐ 일정 아이템 디자인 개선 ⭐⭐ */
 .schedule-item {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(240, 240, 240, 0.95)) !important;
+    color: #2c3e50 !important;
+    border: 1px solid rgba(0,0,0,0.1);
+    text-align: left;
+    max-width: 400px;
     background: rgba(255, 255, 255, 0.85);
     backdrop-filter: blur(10px);
     border-radius: 16px;
@@ -981,35 +961,39 @@ body, html {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
-    border-left: 5px solid #000;
-    border: 1px solid rgba(0, 0, 0, 0.1);
     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
     padding: 25px 20px;
-    color: #222;
     width: 500px;
     flex-shrink: 0;
     transition: all 0.3s ease;
     font-family: 'Noto Sans KR', sans-serif;
+}
+.schedule-item strong {
+    font-size: 17px;
+    color: #111;
+    display: block;
+    margin-bottom: 5px;
+}
+.schedule-item .item-type {
+    font-size: 13px;
+    font-weight: 700;
+    color: #e74c3c;
+    margin-bottom: 5px;
 }
 .schedule-item:hover {
     transform: translateY(-6px);
     box-shadow: 0 15px 35px rgba(0, 0, 0, 0.25);
     border: 1px solid rgba(0, 0, 0, 0.3);
 }
-/* 텍스트 */
-.schedule-item .item-type {
-    color: #000;
-    font-weight: 700;
-}
-.schedule-item strong {
-    color: #111;
-}
 .schedule-item .item-location {
-    color: #444;
+    font-size: 14px;
+    color: #555;
+    display: flex;
+    align-items: center;
 }
 .schedule-item .item-location i {
-    color: #000;
-    margin-right: 6px;
+    margin-right: 5px;
+    color: #8e44ad;
 }
 .schedule-item-info {
     color: #2c3e50;
@@ -1131,7 +1115,6 @@ body, html {
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
     gap: 30px;
 }
-
 /* ⭐⭐ 피처 카드 디자인 개선 ⭐⭐ */
 .feature-card {
     background: rgba(255, 255, 255, 0.1); /* 투명한 흰색 배경 */
@@ -1152,12 +1135,10 @@ body, html {
     border-bottom: 5px solid #6c5ce7;
     border-top: none;
 }
-
 .feature-card:hover {
     transform: translateY(-10px);
     box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
 }
-
 .feature-card .icon-wrapper {
     background: #6c5ce7; /* 보라색 아이콘 배경 */
     color: white;
@@ -1172,11 +1153,9 @@ body, html {
     box-shadow: 0 5px 15px rgba(108, 92, 231, 0.4);
     transition: background 0.3s;
 }
-
 .feature-card:hover .icon-wrapper {
     background: rgba(108, 92, 231, 0.2);
 }
-
 .feature-card h3 {
     color: #020202; /* 흰색 제목 */
     font-size: 26px;
@@ -1184,14 +1163,12 @@ body, html {
     text-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
     font-weight: 800;
 }
-
 .feature-card p {
     color: #000000; /* 밝은 회색 내용 */
     line-height: 1.6;
     margin-bottom: 25px;
     font-size: 16px;
 }
-
 .card-link {
     display: inline-block;
     padding: 10px 20px;
@@ -1203,13 +1180,11 @@ body, html {
     transition: background 0.3s ease;
     margin-top: 10px; /* ⭐⭐⭐ [추가] 버튼 상단 여백 추가 ⭐⭐⭐ */
 }
-
 .feature-card .card-link:hover {
     background: #f39c12;
     transform: translateY(-2px);
 }
 /* ⭐⭐ 끝: 피처 카드 디자인 개선 ⭐⭐ */
-
 /* ===========================
    [추가] 메인페이지 대시보드 요소 스타일
 =========================== */
@@ -1222,7 +1197,6 @@ body, html {
     z-index: 10;
     width: 100%;
 }
-
 .value-section h2 {
     color: white;
     text-shadow: 0 0 10px rgba(0, 0, 0, 0.7);
@@ -1230,7 +1204,6 @@ body, html {
     font-weight: 900;
     margin-bottom: 60px;
 }
-
 .value-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr); /* ✅ 4 → 3으로 변경 */
@@ -1240,7 +1213,6 @@ body, html {
     justify-content: center;
     flex-wrap: wrap;
 }
-
 .value-card {
     background: #ffffff; /* 투명한 흰색 배경 */
     border-radius: 12px;
@@ -1253,12 +1225,10 @@ body, html {
     flex: 1 1 200px;
     border-bottom: 3px solid #6c5ce7;
 }
-
 .value-card:hover {
     transform: translateY(-10px);
     box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
 }
-
 .value-card i {
     color: #6c5ce7; /* 보라색 아이콘 */
     font-size: 48px;
@@ -1266,7 +1236,6 @@ body, html {
     text-shadow: 0 0 10px rgba(108, 92, 231, 0.5);
 
 }
-
 .value-card h3 {
     color: #000000; /* 흰색 제목 */
     font-size: 24px;
@@ -1274,14 +1243,12 @@ body, html {
     text-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
     font-weight: 700;
 }
-
 .value-card p {
     font-size: 0.9rem;
     opacity: 0.8;
     color: #000000;
     line-height: 1.6;
 }
-/* ⭐⭐ Value Section의 반응형 레이아웃 오버라이드 ⭐⭐ */
 @media (max-width: 1200px) {
     .value-grid {
         grid-template-columns: repeat(2, 1fr); /* 2개씩으로 전환 */
@@ -1295,7 +1262,6 @@ body, html {
         grid-template-columns: 1fr;
     }
 }
-
 .global-cta-section {
     width: 100%;
     background: linear-gradient(135deg, #2c3e50, #34495e); /* 검정/남색 계열로 변경 */
@@ -1306,7 +1272,6 @@ body, html {
     z-index: 10;
 
 }
-
 .global-cta-section h2 {
     font-size: 40px;
     margin-bottom: 40px;
@@ -1315,8 +1280,6 @@ body, html {
     color: white; /* 어두운 배경에 흰색 제목 */
     line-height: 1.2;
 }
-
-/* ★★★ 추가: 실시간 채팅 섹션 스타일 ★★★ */
 .chat-promo-section {
     background: linear-gradient(135deg, #34495e, #2c3e50); /* 어두운 파란색 계열 그라데이션 */
     color: white;
@@ -1335,12 +1298,10 @@ body, html {
     text-shadow: 0 0 10px rgba(0, 0, 0, 0.7);
 
 }
-
 .chat-promo-section h2 i {
     color: #f1c40f; /* 노란색 아이콘 강조 */
     margin-right: 10px;
 }
-
 .chat-promo-box {
     background: rgba(255, 255, 255, 0.15); /* 투명한 흰색 배경 */
     border-radius: 15px;
@@ -1378,7 +1339,6 @@ body, html {
     transform: translateY(-3px);
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
 }
-
 /* ---------------------------------
    [추가] 프로젝트 정보 푸터 스타일
 --------------------------------- */
@@ -1395,18 +1355,15 @@ body, html {
     position: relative;
     border-top: 3px solid #6c5ce7;
 }
-
 .project-footer .footer-content {
     max-width: 1200px;
     margin: 0 auto;
     opacity: 0.85;
 }
-
 .project-footer p strong {
     font-weight: 700;
     color: #f7f7f7;
 }
-
 /* ---------------------------------
    [추가] 프로젝트 정보 푸터 링크 스타일
 --------------------------------- */
@@ -1420,7 +1377,6 @@ body, html {
     text-decoration: underline;
     opacity: 0.7;
 }
-
 /* ---------------------------------
    [추가] 채팅 페이지 사용자 프로필 정보 창 스타일 (가정)
 --------------------------------- */
@@ -1442,7 +1398,6 @@ body, html {
     z-index: 10000;
     border: 1px solid #eee;
 }
-
 .profile-close-btn {
     position: absolute;
     top: 15px;
@@ -1455,7 +1410,6 @@ body, html {
 .profile-close-btn:hover {
     color: #e74c3c;
 }
-
 .profile-action-button {
     width: 100%;
     padding: 12px;
@@ -1467,7 +1421,6 @@ body, html {
     transition: all 0.3s ease;
     font-size: 15px;
 }
-
 .chat-button {
     background: #6c5ce7;
     color: white;
@@ -1477,7 +1430,6 @@ body, html {
     filter: brightness(1.1);
     transform: translateY(-1px);
 }
-
 .friend-request-button {
     background: #f0f0f0;
     color: #2c3e50;
@@ -1486,12 +1438,10 @@ body, html {
 .friend-request-button:hover {
     background: #e0e0e0;
 }
-
 .search-content {
     display: flex;
     gap: 20px;
 }
-
 /* ⭐ 폼 중앙 정렬 및 배경 제거/단순화 ⭐ */
 .review-page-main {
     padding: 100px 20px 40px 20px; /* 상단 패딩 유지, 좌우 패딩 줄임 */
@@ -1503,11 +1453,9 @@ body, html {
     position: relative;
     z-index: 1;
 }
-
 .review-page-main::before {
     content: none; /* 오버레이 제거 */
 }
-
 .review-main-wrapper {
     display: block; /* Flex 속성 제거 */
     width: 100%;
@@ -1518,13 +1466,11 @@ body, html {
     overflow: hidden;
     background: white; /* 메인 컨테이너 배경 흰색 */
 }
-
 .review-form-container {
     background: white;
     padding: 40px;
     width: 100%;
 }
-
 .title-review {
     font-size: 28px;
     font-weight: 700;
@@ -1534,12 +1480,10 @@ body, html {
     padding-bottom: 10px;
     text-align: left;
 }
-
 .review-input-group {
     margin-bottom: 25px;
     text-align: left;
 }
-
 .review-input-group label {
     display: block;
     font-size: 16px;
@@ -1547,7 +1491,6 @@ body, html {
     color: #34495e;
     margin-bottom: 8px;
 }
-
 /* 경기 정보 필드 스타일 (이미지처럼 회색 배경) */
 #match-info {
     width: 100%;
@@ -1623,40 +1566,6 @@ body, html {
 .background-image-section {
     display: none; /* 제거 */
 }
-
-
-.stadium-main {
-    padding: 100px 40px 40px 40px;
-    background-color: #f7f7f7;
-    min-height: 100vh;
-}
-.stadium-container {
-    max-width: 1200px;
-    margin: 0 auto;
-    background: white;
-    padding: 40px;
-    border-radius: 15px;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-    display: grid;
-    grid-template-columns: 1fr 400px;
-    gap: 30px;
-}
-.stadium-title {
-    grid-column: 1 / -1;
-    font-size: 32px;
-    font-weight: 800;
-    color: #333;
-    margin-bottom: 5px;
-    border-bottom: 3px solid #6c5ce7;
-    padding-bottom: 10px;
-}
-
-.detail-left-column {
-    grid-column: 1 / 2;
-    display: flex;
-    flex-direction: column;
-}
-
 .stadium-map-area {
     width: 100%;
     height: 350px;
@@ -1670,37 +1579,7 @@ body, html {
     color: #888;
 }
 
-.review-right-column {
-    grid-column: 2 / 3;
-    grid-row: 2 / span 2;
-    background: #fcfcfc;
-    border-radius: 10px;
-    padding: 15px;
-    border: 1px solid #ddd;
-    max-height: 685px;
-    overflow-y: auto;
-}
 
-.info-card {
-    border: 1px solid #ddd;
-    border-radius: 10px;
-    padding: 20px;
-    margin-top: 0;
-}
-.info-card h2{
-    margin-bottom: 20px;
-}
-.info-item {
-    display: flex;
-    align-items: center;
-    margin-bottom: 10px;
-    font-size: 16px;
-}
-.info-item i {
-    width: 25px;
-    color: #6c5ce7;
-    margin-right: 10px;
-}
 .amenities-list {
     margin-top: 15px;
     padding-top: 15px;
@@ -1716,167 +1595,6 @@ body, html {
     margin-right: 8px;
     margin-bottom: 8px;
     font-weight: 600;
-}
-
-.action-button-group {
-    text-align: center;
-    grid-column: 1 / 2;
-    display: flex;
-    justify-content: center;
-    gap: 15px;
-}
-.action-button-group a {
-    display: inline-block;
-    padding: 14px 28px;
-    font-weight: 700;
-    border-radius: 30px;
-    text-decoration: none;
-    transition: all 0.3s ease;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-    font-size: 16px;
-    flex-grow: 0;
-    flex-shrink: 0;
-}
-.btn-schedule {
-    background-color: #333;
-    color: white;
-    border: 2px solid #1a1a1a;
-}
-.btn-schedule:hover {
-    background-color: #1a1a1a;
-    transform: translateY(-2px);
-    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
-}
-.btn-create-match {
-    background-color: #e74c3c;
-    color: white;
-    border: 2px solid #c0392b;
-}
-.btn-create-match:hover {
-    background-color: #c0392b;
-    transform: translateY(-2px);
-    box-shadow: 0 6px 12px rgba(231, 76, 60, 0.3);
-}
-
-.review-right-column h2 {
-    font-size: 24px;
-    color: #333;
-    margin-bottom: 15px;
-}
-
-#review-list {
-    min-height: 300px;
-}
-.review-item {
-    border-bottom: 1px solid #eee;
-    padding: 15px 0;
-}
-.review-item:last-child {
-    border-bottom: none;
-}
-.review-header {
-    display: flex;
-    justify-content: space-between;
-    font-size: 14px;
-    margin-bottom: 5px;
-}
-.review-user {
-    font-weight: 700;
-    color: #6c5ce7;
-    display: flex;
-    align-items: center;
-}
-.review-date {
-    color: #999;
-}
-.review-content {
-    font-size: 15px;
-    line-height: 1.5;
-    color: #333;
-}
-.review-item .star-display {
-    color: #f39c12;
-    font-size: 18px;
-    margin-right: 10px;
-    letter-spacing: 2px;
-}
-
-.review-actions {
-    display: flex;
-    gap: 10px;
-    align-items: center;
-    margin-top: 5px;
-    justify-content: flex-end;
-}
-.review-actions button {
-    background: none;
-    border: none;
-    color: #6c5ce7;
-    font-size: 13px;
-    cursor: pointer;
-    padding: 2px 5px;
-    transition: color 0.2s;
-}
-.review-actions button.delete {
-    color: #e74c3c;
-}
-
-.pagination-controls {
-    text-align: center;
-    margin-top: 20px;
-    padding-top: 10px;
-    border-top: 1px solid #eee;
-}
-.pagination-controls button {
-    background: none;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    padding: 5px 10px;
-    margin: 0 5px;
-    color: #555;
-    font-weight: 600;
-    cursor: pointer;
-    transition: background-color 0.2s;
-}
-.pagination-controls button:hover:not(:disabled) {
-    background-color: #f0f0f0;
-}
-.pagination-controls button.active {
-    background-color: #6c5ce7;
-    color: white;
-    border-color: #6c5ce7;
-}
-.pagination-controls button:disabled {
-    cursor: not-allowed;
-    opacity: 0.5;
-}
-
-.tab-header {
-    display: flex;
-    border-bottom: 2px solid #eee;
-    margin-bottom: 15px;
-}
-.tab-button {
-    flex: 1;
-    text-align: center;
-    padding: 10px 0;
-    cursor: pointer;
-    font-weight: 700;
-    font-size: 15px;
-    border: none;
-    background: none;
-    outline: none;
-    transition: all 0.2s ease;
-}
-.tab-button.active {
-    color: #6c5ce7;
-    border-bottom: 3px solid #6c5ce7;
-}
-.tab-content {
-    display: none;
-}
-.tab-content.active {
-    display: block;
 }
 
 /* ✅ 경기 개설 모달 */
@@ -1981,61 +1699,6 @@ body, html {
 }
 .stadium-btn-create:hover {
     background-color: #111;
-}
-
-/* ✅ 경기 목록 UI */
-.match-filter {
-    margin-bottom: 10px;
-    font-size: 14px;
-}
-.match-filter label {
-    font-weight: 600;
-    margin-right: 8px;
-}
-.match-filter input[type="date"] {
-    padding: 6px 8px;
-    font-size: 14px;
-    border-radius: 6px;
-    border: 1px solid #ddd;
-    background-color: #fff;
-}
-.match-list {
-    margin-top: 10px;
-    border-top: 1px solid #eee;
-}
-.match-item {
-    padding: 10px 0;
-    border-bottom: 1px solid #eee;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    cursor: pointer;
-}
-.match-item:last-child {
-    border-bottom: none;
-}
-.match-item-time {
-    font-weight: 700;
-    color: #333;
-}
-.match-item-meta {
-    font-size: 13px;
-    color: #777;
-}
-.match-item:hover .match-item-time {
-    text-decoration: underline;
-}
-
-/* ✅ 모집중/마감 상태 표시 */
-.match-status {
-    font-weight: 700;
-    margin-left: 4px;
-}
-.match-status.open {
-    color: #27ae60; /* 모집중: 초록 */
-}
-.match-status.closed {
-    color: #e74c3c; /* 마감: 빨강 */
 }
 
 .search-main {
@@ -2212,13 +1875,6 @@ body, html {
     cursor: pointer;
     border: none;
 }
-
-.match-list-container {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 20px;
-}
-
 .match-item-card {
     background: white;
     border: 1px solid #eee;
@@ -2348,6 +2004,7 @@ body, html {
         grid-template-columns: 1fr 350px;
     }
 }
+
 .map-area {
     width: 100%;
     height: 300px;
@@ -2384,60 +2041,6 @@ body, html {
     border-bottom: 1px solid #ddd;
     padding-bottom: 10px;
     margin-bottom: 15px;
-}
-.participant-section {
-    margin-top: 10px;
-}
-.host-participant-list {
-    margin: 0;
-    padding: 0 0 8px 0;
-    border-bottom: 1px dashed #eee;
-}
-.participant-scroll {
-    max-height: 320px;
-    overflow-y: auto;
-    padding-top: 8px;
-}
-.participant-list {
-    list-style: none;
-    padding: 0;
-}
-.participant-list li {
-    padding: 8px 0;
-    color: #555;
-    font-size: 15px;
-    border-bottom: 1px dashed #eee;
-}
-.participant-list li:last-child {
-    border-bottom: none;
-}
-.participant-list .user-info {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-weight: 600;
-    gap: 8px;
-}
-.participant-list .user-main {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-}
-.participant-list .user-main input[type="checkbox"] {
-    cursor: pointer;
-}
-.participant-list .user-info .role-badge {
-    font-size: 12px;
-    background: #e74c3c;
-    color: white;
-    padding: 2px 5px;
-    border-radius: 5px;
-    font-weight: 400;
-}
-.participant-list .detail-info {
-    font-size: 12px;
-    color: #999;
-    margin-top: 3px;
 }
 .join-button {
     width: 100%;
@@ -2565,11 +2168,6 @@ body, html {
 .btn-accept {
     background-color: #2ecc71;
     color: white;
-}
-.btn-reject {
-    background-color: #f0f0f0;
-    color: #555;
-    border: 1px solid #ddd;
 }
 /* 아이콘 컬러 */
 .notification-item .icon-review { color: #faad14; }
@@ -2768,11 +2366,6 @@ input[type="email"]:read-only {
 /* =========================
    SCHEDULE PAGE START
    ========================= */
-.schedule-search-main {
-    padding: 100px 40px 40px 40px;
-    background-color: #f7f7f7;
-    min-height: 100vh;
-}
 .search-container {
     max-width: 1200px;
     margin: 0 auto;
@@ -3030,18 +2623,7 @@ input[type="email"]:read-only {
         grid-template-columns: 1fr 350px;
     }
 }
-.map-area {
-    width: 100%;
-    height: 300px;
-    background-color: #eee;
-    border-radius: 10px;
-    margin-bottom: 20px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 20px;
-    color: #888;
-}
+
 .detail-info-item {
     display: flex;
     font-size: 16px;
@@ -3069,62 +2651,7 @@ input[type="email"]:read-only {
     margin-bottom: 15px;
 }
 
-.participant-section {
-    margin-top: 10px;
-}
-.host-participant-list {
-    margin: 0;
-    padding: 0 0 8px 0;
-    border-bottom: 1px dashed #eee;
-}
 
-.participant-scroll {
-    max-height: 320px;
-    overflow-y: auto;
-    padding-top: 8px;
-}
-
-.participant-list {
-    list-style: none;
-    padding: 0;
-}
-.participant-list li {
-    padding: 8px 0;
-    color: #555;
-    font-size: 15px;
-    border-bottom: 1px dashed #eee;
-}
-.participant-list li:last-child {
-    border-bottom: none;
-}
-.participant-list .user-info {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-weight: 600;
-    gap: 8px;
-}
-.participant-list .user-main {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-}
-.participant-list .user-main input[type="checkbox"] {
-    cursor: pointer;
-}
-.participant-list .user-info .role-badge {
-    font-size: 12px;
-    background: #e74c3c;
-    color: white;
-    padding: 2px 5px;
-    border-radius: 5px;
-    font-weight: 400;
-}
-.participant-list .detail-info {
-    font-size: 12px;
-    color: #999;
-    margin-top: 3px;
-}
 
 .join-button {
     width: 100%;
@@ -3210,20 +2737,17 @@ input[type="email"]:read-only {
     cursor: pointer;
     transition: background-color 0.3s;
 }
-
 .write-btn-save {
     background-color: #6c5ce7;
     color: white;
     border: none;
 }
-
 .write-btn-cancel {
     background-color: #f0f0f0;
     color: #555;
     border: 1px solid #ddd;
     margin-right: 10px;
 }
-
 .write-form input[type="text"],
 .write-form select {
     width: 100%;
@@ -3235,7 +2759,6 @@ input[type="email"]:read-only {
     background: #f7f7f7;
     font-family: inherit;
 }
-
 /* 카테고리 SELECT 박스 너비 제한 (이전 요청사항 반영) */
 .write-form #category {
     width: auto;
@@ -3251,7 +2774,6 @@ input[type="email"]:read-only {
     height: 300px;
     margin-bottom: 25px; /* 버튼과의 간격 조정 */
 }
-
 /* Quill 툴바 스타일 오버라이드 (UI 일관성 유지) */
 .ql-toolbar.ql-snow {
     background: #ecf0f1;
@@ -3264,7 +2786,6 @@ input[type="email"]:read-only {
 .ql-container.ql-snow {
     border: none; /* 바깥 컨테이너 테두리 제거 */
 }
-
 /* Quill undo/redo 버튼 스타일 */
 .ql-toolbar .ql-undo::before,
 .ql-toolbar .ql-redo::before {
@@ -3285,7 +2806,6 @@ input[type="email"]:read-only {
     font-size: 16px;
     line-height: 1;
 }
-
 .detail-header {
     border-bottom: 1px solid #ddd;
     padding-bottom: 15px;
@@ -3296,7 +2816,6 @@ input[type="email"]:read-only {
     color: #2c3e50;
     margin-bottom: 10px;
 }
-
 .detail-meta {
     font-size: 14px;
     color: #777;
@@ -3313,7 +2832,6 @@ input[type="email"]:read-only {
     color: #333;
     border-bottom: 1px solid #eee;
 }
-
 /* 액션 버튼 그룹 */
 .post-actions {
     display: flex;
@@ -3330,11 +2848,9 @@ input[type="email"]:read-only {
     margin-left: 5px;
     border: 1px solid #ddd;
 }
-
 /* 수정/삭제 버튼 스타일 */
 .btn-edit { background-color: #4a90e2; color: white; border: none; }
 .btn-delete { background-color: #e74c3c; color: white; border: none; }
-
 /* ⭐⭐ 댓글 섹션 상단 마진 조정 ⭐⭐ */
 .comments-section {
     margin-top: 35px; /* 여백 확보 */
@@ -3405,8 +2921,6 @@ input[type="email"]:read-only {
     padding-left: 10px;
     margin-bottom: 5px;
 }
-
-
 /* ⭐⭐ 대댓글 폼 스타일 ⭐⭐ */
 .reply-form-container {
     margin-top: 10px;
@@ -3472,7 +2986,6 @@ input[type="email"]:read-only {
     display: table;
     clear: both;
 }
-
 .community-board-container {
     max-width: 1400px; /* 또는 필요에 따라 90% */
     width: 90%;        /* 반응형으로도 대응 가능 */
@@ -3482,7 +2995,6 @@ input[type="email"]:read-only {
     border-radius: 15px;
     box-shadow: 0 10px 25px rgba(0,0,0,0.1);
 }
-
 .board-controls {
     display: flex;
     justify-content: space-between;
@@ -3491,7 +3003,6 @@ input[type="email"]:read-only {
     border-bottom: 2px solid #eee;
     padding-bottom: 10px;
 }
-
 .board-tabs {
     display: flex;
     flex-grow: 1;
@@ -3508,18 +3019,15 @@ input[type="email"]:read-only {
     transition: color 0.2s, border-bottom 0.2s;
     margin-right: 5px;
 }
-
 .board-tabs button.active {
     color: #6c5ce7;
     font-weight: 700;
     border-bottom-color: #6c5ce7;
 }
-
 /* 필요하면 :hover 때 살짝 색만 변경 */
 .board-tabs button:hover {
     color: #6c5ce7;
 }
-
 .write-button {
     padding: 8px 15px;
     background-color: #6c5ce7;
@@ -3533,7 +3041,6 @@ input[type="email"]:read-only {
 .write-button:hover {
     background-color: #8e44ad;
 }
-
 .search-area {
     display: flex;
     gap: 10px;
@@ -3554,7 +3061,6 @@ input[type="email"]:read-only {
     border-radius: 8px;
     cursor: pointer;
 }
-
 /* 게시글 목록 테이블 */
 .post-table {
     width: 100%;
@@ -3587,7 +3093,6 @@ input[type="email"]:read-only {
 .col-category {
     color: #6c5ce7;
 }
-
 /* 페이지네이션 */
 .pagination {
     text-align: center;
@@ -3611,7 +3116,35 @@ input[type="email"]:read-only {
     cursor: not-allowed;
     opacity: 0.5;
 }
-
+.pagination-controls {
+    text-align: center;
+    margin-top: 20px;
+    padding-top: 10px;
+    border-top: 1px solid #eee;
+}
+.pagination-controls button {
+    background: none;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    padding: 5px 10px;
+    margin: 0 5px;
+    color: #555;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+.pagination-controls button:hover:not(:disabled) {
+    background-color: #f0f0f0;
+}
+.pagination-controls button.active {
+    background-color: #6c5ce7;
+    color: white;
+    border-color: #6c5ce7;
+}
+.pagination-controls button:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+}
 .chat-main {
     padding-top: 70px;
     display: flex;
@@ -3621,7 +3154,6 @@ input[type="email"]:read-only {
     overflow-x: hidden;
     transition: all 0.3s ease-in-out;
 }
-
 .chat-sidebar {
     width: 300px;
     background: white;
@@ -3630,7 +3162,6 @@ input[type="email"]:read-only {
     display: flex;
     flex-direction: column;
 }
-
 .chat-content-area {
     flex-grow: 1;
     background: #fff;
@@ -3640,7 +3171,6 @@ input[type="email"]:read-only {
     transition: all 0.3s ease-in-out;
     min-width: 0;
 }
-
 .chat-header {
     padding: 15px 20px;
     border-bottom: 1px solid #eee;
@@ -3651,7 +3181,6 @@ input[type="email"]:read-only {
     font-weight: 700;
     color: #2c3e50;
 }
-
 .chat-type-tabs {
     display: flex;
     justify-content: space-around;
@@ -3682,7 +3211,6 @@ input[type="email"]:read-only {
     color: #2c3e50;
     background-color: transparent;
 }
-
 .room-list-container {
     flex-grow: 1;
     overflow-y: auto;
@@ -3729,7 +3257,6 @@ input[type="email"]:read-only {
 .delete-room-btn:hover {
     opacity: 1;
 }
-
 .chat-messages {
     flex-grow: 1;
     overflow-y: auto;
@@ -3751,7 +3278,6 @@ input[type="email"]:read-only {
     margin-right: 10px;
     font-size: 15px;
 }
-
 .chat-input-area button {
     background-color: #6c5ce7;
     color: white;
@@ -3764,13 +3290,20 @@ input[type="email"]:read-only {
 .chat-input-area button:hover {
     background-color: #8e44ad;
 }
-
 .message-bubble {
     margin-bottom: 15px;
     display: flex;
     align-items: flex-start;
+    max-width: 250px;
+    padding: 9px 12px;
+    border-radius: 18px;
+    line-height: 1.4;
+    font-size: 14px;
+    word-break: break-word;
 }
 .message-bubble.mine {
+    background: #d2e4fc;
+    color: #111;
     justify-content: flex-end;
 }
 .message-bubble.mine .message-content {
@@ -3780,6 +3313,9 @@ input[type="email"]:read-only {
 }
 .message-bubble.other {
     justify-content: flex-start;
+    background: #ffffff;
+    border: 1px solid #ddd;
+    color: #222;
 }
 .message-bubble.other .message-content {
     background-color: white;
@@ -3787,7 +3323,6 @@ input[type="email"]:read-only {
     border-radius: 15px 15px 15px 0;
     border: 1px solid #ddd;
 }
-
 .message-text {
     padding: 10px 15px;
     max-width: 70%;
@@ -3830,8 +3365,6 @@ input[type="email"]:read-only {
     z-index: 990;
     display: none;
 }
-
-
 #participant-sidebar {
     position: fixed;
     top: 70px;
@@ -3850,7 +3383,6 @@ input[type="email"]:read-only {
 #participant-sidebar.open {
     transform: translateX(0);
 }
-
 .sidebar-header {
     padding: 15px 20px;
     font-size: 18px;
@@ -3867,6 +3399,60 @@ input[type="email"]:read-only {
     font-size: 20px;
     cursor: pointer;
     color: #555;
+}
+.participant-section {
+    margin-top: 10px;
+}
+.host-participant-list {
+    margin: 0;
+    padding: 0 0 8px 0;
+    border-bottom: 1px dashed #eee;
+}
+.participant-scroll {
+    max-height: 320px;
+    overflow-y: auto;
+    padding-top: 8px;
+}
+.participant-list {
+    list-style: none;
+    padding: 0;
+}
+.participant-list li {
+    padding: 8px 0;
+    color: #555;
+    font-size: 15px;
+    border-bottom: 1px dashed #eee;
+}
+.participant-list li:last-child {
+    border-bottom: none;
+}
+.participant-list .user-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-weight: 600;
+    gap: 8px;
+}
+.participant-list .user-main {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+.participant-list .user-main input[type="checkbox"] {
+    cursor: pointer;
+}
+.participant-list .user-info .role-badge {
+    font-size: 12px;
+    background: #e74c3c;
+    color: white;
+    padding: 2px 5px;
+    border-radius: 5px;
+    font-weight: 400;
+}
+.participant-list .detail-info {
+    font-size: 12px;
+    color: #999;
+    margin-top: 3px;
 }
 .participant-list-container {
     flex-grow: 1;
@@ -3930,18 +3516,6 @@ input[type="email"]:read-only {
         height: calc(100vh - 70px);
     }
 }
-
-.chat-btn-cancel {
-    background: #f0f0f0;
-    color: #555;
-    border: 1px solid #ddd;
-}
-.chat-btn-create {
-    background: #6c5ce7;
-    color: white;
-    border: none;
-}
-
 .invite-friend-item {
     display: flex;
     justify-content: space-between;
@@ -3981,7 +3555,6 @@ input[type="email"]:read-only {
     background-color: #aaa;
     cursor: not-allowed;
 }
-
 .inline-profile-detail {
     position: fixed;
     top: 100px;
@@ -4013,7 +3586,6 @@ input[type="email"]:read-only {
     cursor: pointer;
     color: #555;
 }
-
 .profile-detail-img {
     width: 70px;
     height: 70px;
@@ -4070,34 +3642,23 @@ input[type="email"]:read-only {
     gap: 10px;
     flex-shrink: 0;
 }
-.unread-badge {
-    background-color: #e74c3c;
-    color: white;
-    font-size: 11px;
-    font-weight: 700;
-    border-radius: 10px;
-    padding: 3px 8px;
-    flex-shrink: 0;
-    min-width: 24px;
-    text-align: center;
-}
 .invite-action-btn {
-    padding: 15px 25px !important;
-    font-size: 16px !important;
+    padding: 15px 25px !important; /* 내부 패딩 증가로 높이/크기 증가 */
+    font-size: 16px !important; /* 폰트 크기 유지 */
     font-weight: 700 !important;
-    cursor: pointer !important;
+    cursor: pointer !important; /* 마우스 포인터 추가 */
     transition: background-color 0.3s, transform 0.2s;
 }
 .invite-action-btn:hover {
     transform: translateY(-1px);
-    background-color: #27ae60 !important;
+    background-color: #27ae60 !important; /* hover 색상 변경 */
 }
-
-#upcoming-schedule-section, #review-notification-section {
+#upcoming-schedule-section,
+#review-notification-section {
     position: relative;
     z-index: 10;
+    padding-right: 40px;
 }
-
 .login-prompt-button {
     z-index: 50;
     display: inline-block;
@@ -4106,7 +3667,7 @@ input[type="email"]:read-only {
     font-size: 16px;
     font-weight: 600;
     color: white;
-    background: #3498db;
+    background: #6c5ce7;
     border-radius: 25px;
     text-decoration: none;
     transition: background 0.3s;
@@ -4114,20 +3675,17 @@ input[type="email"]:read-only {
 .login-prompt-button:hover {
     background: #2980b9;
 }
-
 .fade-in-up {
     opacity: 0;
     transform: translateY(25px);
     animation: fadeUp 0.8s ease-out forwards;
 }
-
 @keyframes fadeUp {
     to {
         opacity: 1;
         transform: translateY(0);
     }
 }
-
 .hero-message {
     font-size: 60px;
     font-weight: 900;
@@ -4141,7 +3699,6 @@ input[type="email"]:read-only {
     text-shadow: 0 0 7px rgba(0, 0, 0, 0.6);
     color: white;
 }
-
 #no-schedule-view {
     padding: 40px;
     background: rgba(44, 62, 80, 0.7);
@@ -4156,7 +3713,6 @@ input[type="email"]:read-only {
         grid-template-columns: 1fr;
     }
 }
-
 .chat-modal-overlay {
     position: fixed;
     top: 0;
@@ -4172,12 +3728,10 @@ input[type="email"]:read-only {
     pointer-events: none;
     transition: opacity 0.3s;
 }
-
 .chat-modal-overlay.open {
     opacity: 1;
     pointer-events: auto;
 }
-
 .chat-modal-content {
     background: white;
     padding: 30px;
@@ -4189,11 +3743,9 @@ input[type="email"]:read-only {
     transition: transform 0.3s;
     position: relative;
 }
-
 .chat-modal-overlay.open .chat-modal-content {
     transform: translateY(0);
 }
-
 .chat-modal-content h2 {
     font-size: 24px;
     color: #2c3e50;
@@ -4201,18 +3753,15 @@ input[type="email"]:read-only {
     border-bottom: 2px solid #6c5ce7;
     padding-bottom: 10px;
 }
-
 .chat-modal-content p {
     font-size: 15px;
     color: #555;
     margin-bottom: 10px;
 }
-
 .chat-modal-content strong {
     color: #6c5ce7;
     margin-left: 5px;
 }
-
 .chat-modal-actions,
 .modal-actions { /* 기존 클래스 사용 중이면 같이 써도 됨 */
     display: flex;
@@ -4220,7 +3769,6 @@ input[type="email"]:read-only {
     gap: 10px;
     margin-top: 20px;
 }
-
 .chat-modal-actions button,
 .modal-actions button {
     padding: 10px 20px;
@@ -4228,7 +3776,6 @@ input[type="email"]:read-only {
     font-weight: 600;
     cursor: pointer;
 }
-
 /* 새 채팅 모달 내부 인풋/셀렉트 */
 #new-chat-modal .chat-modal-content input,
 #new-chat-modal .chat-modal-content select {
@@ -4240,7 +3787,6 @@ input[type="email"]:read-only {
     box-sizing: border-box;
     font-size: 15px;
 }
-
 .login-modal-overlay {
     position: fixed;
     top: 0;
@@ -4253,7 +3799,6 @@ input[type="email"]:read-only {
     align-items: center;
     z-index: 10000;
 }
-
 .login-modal-content {
     background: white;
     padding: 30px 40px;
@@ -4262,137 +3807,40 @@ input[type="email"]:read-only {
     box-shadow: 0 5px 20px rgba(0,0,0,0.2);
     max-width: 350px;
 }
-
 .login-modal-content h2 {
     font-size: 24px;
     color: #2c3e50;
     margin-bottom: 15px;
 }
-
 .login-modal-content p {
     font-size: 16px;
     color: #555;
     margin-bottom: 25px;
     line-height: 1.5;
 }
-
 .login-modal-content .login-button {
     width: 100%;
     margin-top: 10px;
 }
-
-
-
 .address-group button { padding: 12px 15px; font-size: 14px; font-weight: 600; color: #fff; background: #95a5a6; border: none; border-radius: 10px; cursor: pointer; transition: background 0.3s; white-space: nowrap; min-width: 80px; }
 .address-group button:hover { background: #7f8c8d; }
 
 .agree-btn { padding: 12px 24px; font-size: 16px; font-weight: 600; border: none; border-radius: 8px; background: #6c5ce7; color: #fff; cursor: pointer; }
 .agree-btn:hover { background: #574bdb; }
 .terms-link { color: #3498db; text-decoration: underline; cursor: pointer; }
-
-.register-info-message {
-    font-size: 13px !important;
-    font-weight: 500 !important;
-    margin-top: 5px !important;
-    display: none !important;
-    min-height: 0 !important;
-    color: green;
-    border-radius: 5px;
-    margin-bottom: 15px;
-}
-.register-info-message.success {
-    color: #2ecc71 !important;
-    display: block !important;
-}
-.register-info-message.error {
-    color: #e74c3c !important;
-    display: block !important;
-}
-
-.register-modal-overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.5);
-    display: none;
-    justify-content: center;
-    align-items: center;
-    z-index: 9999;
-}
-
-.register-modal-overlay.show {
-    display: flex;
-}
-
-.register-modal {
-    background: #fff;
-    max-width: 900px;
-    width: 90%;
-    max-height: 80vh;
-    border-radius: 12px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-}
-
-.register-modal-header {
-    padding: 16px 20px;
-    border-bottom: 1px solid #eee;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.register-modal-header h1 {
-    margin: 0;
-    font-size: 20px;
-}
-
-.register-modal-close-btn {
-    background: none;
-    border: none;
-    font-size: 22px;
-    cursor: pointer;
-}
-
-.register-modal-body {
-    padding: 16px 20px;
-    overflow-y: auto;
-}
-
-.register-modal-body h2 {
-    margin-top: 24px;
-}
-
-.register-modal-clause {
-    background: #f4f4f4;
-    border: 1px solid #ddd;
-    padding: 15px;
-    margin-top: 10px;
-}
-
-.register-modal-footer {
-    padding: 16px 20px;
-    border-top: 1px solid #eee;
-    text-align: center;
-}
-
 .info-view-group { margin-bottom: 20px; }
 .info-view-group label { display: block; font-weight: 700; margin-bottom: 6px; color: #2c3e50; font-size: 14px; }
 .info-view-text { width: 100%; padding: 12px 15px; border: 1px solid #ddd; border-radius: 10px; font-size: 16px; background: #f7f7f7; color: #333; min-height: 47px; box-sizing: border-box; display: flex; align-items: center; }
 .info-view-profile-pic { width: 120px; height: 120px; border-radius: 50%; object-fit: cover; border: 3px solid #eee; margin-bottom: 15px; }
-
 /* --- 친구 관리 탭 스타일 --- */
 .tab-buttons.sub-tabs { display: flex; margin-bottom: 20px; border-bottom: 1px solid #eee; }
 .tab-buttons.sub-tabs .sub-tab-btn { flex-grow: 1; padding: 10px 15px; background-color: #f0f0f0; border: 1px solid #ddd; border-bottom: none; border-radius: 8px 8px 0 0; cursor: pointer; font-size: 15px; color: #555; transition: all 0.2s ease; margin-right: 5px; text-align: center; }
 .tab-buttons.sub-tabs .sub-tab-btn.active { background-color: #6c5ce7; color: white; border-color: #6c5ce7; position: relative; top: 1px; z-index: 1; }
 .sub-tab-content { display: none; padding: 20px 0; border-top: 1px solid #eee; }
 .sub-tab-content.active { display: block; }
-
 .friend-list-search-group { display: flex; gap: 10px; margin-bottom: 20px; }
 .friend-list-search-group input { flex-grow: 1; padding: 10px; border: 1px solid #ddd; border-radius: 5px; }
 .friend-list-search-group button { padding: 10px 15px; background-color: #6c5ce7; color: white; border: none; border-radius: 5px; cursor: pointer; }
-
 .friend-item-list { list-style: none; padding: 0; margin: 0; }
 .friend-item-list li {
     display: flex;
@@ -4423,9 +3871,7 @@ input[type="email"]:read-only {
     overflow: hidden;
     text-overflow: ellipsis;
 }
-
 .friend-item-list li.active .action-buttons { display: flex; }
-
 .friend-request-item {
     display: flex;
     align-items: center;
@@ -4452,7 +3898,6 @@ input[type="email"]:read-only {
 .friend-add-search-group { display: flex; gap: 10px; margin-bottom: 20px; }
 .friend-add-search-group input { flex-grow: 1; padding: 10px; border: 1px solid #ddd; border-radius: 5px; }
 .friend-add-search-group button { padding: 10px 15px; background-color: #6c5ce7; color: white; border: none; border-radius: 5px; cursor: pointer; }
-
 .action-buttons {
     display: none;
     position: absolute;
@@ -4475,7 +3920,6 @@ input[type="email"]:read-only {
 }
 .action-buttons .btn-chat { background-color: #4a90e2; color: white; }
 .action-buttons .btn-delete { background-color: #ff7675; color: white; }
-
 .request-actions {
     display: none;
     position: absolute;
@@ -4485,7 +3929,6 @@ input[type="email"]:read-only {
     gap: 8px;
     z-index: 10;
 }
-
 .request-actions button {
     padding: 8px 12px;
     border: none;
@@ -4496,19 +3939,6 @@ input[type="email"]:read-only {
     color: white;
     white-space: nowrap;
 }
-.request-actions .btn-accept { background-color: #2ecc71; }
-.request-actions .btn-reject { background-color: #e74c3c; }
-
-.friend-add-actions .btn-add-selected {
-    padding: 10px 20px;
-    background-color: #2ecc71;
-    color: white;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    font-size: 16px;
-}
-
 .score-display {
     display: flex;
     justify-content: space-around;
@@ -4562,7 +3992,6 @@ input[type="email"]:read-only {
     z-index: 2000;
 }
 .friend-add-modal-overlay.show { display: flex; }
-
 .friend-add-modal {
     width: 100%;
     max-width: 600px;
@@ -4592,7 +4021,6 @@ input[type="email"]:read-only {
     color: #999;
 }
 .friend-add-modal-close:hover { color: #666; }
-
 .friend-add-modal .friend-add-search-group {
     display: flex;
     gap: 10px;
@@ -4634,7 +4062,6 @@ input[type="email"]:read-only {
 .friend-add-modal .friend-add-search-group button:hover {
     background-color: #5a4acb;
 }
-
 .friend-add-search-results {
     border: 1px solid #eee;
     border-radius: 8px;
@@ -4656,7 +4083,6 @@ input[type="email"]:read-only {
 .friend-add-result-item:last-child { border-bottom: none; }
 .friend-add-result-item:hover { background-color: #f9f9ff; }
 .friend-add-result-item.active { background-color: #e6e6ff; }
-
 .friend-add-result-user {
     display: flex;
     align-items: center;
@@ -4672,7 +4098,6 @@ input[type="email"]:read-only {
     overflow: hidden;
     text-overflow: ellipsis;
 }
-
 .friend-add-result-actions {
     position: absolute;
     right: 14px;
@@ -4700,7 +4125,15 @@ input[type="email"]:read-only {
     color: #777;
     font-size: 14px;
 }
-
+.friend-add-actions .btn-add-selected {
+    padding: 10px 20px;
+    background-color: #2ecc71;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 16px;
+}
 .fixed-schedule-list li {
     padding: 8px 10px;
     margin-bottom: 8px;
@@ -4732,7 +4165,6 @@ input[type="email"]:read-only {
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
 }
-
 .friends-management-title-wrapper {
     display: flex;
     justify-content: space-between;
@@ -4745,7 +4177,6 @@ input[type="email"]:read-only {
     font-size: 24px;
     color: #2c3e50;
 }
-
 #close-detail-btn {
     position: absolute;
     top: 5px;
@@ -4759,7 +4190,6 @@ input[type="email"]:read-only {
     z-index: 10;
     padding: 5px;
 }
-
 #save-schedule-btn, #delete-schedule-btn {
     background-color: rgba(204, 204, 204, 0.7);
     color: white;
@@ -4812,8 +4242,9 @@ input[type="email"]:read-only {
     color: #999;
 }
 .main-menu li a:hover i,
-.main-menu li a.active i { color: #6c5ce7; }
-
+.main-menu li a.active i {
+    color: #6c5ce7;
+}
 #fixed-schedule-detail-edit-area {
     border: 1px solid rgba(221, 221, 221, 0.5);
     padding: 10px;
@@ -4821,7 +4252,6 @@ input[type="email"]:read-only {
     background: rgba(255, 255, 255, 0.7);
     box-shadow: 0 2px 5px rgba(0,0,0,0.05);
 }
-
 #selected-schedule-time,
 #selected-schedule-name,
 #selected-schedule-content {
@@ -4829,7 +4259,6 @@ input[type="email"]:read-only {
     border: 1px solid rgba(221, 221, 221, 0.7);
     color: #333;
 }
-
 .friends-add-icon-btn {
     background: none;
     border: none;
@@ -4839,7 +4268,6 @@ input[type="email"]:read-only {
     padding: 5px;
     line-height: 1;
 }
-
 .mypage-user-menu {
     display: none;
     position: absolute;
@@ -4873,7 +4301,11 @@ input[type="email"]:read-only {
     color: #777;
     margin: 0;
 }
-.mypage-user-menu ul { list-style: none; padding: 0; margin: 0; }
+.mypage-user-menu ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
 .mypage-user-menu li a {
     display: block;
     padding: 12px 20px;
@@ -4890,8 +4322,9 @@ input[type="email"]:read-only {
     margin-right: 10px;
     color: #999;
 }
-.mypage-user-menu li a:hover i { color: #6c5ce7; }
-
+.mypage-user-menu li a:hover i {
+    color: #6c5ce7;
+}
 .calendar-layout-wrapper {
     display: flex;
     gap: 20px;
@@ -4920,7 +4353,6 @@ input[type="email"]:read-only {
     background: transparent;
     box-shadow: none;
 }
-
 .mypage-page .calendar-day-cell {
     height: 100px;
     border: 1px solid #eee;
@@ -4958,7 +4390,6 @@ input[type="email"]:read-only {
 .mypage-page .calendar-day-cell:hover {
     background-color: rgba(108, 92, 231, 0.05);
 }
-
 .mypage-page .calendar-event.match-schedule {
     background-color: rgba(144, 77, 240, 0.9);
     border-left: 3px solid #9461e7;
@@ -5011,7 +4442,6 @@ input[type="email"]:read-only {
 .mypage-page .calendar-event.more-events:hover {
     background-color: rgba(108, 92, 231, 0.08);
 }
-
 .mypage-page .calendar-container {
     flex-grow: 1;
     max-width: none;
@@ -5047,7 +4477,6 @@ input[type="email"]:read-only {
     backdrop-filter: blur(3px);
     -webkit-backdrop-filter: blur(3px);
 }
-
 .mypage-page .main-wrapper {
     width: 1000px;
     max-width: 95%;
@@ -5065,42 +4494,23 @@ input[type="email"]:read-only {
     border-bottom-color: #6c5ce7;
     margin-bottom: -2px;
 }
-
 .field-search-page .filter-section input[type="date"] {
     width: 150px;
     text-align: center;
 }
-
 .match-search-page .filter-section input[type="date"] {
     flex-grow: 1;
     min-width: 200px;
 }
-
-/* ===========================
-   main.html 내부 <style> 분리본
-   ✅ 디자인 유지 위해 style.css "맨 아래"에 위치해야 함
-=========================== */
-
-/* main-content 투명 유지 */
 .main-content {
     min-height: 100vh;
     background: transparent;
     padding: 0;
 }
-
-/* Hero 아래 콘텐츠(일정/알림) z-index 유지 */
-#upcoming-schedule-section,
-#review-notification-section {
-    position: relative;
-    z-index: 10;
+.close-review-btn:hover {
+    opacity: 1;
+    color: white;
 }
-
-/* 알림 배너 닫기 버튼 공간 확보 */
-#review-notification-section {
-    position: relative;
-    padding-right: 40px;
-}
-
 /* 알림 배너 닫기 버튼(HTML inline 버전 유지) */
 .close-review-btn {
     position: absolute;
@@ -5117,86 +4527,32 @@ input[type="email"]:read-only {
     line-height: 1;
     z-index: 20;
 }
-.close-review-btn:hover {
-    opacity: 1;
-}
-
-/* 비회원 로그인 유도 버튼 위치/스타일 유지 */
-.login-prompt-button {
-    z-index: 50;
-    display: inline-block;
-    margin: 10px 5px 0 5px;
-    padding: 10px 20px;
-    font-size: 16px;
-    font-weight: 600;
-    color: white;
-    background: #6c5ce7;
-    border-radius: 25px;
-    text-decoration: none;
-    transition: background 0.3s;
-}
-
-/* 슬라이더 아이템 최종 오버라이드 유지 */
-.schedule-item {
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(240, 240, 240, 0.95)) !important;
-    color: #2c3e50 !important;
-    border: 1px solid rgba(0,0,0,0.1);
-    text-align: left;
-}
-.schedule-item strong {
-    font-size: 17px;
-    color: #2c3e50;
-    display: block;
-    margin-bottom: 5px;
-}
-.schedule-item .item-location {
-    font-size: 14px;
-    color: #555;
-    display: flex;
-    align-items: center;
-}
-.schedule-item .item-location i {
-    margin-right: 5px;
-    color: #8e44ad;
-}
-.schedule-item .item-type {
-    font-size: 13px;
-    font-weight: 700;
-    color: #e74c3c;
-    margin-bottom: 5px;
-}
-
 .user-row {
     display: flex;
     justify-content: space-between; /* 🔥 왼쪽(닉네임) ↔ 오른쪽(버튼) */
     align-items: center;
     width: 100%;
 }
-
 .manage-btns {
     display: flex;
     gap: 6px; /* 버튼 사이 여백 */
 }
-
 .btn-sm {
     padding: 5px 8px;
     font-size: 12px;
     border-radius: 4px;
     cursor: pointer;
 }
-
 .btn-approve {
     background-color: #2ecc71;
     color: white;
     border: none;
 }
-
 .btn-reject {
     background-color: #e74c3c;
     color: white;
     border: none;
 }
-
 .btn-cancel,
 .btn-join {
     background-color: #6c5ce7 !important;
@@ -5210,13 +4566,11 @@ input[type="email"]:read-only {
     width: 100%;
     text-align: center;
 }
-
 /* 선택: 마우스 올릴 때 */
 .btn-cancel:hover,
 .btn-join:hover{
     background-color: #5847c2;
 }
-
 .btn-close,.btn-disabled{
     background-color: #e74c3c !important;
     color: #ffffff !important;
@@ -5229,75 +4583,24 @@ input[type="email"]:read-only {
     width: 100%;
     text-align: center;
 }
-
 .btn-close:hover,.btn-disabled:hover{
     background-color: #a10000;
 }
-
 /* ===========================
    schedule.html 에서 분리한 CSS
    (디자인 유지용 / schedule 전용)
 =========================== */
-
 /* schedule 페이지 메인 레이아웃 */
 .schedule-search-main {
     padding: 100px 40px 40px 40px;
     background-color: #f7f7f7;
     min-height: 100vh;
 }
-
 /* schedule 페이지에서 날짜 input이 넓게 늘어나도록 유지 */
 .schedule-search-main .filter-section input[type="date"] {
     flex-grow: 1;
     min-width: 200px;
 }
-
-/* ===========================
-   ✅ 경기 생성 모달 버튼 비율 맞추기
-   - 전역 .btn-cancel width:100% 오버라이드
-=========================== */
-
-/* 경기 생성 모달(#match-create-modal) 안 버튼 영역 */
-#match-create-modal .modal-actions {
-    display: flex;
-    gap: 10px;
-}
-
-/* 취소/생성 버튼을 1:1로 */
-#match-create-modal .modal-actions .btn-create,
-#match-create-modal .modal-actions .btn-cancel {
-    flex: 1;                   /* ⭐ 반반 */
-    width: auto !important;    /* ⭐ 전역 width:100% 무력화 */
-    padding: 12px 0;
-    border-radius: 10px;
-    font-size: 16px;
-    font-weight: 700;
-}
-
-/* 색상은 기존 화면 톤에 맞춰 유지 */
-#match-create-modal .modal-actions .btn-create {
-    background: #6c5ce7 !important;
-    color: #fff !important;
-    border: none;
-}
-#match-create-modal .modal-actions .btn-cancel {
-    background: #333 !important;
-    color: #fff !important;
-    border: none;
-}
-
-#match-create-modal .modal-actions .btn-create:hover {
-    background: #5648d6 !important;
-}
-#match-create-modal .modal-actions .btn-cancel:hover {
-    background: #111 !important;
-}
-
-/* ===========================
-   ✅ stadium_detail.html 최종 통합/오버라이드
-   - style.css 맨 아래에 붙여넣기
-=========================== */
-
 /* 1) HTML 인라인 스타일 제거용 ------------------- */
 #nav-login-btn{
     margin-right: 10px;
@@ -5305,26 +4608,18 @@ input[type="email"]:read-only {
     color: #333;
     display: block;
 }
-
 /* 기존 .menu-toggle-btn을 보완 (HTML inline 제거용) */
 #menu-toggle.menu-toggle-btn{
     background: none;
     border: none;
     font-size: 20px;
 }
-
 /* 탭 섹션 제목 공통 */
 .tab-section-title{
     font-size: 24px;
     color: #333;
     margin-bottom: 15px;
 }
-
-/* 2) 모달 클래스 통일(중요!) ------------------- */
-/* 네 CSS에 stadium-modal-* 는 있는데 modal-* 이 없으면
-   stadium_detail.html 모달이 스타일 없이 뜨는 문제가 생김.
-   그래서 둘 다 같은 스타일로 묶어줌. */
-
 .modal-overlay,
 .stadium-modal-overlay{
     position: fixed;
@@ -5335,12 +4630,10 @@ input[type="email"]:read-only {
     justify-content: center;
     z-index: 999; /* 기존 z-index 흐름 유지 */
 }
-
 .modal-overlay.show,
 .stadium-modal-overlay.show{
     display: flex;
 }
-
 .modal-content,
 .stadium-modal-content{
     background: #fff;
@@ -5350,7 +4643,6 @@ input[type="email"]:read-only {
     max-width: 600px;
     box-shadow: 0 10px 25px rgba(0,0,0,0.25);
 }
-
 /* 모달 내부 타이틀/라벨/인풋 톤 */
 .modal-content h2,
 .stadium-modal-content h2{
@@ -5359,7 +4651,6 @@ input[type="email"]:read-only {
     font-weight: 800;
     color: #2c3e50;
 }
-
 .modal-content label,
 .stadium-modal-content label{
     display: block;
@@ -5369,10 +4660,10 @@ input[type="email"]:read-only {
     margin-top: 10px;
     margin-bottom: 6px;
 }
-
 .modal-content input[type="text"],
 .modal-content input[type="date"],
 .modal-content select,
+.modal-content textarea,
 .stadium-modal-content input[type="text"],
 .stadium-modal-content input[type="date"],
 .stadium-modal-content select{
@@ -5385,7 +4676,6 @@ input[type="email"]:read-only {
     background-color: #f9f9f9;
     color: #333;
 }
-
 .modal-content input[readonly],
 .stadium-modal-content input[readonly]{
     background-color: #e9ecef;
@@ -5393,7 +4683,6 @@ input[type="email"]:read-only {
     font-weight: 600;
     border: 1px solid #ced4da;
 }
-
 /* 시간 선택 줄 */
 .modal-content .time-select-group,
 .stadium-modal-content .time-select-group{
@@ -5412,13 +4701,17 @@ input[type="email"]:read-only {
     color: #555;
     font-weight: 600;
 }
-
-/* 3) 모달 버튼 비율 1:1 유지 ------------------- */
-#match-create-modal .modal-actions{
+/* 경기 생성 모달(#match-create-modal) 안 버튼 영역 */
+#match-create-modal .modal-actions {
     display: flex;
     gap: 10px;
 }
-
+#match-create-modal .modal-actions .btn-create:hover {
+    background: #5648d6 !important;
+}
+#match-create-modal .modal-actions .btn-cancel:hover {
+    background: #111 !important;
+}
 #match-create-modal .modal-actions .btn-cancel,
 #match-create-modal .modal-actions .btn-create{
     flex: 1;
@@ -5430,7 +4723,6 @@ input[type="email"]:read-only {
     border: none;
     cursor: pointer;
 }
-
 #match-create-modal .modal-actions .btn-create{
     background: #6c5ce7 !important;
     color: #fff !important;
@@ -5439,47 +4731,23 @@ input[type="email"]:read-only {
     background: #333 !important;
     color: #fff !important;
 }
-
-#match-create-modal .modal-actions .btn-create:hover{
-    background: #5648d6 !important;
-}
-#match-create-modal .modal-actions .btn-cancel:hover{
-    background: #111 !important;
-}
-
 /* 4) stadium 상세 페이지 레이아웃 보정 ------------------- */
 /* stadium-main 내부 container 너비/여백 안정화 */
 .stadium-main .search-container{
     max-width: 1200px;
     margin: 0 auto;
 }
-
-/* 리뷰/경기 탭 높이 스크롤 감 */
-.review-right-column{
-    overflow-y: auto;
-}
-
-/* match-list 비어있을 때 문구 가독성 약간 개선 */
 #match-list p{
     font-size: 13px;
     color: #777;
     padding: 10px 0;
 }
-
-/* ===========================
-   ✅ stadium-detail.html 전용 (inline <style> 분리본)
-   - style.css 맨 아래에 위치
-=========================== */
-
-/* 페이지 메인 */
 .stadium-main {
-    padding: 100px 40px 40px;
+    padding: 100px 40px 40px 40px;
     background-color: #f7f7f7;
     min-height: 100vh;
 }
-
-/* stadium-detail에서 실제 사용하는 컨테이너는 search-container */
-.stadium-main .search-container {
+.stadium-container {
     max-width: 1200px;
     margin: 0 auto;
     background: white;
@@ -5490,8 +4758,6 @@ input[type="email"]:read-only {
     grid-template-columns: 1fr 400px;
     gap: 30px;
 }
-
-/* 타이틀 */
 .stadium-title {
     grid-column: 1 / -1;
     font-size: 32px;
@@ -5501,42 +4767,19 @@ input[type="email"]:read-only {
     border-bottom: 3px solid #6c5ce7;
     padding-bottom: 10px;
 }
-
-/* 왼쪽 영역 */
 .detail-left-column {
     grid-column: 1 / 2;
     display: flex;
     flex-direction: column;
 }
-
-/* 지도 영역 (id="map" 이 map-area 클래스 사용 중) */
-.map-area {
-    width: 100%;
-    height: 350px;
-    background-color: #eee;
-    border-radius: 10px;
-    margin-bottom: 25px;
-}
-
-/* 오른쪽 리뷰/경기 탭 */
-.review-right-column {
-    grid-column: 2 / 3;
-    grid-row: 2 / span 2;
-    background: #fcfcfc;
-    border-radius: 10px;
-    padding: 15px;
-    border: 1px solid #ddd;
-    max-height: 685px;
-    overflow-y: auto;
-}
-
-/* 기본 정보 카드 */
 .info-card {
     border: 1px solid #ddd;
     border-radius: 10px;
     padding: 20px;
 }
-.info-card h2 { margin-bottom: 20px; }
+.info-card h2{
+    margin-bottom: 20px;
+}
 .info-item {
     display: flex;
     align-items: center;
@@ -5548,7 +4791,6 @@ input[type="email"]:read-only {
     color: #6c5ce7;
     margin-right: 10px;
 }
-
 /* 하단 버튼 */
 .action-button-group {
     text-align: center;
@@ -5590,7 +4832,6 @@ input[type="email"]:read-only {
     transform: translateY(-2px);
     box-shadow: 0 6px 12px rgba(231, 76, 60, 0.3);
 }
-
 /* 탭 */
 .tab-header {
     display: flex;
@@ -5613,9 +4854,12 @@ input[type="email"]:read-only {
     color: #6c5ce7;
     border-bottom: 3px solid #6c5ce7;
 }
-.tab-content { display: none; }
-.tab-content.active { display: block; }
-
+.tab-content {
+    display: none;
+}
+.tab-content.active {
+    display: block;
+}
 /* 경기 필터/리스트 */
 .match-filter {
     margin-bottom: 10px;
@@ -5632,7 +4876,6 @@ input[type="email"]:read-only {
     border: 1px solid #ddd;
     background-color: #fff;
 }
-
 .match-list {
     margin-top: 10px;
     border-top: 1px solid #eee;
@@ -5645,7 +4888,9 @@ input[type="email"]:read-only {
     align-items: center;
     cursor: pointer;
 }
-.match-item:last-child { border-bottom: none; }
+.match-item:last-child {
+    border-bottom: none;
+}
 .match-item-time {
     font-weight: 700;
     color: #333;
@@ -5654,21 +4899,62 @@ input[type="email"]:read-only {
     font-size: 13px;
     color: #777;
 }
-.match-item:hover .match-item-time { text-decoration: underline; }
-
+.match-item:hover .match-item-time {
+    text-decoration: underline;
+}
 /* 모집 상태 */
 .match-status { font-weight: 700; margin-left: 4px; }
 .match-status.open { color: #27ae60; }
 .match-status.closed { color: #e74c3c; }
-
 /* 후기 */
-#review-list { min-height: 300px; }
+.review-right-column{
+    overflow-y: auto;
+}
+.review-right-column {
+    grid-column: 2 / 3;
+    grid-row: 2 / span 2;
+    background: #fcfcfc;
+    border-radius: 10px;
+    padding: 15px;
+    border: 1px solid #ddd;
+    max-height: 685px;
+    overflow-y: auto;
+}
+.review-right-column h2 {
+    font-size: 24px;
+    color: #333;
+    margin-bottom: 15px;
+}
+#review-list {
+    min-height: 300px;
+}
 .review-item {
     border-bottom: 1px solid #eee;
     padding: 15px 0;
 }
-.review-item:last-child { border-bottom: none; }
-
+.review-item:last-child {
+    border-bottom: none;
+}
+.review-user {
+    font-weight: 700;
+    color: #6c5ce7;
+    display: flex;
+    align-items: center;
+}
+.review-date {
+    color: #999;
+}
+.review-content {
+    font-size: 15px;
+    line-height: 1.5;
+    color: #333;
+}
+.review-item .star-display {
+    color: #f39c12;
+    font-size: 18px;
+    margin-right: 10px;
+    letter-spacing: 2px;
+}
 .review-header {
     display: flex;
     justify-content: space-between;
@@ -5685,18 +4971,15 @@ input[type="email"]:read-only {
     color: #f39c12;
     font-weight: 700;
 }
-.review-content {
-    font-size: 15px;
-    line-height: 1.5;
-    color: #333;
-}
-
 .review-actions {
     display: flex;
     gap: 10px;
     align-items: center;
     margin-top: 5px;
     justify-content: flex-end;
+}
+.review-actions button.delete {
+    color: #e74c3c;
 }
 .review-actions .action-btn {
     background: none;
@@ -5707,136 +4990,14 @@ input[type="email"]:read-only {
     padding: 2px 5px;
     transition: color 0.2s;
 }
-.review-actions .action-btn.delete { color: #e74c3c; }
-
-/* ===========================
-   모달 (stadium-detail에서 쓰는 modal-*)
-=========================== */
-.modal-overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.5);
-    display: none;
-    align-items: center;
-    justify-content: center;
-    z-index: 999;
-}
-.modal-overlay.show { display: flex; }
-
-.modal-content {
-    background: #fff;
-    border-radius: 15px;
-    padding: 25px 25px 20px;
-    width: 90%;
-    max-width: 600px;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.25);
-}
-
-.modal-content h2 {
-    font-size: 24px;
-    margin-bottom: 15px;
-    font-weight: 800;
-    color: #2c3e50;
-}
-.modal-content label {
-    display: block;
-    font-size: 15px;
-    font-weight: 700;
-    color: #34495e;
-    margin-top: 10px;
-    margin-bottom: 6px;
-}
-.modal-content input[type="text"],
-.modal-content input[type="date"],
-.modal-content select,
-.modal-content textarea {
-    width: 100%;
-    padding: 10px 12px;
-    font-size: 15px;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    box-sizing: border-box;
-    background-color: #f9f9f9;
-    color: #333;
-}
-.modal-content input[readonly] {
-    background-color: #e9ecef;
-    color: #495057;
-    font-weight: 600;
-    border: 1px solid #ced4da;
-}
-
-.time-select-group {
-    display: flex;
-    gap: 10px;
-    align-items: center;
-}
-.time-select-group select {
-    flex-grow: 1;
-    min-width: 120px;
-}
-.time-select-group span {
-    font-size: 18px;
-    color: #555;
-    font-weight: 600;
-}
-
-/* 모달 버튼 */
-.modal-actions {
-    display: flex;
-    justify-content: flex-end;
-    gap: 10px;
-    margin-top: 20px;
-}
-.modal-actions .btn-cancel,
-.modal-actions .btn-create {
-    padding: 10px 20px;
-    border-radius: 8px;
-    font-weight: 700;
-    cursor: pointer;
-    border: none;
-}
-
-/* 경기 생성 모달 버튼 1:1 */
-#match-create-modal .modal-actions {
-    display: flex;
-    gap: 10px;
-}
-#match-create-modal .modal-actions .btn-cancel,
-#match-create-modal .modal-actions .btn-create {
-    flex: 1;
-    width: auto !important;
-    padding: 12px 0;
-    border-radius: 10px;
-    font-size: 16px;
-    font-weight: 700;
-}
-#match-create-modal .modal-actions .btn-create {
-    background: #6c5ce7 !important;
-    color: #fff !important;
-}
-#match-create-modal .modal-actions .btn-cancel {
-    background: #333 !important;
-    color: #fff !important;
-}
-#match-create-modal .modal-actions .btn-create:hover {
-    background: #5648d6 !important;
-}
-#match-create-modal .modal-actions .btn-cancel:hover {
-    background: #111 !important;
-}
-
 /* =========================
    fields(구장 검색) 페이지 전용 스타일
    ========================= */
-
 .field-search-main {
     padding: 100px 40px 40px 40px;
     background-color: #f7f7f7;
     min-height: 100vh;
 }
-
-/* ⚠️ 전역 오염 방지: fields 내부로 스코프 */
 .field-search-main .search-container {
     max-width: 1200px;
     margin: 0 auto;
@@ -5845,7 +5006,6 @@ input[type="email"]:read-only {
     border-radius: 15px;
     box-shadow: 0 10px 25px rgba(0,0,0,0.1);
 }
-
 .field-search-main .search-title {
     font-size: 28px;
     font-weight: 700;
@@ -5854,14 +5014,12 @@ input[type="email"]:read-only {
     border-bottom: 2px solid #6c5ce7;
     padding-bottom: 10px;
 }
-
 .field-search-main .filter-section {
     display: flex;
     gap: 15px;
     margin-bottom: 25px;
     flex-wrap: wrap;
 }
-
 .field-search-main .filter-section input {
     padding: 12px 15px;
     font-size: 15px;
@@ -5871,7 +5029,6 @@ input[type="email"]:read-only {
     flex-grow: 1;
     min-width: 200px;
 }
-
 .field-search-main .filter-section button {
     padding: 12px 15px;
     background-color: #6c5ce7;
@@ -5881,19 +5038,16 @@ input[type="email"]:read-only {
     border: none;
     border-radius: 10px;
 }
-
 .field-search-main .search-content {
     display: flex;
     gap: 20px;
 }
-
 .field-search-main .map-area {
     flex: 7;
     height: 500px;
     background-color: #eee;
     border-radius: 10px;
 }
-
 .field-search-main .field-list-area {
     flex: 3;
     max-height: 500px;
@@ -5902,14 +5056,12 @@ input[type="email"]:read-only {
     padding: 15px;
     border-radius: 10px;
 }
-
 .field-search-main #field-list {
     display: flex;
     flex-direction: column;
     gap: 12px;
     margin-top: 10px;
 }
-
 .field-search-main .field-card {
     background: #ffffff;
     border-radius: 10px;
@@ -5919,194 +5071,26 @@ input[type="email"]:read-only {
     cursor: pointer;
     transition: transform 0.2s, box-shadow 0.2s;
 }
-
 .field-search-main .field-card:hover {
     transform: translateY(-3px);
     box-shadow: 0 6px 18px rgba(0,0,0,0.12);
 }
-
 .field-search-main .field-card h3 {
     font-size: 16px;
     color: #2c3e50;
 }
-/* [기존 스타일 유지] */
-.chat-main {
-    padding-top: 70px;
-    display: flex;
-    min-height: 100vh;
-    background-color: #f7f7f7;
-    position: relative;
-    overflow-x: hidden;
-    transition: all 0.3s ease-in-out;
-}
-.chat-sidebar {
-    width: 300px;
-    background: white;
-    border-right: 1px solid #ddd;
-    flex-shrink: 0;
-    display: flex;
-    flex-direction: column;
-}
-.chat-content-area {
-    flex-grow: 1;
-    background: #fff;
-    display: flex;
-    flex-direction: column;
-    position: relative;
-    transition: all 0.3s ease-in-out;
-    min-width: 0;
-}
-
-/* 핵심 CSS: 사이드바가 열릴 때 메인 콘텐츠를 밀어냅니다. */
-.chat-main.sidebar-open {
-    margin-right: 280px;
-}
-
-.chat-header {
-    padding: 15px 20px;
-    border-bottom: 1px solid #eee;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-size: 18px;
-    font-weight: 700;
-    color: #2c3e50;
-}
-
 /* ★채팅 유형 탭 버튼 스타일 (깔끔한 글씨 밑줄 형식)★ */
-.chat-type-tabs {
-    display: flex;
-    justify-content: space-around;
-    padding: 10px 0 0 0;
-    margin-bottom: 0;
-    border-bottom: 1px solid #eee;
-}
-.chat-type-tabs button {
-    flex-grow: 1;
-    padding: 10px 5px;
-    margin: 0;
-    background: none !important;
-    border: none !important;
-    border-radius: 0 !important;
-    font-size: 14px;
-    font-weight: 600;
-    color: #999;
-    cursor: pointer;
-    border-bottom: 2px solid transparent;
-    transition: all 0.2s;
-    outline: none;
-}
-.chat-type-tabs button.active {
-    color: #6c5ce7;
-    border-bottom-color: #6c5ce7;
-}
-.chat-type-tabs button:hover:not(.active) {
-    color: #2c3e50;
-    background-color: transparent;
-}
-
-
-/* 채팅방 목록 */
-.room-list-container {
-    flex-grow: 1;
-    overflow-y: auto;
-}
-.room-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 15px 10px 15px 20px;
-    border-bottom: 1px solid #f7f7f7;
-    cursor: pointer;
-    transition: background-color 0.2s;
-}
-.room-item:hover, .room-item.active {
-    background-color: #f0f0f0;
-}
-.room-info {
-    flex-grow: 1;
-    min-width: 0;
-    padding-right: 10px;
-}
-.room-name {
-    font-weight: 600;
-    color: #2c3e50;
-}
-.last-message {
-    font-size: 13px;
-    color: #888;
-    margin-top: 4px;
-    overflow: hidden;
-    white-space: nowrap;
-    text-overflow: ellipsis;
-}
-
-/* 삭제 버튼 스타일 */
-.delete-room-btn {
-    background: none;
-    border: none;
-    color: #e74c3c;
-    font-size: 15px;
-    cursor: pointer;
-    flex-shrink: 0;
-    opacity: 0.7;
-    padding: 5px;
-}
-.delete-room-btn:hover {
-    opacity: 1;
-}
-
-/* 채팅방 상세 */
-.chat-messages {
-    flex-grow: 1;
-    overflow-y: auto;
-    padding: 20px;
-    background-color: #f7f7f7;
-}
-.chat-input-area {
-    border-top: 1px solid #ddd;
-    padding: 10px 20px;
-    display: flex;
-    align-items: center;
-    background: white;
-}
-.chat-input-area input {
-    flex-grow: 1;
-    padding: 12px;
-    border: 1px solid #ddd;
-    border-radius: 20px;
-    margin-right: 10px;
-    font-size: 15px;
-}
-.chat-input-area button {
-    background-color: #6c5ce7;
-    color: white;
-    border: none;
-    padding: 10px 15px;
-    border-radius: 20px;
-    cursor: pointer;
-    transition: background-color 0.3s;
-}
-.chat-input-area button:hover {
-    background-color: #8e44ad;
-}
-/* 각 메시지 묶음 */
 .message-wrapper {
     margin: 12px 0;
     display: flex;
     flex-direction: column;
 }
-
-/* 정렬 */
 .message-wrapper.other {
     align-items: flex-start;
 }
-
 .message-wrapper.mine {
     align-items: flex-end;
 }
-
-/* 닉네임 */
 .message-nickname {
     font-size: 13px;
     color: #444;
@@ -6114,356 +5098,28 @@ input[type="email"]:read-only {
     margin-left: 4px;
     font-weight: 600;
 }
-
-/* 말풍선 + 시간 행 */
 .bubble-row {
     display: flex;
     align-items: flex-end;
     gap: 6px;
 }
-
 .bubble-row.other {
     justify-content: flex-start;
 }
-
 .bubble-row.mine {
     justify-content: flex-end;
 }
-
-/* 말풍선 스타일 */
-.message-bubble {
-    max-width: 250px;
-    padding: 9px 12px;
-    border-radius: 18px;
-    line-height: 1.4;
-    font-size: 14px;
-    word-break: break-word;
-}
-
-/* 상대 말풍선 */
-.message-bubble.other {
-    background: #ffffff;
-    border: 1px solid #ddd;
-    color: #222;
-}
-
-/* 내 말풍선 (카톡 블루 계열) */
-.message-bubble.mine {
-    background: #d2e4fc;
-    color: #111;
-}
-
-/* 시간 */
 .message-time {
     font-size: 11px;
     color: #777;
     margin-bottom: 15px;
-}
-
-.message-text {
-    padding: 10px 15px;
-    max-width: 70%;
-    word-wrap: break-word;
-    font-size: 15px;
-}
-.message-meta {
-    font-size: 11px;
-    color: #888;
-    align-self: flex-end;
-    margin: 0 5px;
-}
-
-/* 룸이 선택되지 않았을 때 */
-#chat-welcome-message {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-size: 20px;
-    color: #999;
-    height: 100%;
-    text-align: center;
-}
-#current-chat-room {
-    display: none;
-    flex-direction: column;
-    position: relative;
-    height: 100%;
-    overflow: hidden; /* 인라인 프로필이 벗어나지 않도록 */
-}
-
-/* 상태 메시지 */
-#connection-status {
-    position: absolute;
-    top: 70px;
-    left: 0;
-    width: 100%;
-    background-color: #f0f0f0;
-    color: #e74c3c;
-    padding: 8px;
-    text-align: center;
-    font-size: 14px;
-    font-weight: 600;
-    z-index: 990;
-    display: none;
-}
-
-/* ★참여자 목록 사이드바 스타일★ */
-#participant-sidebar {
-    position: fixed;
-    top: 70px;
-    right: 0;
-    width: 280px;
-    height: calc(100vh - 70px);
-    background: white;
-    box-shadow: -4px 0 10px rgba(0, 0, 0, 0.2);
-    z-index: 1000;
-    transform: translateX(100%);
-    transition: transform 0.3s ease-in-out;
-    display: flex;
-    flex-direction: column;
-    border-left: 1px solid #ddd;
-}
-#participant-sidebar.open {
-    transform: translateX(0);
-}
-.sidebar-header {
-    padding: 15px 20px;
-    font-size: 18px;
-    font-weight: 700;
-    color: #2c3e50;
-    border-bottom: 1px solid #eee;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-.sidebar-close-btn {
-    background: none;
-    border: none;
-    font-size: 20px;
-    cursor: pointer;
-    color: #555;
-}
-.participant-list-container {
-    flex-grow: 1;
-    padding: 10px 0;
-}
-
-/* 참여자 항목 스타일 개선 */
-.participant-item {
-    display: flex;
-    align-items: center;
-    padding: 10px 20px;
-    border-bottom: 1px solid #f7f7f7;
-    cursor: pointer;
-}
-.participant-item:hover {
-    background-color: #fcfcfc;
-}
-.participant-icon-wrapper {
-    width: 35px;
-    height: 35px;
-    border-radius: 50%;
-    background-color: #f0f0f0;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin-right: 10px;
-    flex-shrink: 0;
-}
-.participant-icon-wrapper i {
-    font-size: 16px;
-    color: #6c5ce7;
-    margin: 0;
-}
-.participant-details {
-    display: flex;
-    flex-direction: column;
-    line-height: 1.3;
-}
-.participant-name {
-    font-size: 15px;
-    color: #333;
-    font-weight: 500;
-}
-.participant-role-badge {
-    font-size: 11px;
-    font-weight: 700;
-    padding: 2px 5px;
-    border-radius: 5px;
-    margin-left: 5px;
-    color: white;
-    white-space: nowrap;
-}
-.role-admin { background-color: #6c5ce7; }
-.role-host { background-color: #e74c3c; }
-.role-me { background-color: #3498db; }
-
-/* 모바일 대응 */
-@media (max-width: 900px) {
-    .chat-main.sidebar-open {
-        width: 100%;
-        margin-right: 0;
-    }
-    #participant-sidebar {
-        width: 100%;
-        height: calc(100vh - 70px);
-    }
-}
-
-.btn-cancel {
-    background: #f0f0f0;
-    color: #555;
-    border: 1px solid #ddd;
 }
 .btn-create {
     background: #6c5ce7;
     color: white;
     border: none;
 }
-
-/* 새 채팅 모달 전용 입력 필드 스타일 */
-#new-chat-modal .modal-content input,
-#new-chat-modal .modal-content select {
-    width: 100%;
-    padding: 12px;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    margin-bottom: 15px;
-    box-sizing: border-box;
-    font-size: 15px;
-}
-
-/* ★친구 초대 모달 목록 스타일 */
-.invite-friend-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 8px 0;
-    border-bottom: 1px solid #f7f7f7;
-    cursor: pointer;
-}
-.invite-friend-item span {
-    font-size: 15px;
-    color: #333;
-}
-.friend-status {
-    font-size: 12px;
-    color: #28a745; /* 온라인 색상 */
-    margin-left: 10px;
-}
-.friend-status.offline {
-    color: #999;
-}
-
-/* ★초대 모달 내 버튼 */
-#invite-modal .modal-content button {
-    padding: 5px 15px;
-    border-radius: 5px;
-    font-weight: 600;
-}
-#final-invite-btn:disabled {
-    background-color: #aaa;
-    cursor: not-allowed;
-}
-
-/* ★★★ 최종 수정: 인라인 프로필 상세 정보 스타일 (버그 해결 및 UI 확정) ★★★ */
-.inline-profile-detail {
-    /* ⭐⭐⭐ 위치 조정: FIXED + 우측 참여자 사이드바 옆에 나오도록 ⭐⭐⭐ */
-    position: fixed;
-    top: 100px;
-    right: 280px; /* 참여자 사이드바 너비만큼 왼쪽으로 띄우기 (280px) */
-    width: 200px; /* 창 크기 조정 */
-    height: auto;
-    background: white;
-    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
-    border-radius: 10px;
-    padding: 15px;
-
-    /* ⭐⭐⭐ 초기 숨김 상태 (JS에서 display:none 제어) ⭐⭐⭐ */
-    transform: translateX(100%);
-    transition: transform 0.3s ease-in-out;
-    display: none; /* ⭐⭐ 초기 렌더링 시 아예 숨김 ⭐⭐ */
-    flex-direction: column;
-    z-index: 9999;
-    border: 1px solid #ddd;
-}
-
-/* 창이 열렸을 때 (현재 위치(right: 280px)로 이동) */
-.inline-profile-detail.open {
-    transform: translateX(0%); /* X축 이동 0% = right: 280px 위치에 표시 */
-    display: flex; /* ⭐⭐ 열릴 때만 보이게 설정 ⭐⭐ */
-}
-
-.inline-profile-detail .close-profile-btn {
-    position: absolute;
-    top: 5px;
-    right: 10px;
-    background: none;
-    border: none;
-    font-size: 20px;
-    cursor: pointer;
-    color: #555;
-}
-.profile-detail-img {
-    width: 70px;
-    height: 70px;
-    border-radius: 50%;
-    object-fit: cover;
-    margin-bottom: 8px;
-    border: 2px solid #6c5ce7;
-}
-.profile-info-content h3 {
-    font-size: 16px;
-    color: #2c3e50;
-    margin-bottom: 8px;
-}
-.profile-meta-info p {
-    font-size: 12px;
-    color: #555;
-    margin-bottom: 4px;
-}
-.profile-meta-info strong {
-    font-size: 13px;
-}
-.chat-one-on-one-btn, .send-friend-request-btn {
-    padding: 8px 10px;
-    margin-top: 8px;
-    border: none;
-    border-radius: 8px;
-    font-weight: 600;
-    cursor: pointer;
-    width: 100%;
-    transition: background-color 0.2s;
-    font-size: 13px;
-}
-/* 프로필 상세 창이 열렸을 때 메시지 영역을 밀어냅니다. (fixed position이라 필요 없음) */
-.chat-content-area.profile-open {
-    padding-left: 0;
-}
-/* ⭐⭐ 보강: 채팅방 상세 정보 (인원/유형) 헤더 스타일 ⭐⭐ */
-.room-title-wrapper {
-    display: flex;
-    align-items: center;
-}
-.room-status-info {
-    font-size: 13px;
-    font-weight: 500;
-    color: #6c5ce7;
-    margin-left: 15px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-.room-status-info .fa-lock { color: #e74c3c; } /* 1:1 채팅 아이콘 색상 */
-.room-status-info .fa-users { color: #6c5ce7; } /* 그룹 채팅 아이콘 색상 */
-/* ⭐⭐ 보강 끝 ⭐⭐ */
 /* ⭐⭐ 보강: 안 읽은 메시지 뱃지 및 인원 수 표시를 위한 컨테이너 ⭐⭐ */
-.room-item-actions {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    flex-shrink: 0;
-}
 .unread-badge {
     background-color: #e74c3c;
     color: white;
@@ -6478,20 +5134,6 @@ input[type="email"]:read-only {
     text-align: center;
 }
 /* ⭐⭐ 보강 끝 ⭐⭐ */
-
-/* ★추가: 친구 초대 버튼 스타일 개선 */
-.invite-action-btn {
-    padding: 15px 25px !important; /* 내부 패딩 증가로 높이/크기 증가 */
-    font-size: 16px !important; /* 폰트 크기 유지 */
-    font-weight: 700 !important;
-    cursor: pointer !important; /* 마우스 포인터 추가 */
-    transition: background-color 0.3s, transform 0.2s;
-}
-.invite-action-btn:hover {
-    transform: translateY(-1px);
-    background-color: #27ae60 !important; /* hover 색상 변경 */
-}
-
 /* 🔥 친구 초대 모달 X 버튼 스타일 */
 .modal-close-x {
     position: absolute;
