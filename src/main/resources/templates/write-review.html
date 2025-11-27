@@ -8,32 +8,6 @@
     <link rel="stylesheet" th:href="@{/css/style.css}">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700;900&family=Noto+Sans+KR:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-
-    <style>
-        /* 스타일 유지 */
-        .login-page-main { min-height: 100vh; display: flex; align-items: center; justify-content: center; background-color: #f4f4f4; padding: 40px 20px; }
-        .main-wrapper { max-width: 1000px; width: 100%; display: flex; background: white; border-radius: 15px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
-        .login-section { flex: 1; padding: 40px; }
-        .background-image-section { flex: 1; background: url('https://placehold.co/500x700/6c5ce7/ffffff?text=Review') no-repeat center center/cover; }
-        .login-container { max-width: 400px; margin: 0 auto; }
-        .title-login { font-size: 30px; font-weight: 800; color: #333; margin-bottom: 20px; }
-        .input-group label { display: block; font-weight: 700; color: #555; margin-bottom: 8px; font-size: 14px; }
-        .input-group input, .input-group textarea { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 10px; font-size: 15px; box-sizing: border-box; background: #f7f7f7; }
-        .login-button { width: 100%; padding: 15px; background-color: #6c5ce7; color: white; border: none; border-radius: 10px; font-size: 16px; font-weight: 700; cursor: pointer; transition: background-color 0.3s; }
-        .login-button:hover { background-color: #5d4bc5; }
-        .error-message { color: #e74c3c; margin-top: 15px; font-weight: 700; font-size: 14px; padding: 10px; background: #fceae9; border-left: 5px solid #e74c3c; border-radius: 5px; display: none; }
-        .info-message { color: #27ae60; margin-top: 15px; font-weight: 700; font-size: 14px; padding: 10px; background: #e9fcee; border-left: 5px solid #27ae60; border-radius: 5px; display: none; }
-        /* ⭐⭐ 추가: 비활성화 메시지 스타일 ⭐⭐ */
-        .access-denied-message {
-            margin-top: 40px;
-            padding: 20px;
-            text-align: center;
-            border: 2px dashed #e74c3c;
-            color: #c0392b;
-            font-weight: bold;
-            border-radius: 10px;
-        }
-    </style>
 </head>
 <body>
 
@@ -220,7 +194,6 @@
                         '✅ 후기가 성공적으로 등록되었습니다. 구장 상세 페이지로 이동합니다.';
                     successMsg.style.display = 'block';
 
-                    // 알림 배지에서 후기 알림은 읽은 것으로 처리
                     localStorage.setItem('hasReadReviews', 'true');
 
                     setTimeout(() => {
