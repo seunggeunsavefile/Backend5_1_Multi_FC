@@ -13,227 +13,6 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/ko.js"></script>
-
-    <style>
-        .schedule-search-main {
-            padding: 100px 40px 40px 40px;
-            background-color: #f7f7f7;
-            min-height: 100vh;
-        }
-        .search-container {
-            max-width: 1200px;
-            margin: 0 auto;
-            background: white;
-            padding: 30px;
-            border-radius: 15px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-        }
-        .search-title {
-            font-size: 28px;
-            font-weight: 700;
-            color: #2c3e50;
-            margin-bottom: 25px;
-            border-bottom: 2px solid #6c5ce7;
-            padding-bottom: 10px;
-        }
-        .filter-section {
-            display: flex;
-            gap: 15px;
-            margin-bottom: 25px;
-            flex-wrap: wrap;
-            align-items: center;
-        }
-        .filter-section input,
-        .filter-section select,
-        .filter-section button {
-            padding: 12px 15px;
-            font-size: 15px;
-            border: 1px solid #ddd;
-            border-radius: 10px;
-            background: #f9f9f9;
-            font-family: inherit;
-        }
-        .filter-section input[type="text"] {
-            min-width: 220px;
-        }
-        .filter-section > button#search-btn {
-            background-color: #6c5ce7;
-            color: white;
-            font-weight: 600;
-            cursor: pointer;
-            border: none;
-        }
-
-        /* 카드 그리드 (한 페이지 안에서 최대 6개) */
-        .match-list-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 20px;
-        }
-        .match-item-card {
-            background: white;
-            border: 1px solid #eee;
-            border-radius: 10px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-            overflow: hidden;
-            transition: transform 0.3s, box-shadow 0.3s;
-            border-left: 5px solid #6c5ce7;
-        }
-        .match-item-card.closed {
-            border-left-color: #aaa;
-        }
-        .match-item-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 15px rgba(0,0,0,0.1);
-        }
-        .match-item-header {
-            padding: 15px 20px;
-            background: #fdfdfd;
-            border-bottom: 1px solid #eee;
-        }
-        .match-item-header .date {
-            font-size: 18px;
-            font-weight: 700;
-            color: #6c5ce7;
-        }
-        .match-item-card.closed .match-item-header .date {
-            color: #555;
-        }
-        .match-item-body {
-            padding: 20px;
-        }
-        .match-item-body .location,
-        .match-item-body .status {
-            display: flex;
-            align-items: center;
-            font-size: 15px;
-            color: #555;
-            margin-bottom: 12px;
-        }
-        .match-item-body .location i,
-        .match-item-body .status i {
-            margin-right: 10px;
-            color: #6c5ce7;
-            width: 16px;
-        }
-        .match-item-body p i.fa-crown {
-            color: #f39c12;
-        }
-        .match-item-card.closed .match-item-body .location i,
-        .match-item-card.closed .match-item-body .status i {
-            color: #aaa;
-        }
-        .match-item-body .status {
-            margin-bottom: 20px;
-        }
-        .status-badge {
-            font-weight: 600;
-            padding: 4px 8px;
-            border-radius: 5px;
-            color: white;
-            margin-right: 8px;
-        }
-        .status-badge.open {
-            background-color: #28a745;
-        }
-        .status-badge.closed {
-            background-color: #888;
-        }
-        .details-button {
-            display: block;
-            width: 100%;
-            text-align: center;
-            padding: 10px;
-            text-decoration: none;
-            background-color: #6c5ce7;
-            color: white;
-            font-weight: 600;
-            border-radius: 8px;
-            transition: background-color 0.3s;
-        }
-        .details-button:hover {
-            background-color: #8e44ad;
-        }
-        .details-button.disabled {
-            background: #aaa;
-            cursor: not-allowed;
-        }
-        .details-button.disabled:hover {
-            background: #aaa;
-        }
-
-        /* 🔧 flatpickr: 연도 → 월 순서로 보이게 */
-        .flatpickr-current-month {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .flatpickr-current-month .numInputWrapper { /* 연도 */
-            order: 1;
-            margin-right: 4px;
-        }
-        .flatpickr-current-month .flatpickr-monthDropdown-months { /* 월 */
-            order: 2;
-        }
-
-        /* 🔥 슬라이더 레이아웃 */
-        .match-slider-wrapper {
-            position: relative;
-            margin-top: 10px;
-        }
-        .match-slider-viewport {
-            overflow: hidden;
-            width: 100%;
-        }
-        .match-slider-track {
-            display: flex;
-            width: 100%;
-            transition: transform 0.4s ease;
-        }
-        .match-slider-page {
-            flex: 0 0 100%;
-            box-sizing: border-box;
-            padding: 5px 0;
-        }
-
-        /* 좌우 화살표 */
-        .schedule-arrow {
-            position: absolute;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 34px;
-            height: 34px;
-            border-radius: 50%;
-            border: none;
-            background: rgba(0,0,0,0.25);
-            color: #fff;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            cursor: pointer;
-            z-index: 5;
-        }
-        .schedule-arrow.left {
-            left: -10px;
-        }
-        .schedule-arrow.right {
-            right: -10px;
-        }
-        .schedule-arrow:disabled {
-            opacity: 0.3;
-            cursor: default;
-        }
-
-        /* 모바일에서 화살표 조금 안쪽으로 */
-        @media (max-width: 768px) {
-            .schedule-arrow.left {
-                left: 0;
-            }
-            .schedule-arrow.right {
-                right: 0;
-            }
-        }
-    </style>
 </head>
 <body>
 
@@ -450,12 +229,11 @@
                     ? String(match.matchTime).split(':').slice(0, 2).join(':')
                     : '';
 
-                // 백엔드에서 내려준 현재 인원 (방장/본인 제외일 가능성 있어서 0 처리)
                 const baseCurrent = typeof match.currentPlayers === 'number'
                     ? match.currentPlayers
                     : 0;
 
-                const displayCurrent = baseCurrent + 1;   // ➕ 방장 1명 포함
+                const displayCurrent = baseCurrent + 1;
 
                 return {
                     id: match.roomId,
@@ -559,12 +337,10 @@
         });
     }
 
-    // --- 페이지 로드 ---
     document.addEventListener('DOMContentLoaded', async () => {
         const accessToken = localStorage.getItem('accessToken');
         const currentPath = window.location.pathname;
 
-        // 🔒 로그인 체크
         if (!accessToken) {
             alert("❌ 회원 전용 페이지입니다.\n로그인 후에 이용하실 수 있습니다.");
             localStorage.setItem('redirectAfterLogin', currentPath);
@@ -572,7 +348,6 @@
             return;
         }
 
-        // ✅ 헤더 닉네임 ("사용자님" 대신)
         const userMenuName = document.getElementById('user-menu-username');
         if (userMenuName) {
             const nickname =
@@ -582,7 +357,6 @@
             userMenuName.textContent = nickname;
         }
 
-        // 🔴 헤더에 정의된 전역 알림 함수가 있으면 호출 → 빨간 배지 갱신
         if (typeof checkPendingReviews === 'function') {
             try { await checkPendingReviews(); } catch (e) { console.error(e); }
         }
@@ -593,7 +367,6 @@
             try { updateGlobalBadge(); } catch (e) { console.error(e); }
         }
 
-        // 📅 나의 일정 불러오기
         const schedules = await fetchMySchedules();
 
         const dateRangeInput = document.getElementById('filter-date-range');
@@ -630,7 +403,6 @@
 
         setupPeriodSelect();
 
-        // 슬라이더 화살표 이벤트
         const prevBtn = document.getElementById('prev-slide');
         const nextBtn = document.getElementById('next-slide');
 
@@ -652,7 +424,6 @@
             });
         }
 
-        // 초기 전체 목록 (정렬 기본값: 최신순)
         renderMatchList(
             [...schedules].sort((a, b) =>
                 new Date(`${b.matchDate}T${b.matchTime || '00:00'}`) -
