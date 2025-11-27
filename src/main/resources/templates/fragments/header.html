@@ -35,7 +35,6 @@
         </nav>
     </header>
 
-    <!-- 🔥 로그아웃 글자 빨간색 적용 -->
     <style>
         #nav-logout-li a {
             color: #e74c3c !important;
@@ -43,7 +42,6 @@
         }
     </style>
 
-    <!-- ✅ 헤더용 JS (알림/배지 공용 함수 + 메뉴 컨트롤) -->
     <script>
         // === 전역 알림 상태 (여러 페이지에서 공유) ===
         window.hasReviewNotif = window.hasReviewNotif || false;
@@ -56,26 +54,25 @@
             const mainMenu = document.getElementById('main-menu');
             const profileMenuToggle = document.getElementById('profile-menu-toggle');
             const profileMenu = document.getElementById('profile-menu');
-            const logoutButton = document.getElementById('logout-button'); // 없으면 무시
             const navNotificationsLink = document.getElementById('nav-notifications-link');
             const navLogoutLink = document.getElementById('nav-logout-link');
             const navLoginLink = document.getElementById('nav-login-link');
             const navChatLinkElement = document.getElementById('nav-chat-link');
             const badge = document.getElementById('notification-badge');
 
-            // === 1) 알림/배지 전역 함수 정의 (여기서 "정의만" 하고 호출은 각 페이지에서) ===
+            // === 1) 전역 알림/배지 함수 ===
             window.updateGlobalBadge = function () {
                 if (!badge) return;
 
-                if (pendingReviewStadiumIds.length > 0 || hasScheduleNotif) {
-                    if (localStorage.getItem('hasReadReviews') !== 'true') {
-                        badge.style.display = 'block';
-                    } else {
-                        badge.style.display = 'none';
-                    }
-                } else {
-                    badge.style.display = 'none';
-                }
+                const hasReadReviews = localStorage.getItem('hasReadReviews') === 'true';
+                const hasReadSchedules = localStorage.getItem('hasReadSchedules') === 'true';
+
+                const showReviewBadge =
+                    (window.pendingReviewStadiumIds?.length > 0) && !hasReadReviews;
+                const showScheduleBadge =
+                    window.hasScheduleNotif && !hasReadSchedules;
+
+                badge.style.display = (showReviewBadge || showScheduleBadge) ? 'block' : 'none';
             };
 
             window.checkPendingReviews = async function () {
@@ -86,19 +83,16 @@
                     const response = await fetch(`/api/reviews/pending-stadiums?userId=${currentUserId}`);
                     if (response.ok) {
                         const ids = await response.json();
-                        pendingReviewStadiumIds = ids;
-                        hasReviewNotif = ids && ids.length > 0;
+                        window.pendingReviewStadiumIds = ids;
+                        window.hasReviewNotif = ids && ids.length > 0;
                     }
                 } catch (error) {
                     console.error("후기 알림 요청 중 오류:", error);
                 }
             };
 
+            // ✅ 읽음 플래그 때문에 API 호출 막지 않도록 수정
             window.checkUpcomingSchedules = async function () {
-                if (localStorage.getItem('hasReadSchedules') === 'true') {
-                    hasScheduleNotif = false;
-                    return;
-                }
                 const accessToken = localStorage.getItem('accessToken');
                 if (!accessToken) return;
 
@@ -109,15 +103,15 @@
 
                     if (response.ok) {
                         const data = await response.json();
-                        upcomingSchedules = data.map(item => ({
+                        window.upcomingSchedules = data.map(item => ({
                             id: item.scheduleId,
                             matchId: item.matchId,
-                            type: item.scheduleType,   // "경기" / "개인"
+                            type: item.scheduleType,
                             date: item.scheduleDate,
                             time: item.scheduleTime,
                             title: item.title
                         }));
-                        hasScheduleNotif = upcomingSchedules.length > 0;
+                        window.hasScheduleNotif = window.upcomingSchedules.length > 0;
                     }
                 } catch (error) {
                     console.error("일정 요청 중 오류:", error);
@@ -152,7 +146,7 @@
                 }
             });
 
-            // === 3) 로그인/로그아웃 UI 기본 처리 (옵션) ===
+            // === 3) 로그인/로그아웃 UI ===
             const accessToken = localStorage.getItem('accessToken');
             const profileIcon = document.getElementById('profile-menu-toggle');
             const userMenuName = document.getElementById('user-menu-username');
@@ -205,12 +199,11 @@
                 });
             }
 
-            // 알림 목록 클릭 시 읽음 처리
+            // ✅ 알림 목록 클릭은 "페이지 이동"만. 읽음 플래그는 notifications 페이지에서 처리
             if (navNotificationsLink) {
                 navNotificationsLink.addEventListener('click', () => {
-                    localStorage.setItem('hasReadReviews', 'true');
-                    localStorage.setItem('hasReadSchedules', 'true');
-                    // 실제 페이지 이동은 a 태그 href로 진행
+                    // 여기서 hasReadReviews / hasReadSchedules 절대 저장 X
+                    // 실제 읽음 처리 로직은 알림 목록에서 개별 읽음/모두 읽음으로 처리
                 });
             }
         });
