@@ -8,101 +8,6 @@
     <link rel="stylesheet" th:href="@{/css/style.css}">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700;900&family=Noto+Sans+KR:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-
-    <style>
-        .input-group.address-group { display: flex; gap: 10px; align-items: flex-end; }
-        .input-group.address-group .input-wrapper { flex-grow: 1; }
-        .address-group button { padding: 12px 15px; font-size: 14px; font-weight: 600; color: #fff; background: #95a5a6; border: none; border-radius: 10px; cursor: pointer; transition: background 0.3s; white-space: nowrap; min-width: 80px; }
-        .address-group button:hover { background: #7f8c8d; }
-        .modal-overlay { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.5); display: none; justify-content: center; align-items: center; z-index: 9999; }
-        .modal-overlay.show { display: flex; }
-        .modal { background: #fff; max-width: 900px; width: 90%; max-height: 80vh; border-radius: 12px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25); display: flex; flex-direction: column; overflow: hidden; }
-        .modal-header { padding: 16px 20px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; }
-        .modal-header h1 { margin: 0; font-size: 20px; }
-        .modal-close-btn { background: none; border: none; font-size: 22px; cursor: pointer; }
-        .modal-body { padding: 16px 20px; overflow-y: auto; }
-        .modal-body h2 { margin-top: 24px; }
-        .modal-body .clause { background: #f4f4f4; border: 1px solid #ddd; padding: 15px; margin-top: 10px; }
-        .modal-footer { padding: 16px 20px; border-top: 1px solid #eee; text-align: center; }
-        .agree-btn { padding: 12px 24px; font-size: 16px; font-weight: 600; border: none; border-radius: 8px; background: #6c5ce7; color: #fff; cursor: pointer; }
-        .agree-btn:hover { background: #574bdb; }
-        .terms-link { color: #3498db; text-decoration: underline; cursor: pointer; }
-
-        .info-message {
-            font-size: 13px !important;
-            font-weight: 500 !important;
-            margin-top: 5px !important;
-            display: none !important;
-            min-height: 0 !important;
-        }
-        .info-message.success {
-            color: #2ecc71 !important;
-            display: block !important;
-        }
-        .info-message.error {
-            color: #e74c3c !important;
-            display: block !important;
-        }
-        .profile-upload-container {
-            display: flex;
-            align-items: center;
-            gap: 20px;
-            margin-top: 10px;
-        }
-        .preview-wrapper {
-            position: relative;
-            width: 100px;
-            height: 100px;
-            border-radius: 50%;
-            border: 2px solid #ddd;
-            background-color: #fff;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            overflow: hidden;
-        }
-        .preview-text {
-            font-size: 14px;
-            color: #aaa;
-            font-weight: bold;
-            z-index: 1;
-        }
-        .profile-preview {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            display: none;
-            z-index: 2;
-        }
-        .profile-preview.active {
-            display: block;
-        }
-        .profile-actions {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-        .reset-img-btn {
-            background-color: #e74c3c;
-            color: white;
-            border: none;
-            padding: 8px 12px;
-            border-radius: 5px;
-            font-size: 12px;
-            cursor: pointer;
-            transition: background 0.3s;
-        }
-        .reset-img-btn:hover { background-color: #c0392b; }
-        input[type="text"]:read-only,
-        input[type="email"]:read-only {
-            background-color: #eee !important;
-            color: #777;
-            cursor: not-allowed;
-        }
-    </style>
 </head>
 <body>
 <div th:replace="~{fragments/header :: siteHeader}"></div>
@@ -158,7 +63,6 @@
                         </div>
                     </div>
 
-
                     <div class="input-group" style="display: flex; align-items: center; gap: 20px; margin-top: 5px;">
                         <label style="margin: 0; min-width: 100px; font-weight: 700; font-size: 20px;">
                             성별 (Gender)
@@ -184,7 +88,6 @@
                             <option value="콜레이로(GOLEIRO)">콜레이로(GOLEIRO)</option>
                         </select>
                     </div>
-
 
                     <div class="input-group">
                         <label for="skill-level">나의 실력 레벨</label>
@@ -230,7 +133,6 @@
                         <p id="profile-pic-message" class="info-message"></p>
                     </div>
 
-
                     <div class="terms-agreement">
                         <input type="checkbox" id="terms-agree" name="termsAgree" value="true" required>
                         <label for="terms-agree">
@@ -259,7 +161,6 @@
             <button type="button" class="modal-close-btn" id="terms-modal-close">&times;</button>
         </div>
         <div class="modal-body">
-            <!-- 약관 내용 (생략: 기존과 동일) -->
             <h2>제 1 조 (목적)</h2>
             <div class="clause">
                 <p>본 약관은 Multi FC(이하 "회사")가 제공하는 풋살 매칭 및 관련 제반 서비스의 이용과 관련하여 회사와 회원과의 권리, 의무 및 책임사항 등을 규정함을 목적으로 합니다.</p>
@@ -277,6 +178,7 @@
         </div>
     </div>
 </div>
+
 <script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
 
 <script>
@@ -302,7 +204,6 @@
             oncomplete: function(data) {
                 document.getElementById("address").value = data.roadAddress || data.jibunAddress;
                 document.getElementById("address-detail").focus();
-                // 강제 이벤트 발생 (유효성 체크용)
                 document.getElementById("address").dispatchEvent(new Event('change'));
             }
         }).open();
@@ -318,17 +219,11 @@
         modalOverlay.classList.remove('show');
     });
 
-    // ⭐️ 4. 핵심 로직 (유효성 검사 + 이미지 프리뷰 + 헤더 닉네임/배지) ⭐️
     document.addEventListener('DOMContentLoaded', async () => {
-        /* ===== 헤더 쪽: 사용자명/배지 처리 (공통) ===== */
         const headerNameSpan = document.getElementById('user-menu-username');
         const savedName = (localStorage.getItem('username') || '').trim();
-        if (headerNameSpan) {
-            // "사용자님" 같은 기본 문구 대신 저장된 닉네임 / 없으면 '게스트'
-            headerNameSpan.textContent = savedName || '게스트';
-        }
+        if (headerNameSpan) headerNameSpan.textContent = savedName || '게스트';
 
-        // 빨간 알림 배지 (헤더에서 정의된 전역 함수가 있을 때만 안전하게 호출)
         if (typeof checkPendingReviews === 'function') {
             try { await checkPendingReviews(); } catch (e) { console.error(e); }
         }
@@ -338,12 +233,10 @@
         if (typeof updateGlobalBadge === 'function') {
             try { updateGlobalBadge(); } catch (e) { console.error(e); }
         }
-        /* ===== 여기까지가 헤더 관련, 아래는 기존 회원가입 로직 그대로 ===== */
 
         const registerForm = document.getElementById('register-form');
         const registerSubmitBtn = document.getElementById('register-submit-btn');
 
-        // 필드
         const emailInput = document.getElementById('email');
         const usernameInput = document.getElementById('username');
         const nicknameInput = document.getElementById('nickname');
@@ -352,10 +245,8 @@
         const termsCheckbox = document.getElementById('terms-agree');
         const skillLevelSelect = document.getElementById('skill-level');
         const addressInput = document.getElementById('address');
-        const genderInputs = document.querySelectorAll('input[name="gender"]');
         const dateElement = document.getElementById('terms-date');
 
-        // 메시지창
         const emailMsg = document.getElementById('email-message');
         const usernameMsg = document.getElementById('username-message');
         const nicknameMsg = document.getElementById('nickname-message');
@@ -363,15 +254,13 @@
         const profilePicMsg = document.getElementById('profile-pic-message');
         const errorMsg = document.getElementById('error-message');
 
-        // 이미지 관련
         const profilePicInput = document.getElementById('profile-pic');
         const imagePreview = document.getElementById('image-preview');
         const resetImageBtn = document.getElementById('reset-image-btn');
         const socialProfileUrlInput = document.getElementById('socialProfileUrl');
 
-        // 초기 유효성 상태
         let validationStatus = {
-            email: emailInput.value.length > 0 && emailInput.readOnly, // 소셜이면 true
+            email: emailInput.value.length > 0 && emailInput.readOnly,
             username: false,
             nickname: nicknameInput.value.length > 0,
             password: false,
@@ -381,14 +270,12 @@
             gender: true
         };
 
-        // 버튼 상태 업데이트
         function checkSubmitButtonState() {
             const allValid = Object.values(validationStatus).every(Boolean);
             registerSubmitBtn.disabled = !allValid;
             registerSubmitBtn.textContent = allValid ? 'Create Account' : '모든 항목을 확인해주세요';
         }
 
-        // 메시지 표시/숨김
         function showFeedback(element, message, isError) {
             if (!element) return;
             element.textContent = message;
@@ -401,12 +288,10 @@
             }
         }
 
-        // ⭐️ 유효성 검사 함수 (Debounce) ⭐️
         let debounceTimer;
         async function validateField(field, value, messageElement, apiUrl, regex, regexMsg) {
             clearTimeout(debounceTimer);
 
-            // 1. 정규식 검사
             if (!regex.test(value)) {
                 showFeedback(messageElement, regexMsg, true);
                 validationStatus[field] = false;
@@ -414,7 +299,6 @@
                 return;
             }
 
-            // 2. API 중복 검사 (0.5초 대기)
             debounceTimer = setTimeout(async () => {
                 try {
                     const response = await fetch(`${apiUrl}?${field}=${encodeURIComponent(value)}`);
@@ -434,9 +318,6 @@
             }, 500);
         }
 
-        // --- 이벤트 리스너 (검사 로직) ---
-
-        // 1. 이메일
         if (emailInput.readOnly) {
             showFeedback(emailMsg, '✅ 소셜 로그인 인증 완료', false);
         } else {
@@ -446,19 +327,16 @@
             });
         }
 
-        // 2. 아이디
         usernameInput.addEventListener('input', () => {
             const regex = /^[a-z0-9_]{5,20}$/;
             validateField('username', usernameInput.value, usernameMsg, '/api/users/check-username', regex, '5~20자 영문 소문자, 숫자, (_)만 사용 가능');
         });
 
-        // 3. 닉네임
         nicknameInput.addEventListener('input', () => {
             const regex = /^[가-힣a-zA-Z0-9]{2,16}$/;
             validateField('nickname', nicknameInput.value, nicknameMsg, '/api/users/check-nickname', regex, '2~16자 한글, 영문, 숫자만 사용 가능');
         });
 
-        // 4. 비밀번호
         passwordInput.addEventListener('input', () => {
             const regex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$/;
             if (regex.test(passwordInput.value)) {
@@ -480,12 +358,10 @@
             }
         });
 
-        // 5. 기타 필수 항목
         termsCheckbox.addEventListener('change', () => { validationStatus.terms = termsCheckbox.checked; checkSubmitButtonState(); });
         skillLevelSelect.addEventListener('change', () => { validationStatus.skill = !!skillLevelSelect.value; checkSubmitButtonState(); });
         addressInput.addEventListener('change', () => { validationStatus.address = !!addressInput.value; checkSubmitButtonState(); });
 
-        // ⭐️ 이미지 프리뷰 및 초기화 로직 ⭐️
         function updateImagePreview() {
             const file = profilePicInput.files[0];
             const socialUrl = socialProfileUrlInput.value;
@@ -523,22 +399,18 @@
             updateImagePreview();
         });
 
-        // 초기 실행
         updateImagePreview();
         if (nicknameInput.value) nicknameInput.dispatchEvent(new Event('input'));
         checkSubmitButtonState();
 
-        // 약관 날짜
         if (dateElement) {
             const today = new Date();
             const year = today.getFullYear();
             const month = String(today.getMonth() + 1).padStart(2, '0');
             const day = String(today.getDate()).padStart(2, '0');
-
             dateElement.textContent = `${year}년 ${month}월 ${day}일`;
         }
 
-        // ⭐️ 폼 제출 ⭐️
         registerForm.addEventListener('submit', async (e) => {
             e.preventDefault();
 
