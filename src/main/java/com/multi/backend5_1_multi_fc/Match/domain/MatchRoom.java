@@ -13,6 +13,7 @@ public class MatchRoom {
     private Long hostId;
     private LocalDate matchDate;
     private LocalTime matchTime;
+    private LocalTime endTime;
     private Integer maxPlayers;
     private String level;
     private String status;

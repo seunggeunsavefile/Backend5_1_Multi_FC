@@ -26,4 +26,7 @@ public interface MatchParticipantMapper {
     List<ParticipantDto> findParticipantsInfo(@Param("roomId") Long roomId);
 
     void updateStatus(@Param("roomId") Long roomId, @Param("userId") Long userId, @Param("status") String status);
+
+    // ✨ [추가된 메서드] 특정 방의 확정 참가자(호스트 포함) ID 목록 조회
+    List<Long> findConfirmedParticipantUserIds(@Param("roomId") Long roomId);
 }

@@ -294,8 +294,6 @@ body, html {
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
-    /* 🔹 흰색 50% 투명 */
-    background: rgba(255, 255, 255, 0.3);
     position: relative;
     overflow-y: auto;
 }
