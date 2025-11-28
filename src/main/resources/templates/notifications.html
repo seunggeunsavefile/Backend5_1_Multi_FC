@@ -9,6 +9,60 @@
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700;900&family=Noto+Sans+KR:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 
+    <style>
+        .notification-list { list-style: none; padding: 0; margin: 0; }
+        .notification-item {
+            display: grid;
+            grid-template-columns: 40px 1fr auto;
+            gap: 15px;
+            align-items: center; padding: 20px 15px;
+            border-bottom: 1px solid #eee; text-decoration: none;
+            color: #333; transition: background-color 0.3s;
+            position: relative;
+        }
+        .notification-item:hover { background-color: #f9f9f9; }
+
+        .notification-item.unread {
+            background-color: #fff8e1;
+            border-left: 5px solid #ffc107;
+            padding-left: 10px;
+        }
+        .notification-item.clickable { cursor: pointer; }
+        .notification-item.clickable:hover { background-color: #f0f0f0; }
+
+        .notification-item i { font-size: 20px; text-align: center; }
+        .notification-item .icon-review { color: #faad14; }
+        .notification-item .icon-schedule { color: #6c5ce7; }
+        .notification-item .icon-friend { color: #2ecc71; }
+        .notification-item .icon-comment { color: #3498db; }
+        .notification-item .icon-chat { color: #f39c12; }
+
+        .notification-content { padding-right: 10px; }
+        .notification-content p {
+            font-size: 16px; font-weight: 600;
+            margin: 0; color: #2c3e50;
+        }
+        .notification-content .time {
+            font-size: 13px; color: #888; margin-top: 4px;
+        }
+
+        .notification-actions {
+            display: flex;
+            gap: 5px;
+            flex-shrink: 0;
+        }
+        .notification-actions button {
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            white-space: nowrap;
+        }
+        .btn-accept { background-color: #2ecc71; color: white; }
+        .btn-reject { background-color: #f0f0f0; color: #555; border: 1px solid #ddd; }
+    </style>
 </head>
 
 <body>
@@ -145,18 +199,19 @@
                         }
                     };
 
-                } else if (notif.type === '친구신청' || notif.type === '친구요청'){
+                } else if (notif.type === '친구신청' || notif.type === '친구요청') {
+                    // 친구 요청 알림: 버튼 없이, 클릭하면 마이페이지 친구요청 탭으로 이동
                     iconHtml = '<i class="fas fa-user-friends icon-friend"></i>';
-                    actionHtml = `
-                        <div class="notification-actions">
-                            <button class="btn-accept"
-                                onclick="handleFriendAction(${notif.referenceId}, 'accept', event)">수락</button>
-                            <button class="btn-reject"
-                                onclick="handleFriendAction(${notif.referenceId}, 'reject', event)">거절</button>
-                        </div>
-                    `;
-                    isClickable = false;
-                    item.style.cursor = 'default';
+
+                    item.onclick = () => {
+                        if (isClickable) {
+                            markAsRead(notif.notificationId, notif.type);
+                            window.location.href = '/mypage?tab=friends&subtab=add';
+                        }
+                    };
+                    actionHtml = '';
+                    isClickable = true;
+                    item.style.cursor = 'pointer';
 
                 } else if (notif.type === '매치') {
                     iconHtml = '<i class="fas fa-calendar-alt icon-schedule"></i>';
@@ -224,7 +279,6 @@
     }
 
     async function markAsRead(notificationId, type){
-        // 가짜 알림 ID(0) 처리
         if (notificationId === 0) {
             await loadNotifications();
             return;
@@ -270,52 +324,55 @@
         }
     }
 
-    async function handleFriendAction(friendId, action, event) {
-        event.stopPropagation();
-        const accessToken = localStorage.getItem('accessToken');
-
-        try {
-            const endpoint = action === 'accept'
-                ? `/api/friends/accept/${friendId}`
-                : `/api/friends/reject/${friendId}`;
-
-            const response = await fetch(endpoint, {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${accessToken}`,
-                    'Content-Type': 'application/json'
-                },
-                credentials: 'include'
-            });
-
-            if (!response.ok) throw new Error('친구 요청 처리 실패');
-
-            alert(action === 'accept'
-                ? '✅ 친구 요청을 수락했습니다.'
-                : '❌ 친구 요청을 거절했습니다.');
-
-            loadNotifications();
-
-            // 처리 후 배지 갱신
-            try {
-                if (typeof window.checkPendingReviews === 'function') {
-                    await window.checkPendingReviews();
-                }
-                if (typeof window.checkUpcomingSchedules === 'function') {
-                    await window.checkUpcomingSchedules();
-                }
-                if (typeof window.updateGlobalBadge === 'function') {
-                    window.updateGlobalBadge();
-                }
-            } catch (e) {
-                console.error('배지 업데이트 중 오류:', e);
-            }
-
-        } catch (error){
-            console.error('친구 요청 처리 실패:', error);
-            alert('친구 요청 처리 중 오류가 발생했습니다.');
-        }
-    }
+    // async function handleFriendAction(friendId, notificationId, action, event) {
+    //     event.stopPropagation();
+    //     const accessToken = localStorage.getItem('accessToken');
+    //
+    //     try {
+    //         const endpoint = action === 'accept'
+    //             ? `/api/friends/requests/${friendId}/accept`   // 수정
+    //             : `/api/friends/requests/${friendId}/reject`;  // 수정
+    //
+    //         const response = await fetch(endpoint, {
+    //             method: 'POST',
+    //             headers: {
+    //                 'Authorization': `Bearer ${accessToken}`,
+    //                 'Content-Type': 'application/json'
+    //             },
+    //             credentials: 'include'
+    //         });
+    //
+    //         if (!response.ok) throw new Error('친구 요청 처리 실패');
+    //
+    //         alert(action === 'accept'
+    //             ? '✅ 친구 요청을 수락했습니다.'
+    //             : '❌ 친구 요청을 거절했습니다.');
+    //
+    //         // 🔥 수락/거절 성공 후 이 알림을 읽음 처리
+    //         if (notificationId) {
+    //             await markAsRead(notificationId, '친구요청');
+    //         }
+    //
+    //         // 처리 후 배지 갱신
+    //         try {
+    //             if (typeof window.checkPendingReviews === 'function') {
+    //                 await window.checkPendingReviews();
+    //             }
+    //             if (typeof window.checkUpcomingSchedules === 'function') {
+    //                 await window.checkUpcomingSchedules();
+    //             }
+    //             if (typeof window.updateGlobalBadge === 'function') {
+    //                 window.updateGlobalBadge();
+    //             }
+    //         } catch (e) {
+    //             console.error('배지 업데이트 중 오류:', e);
+    //         }
+    //
+    //     } catch (error){
+    //         console.error('친구 요청 처리 실패:', error);
+    //         alert('친구 요청 처리 중 오류가 발생했습니다.');
+    //     }
+    // }
 
     document.addEventListener('DOMContentLoaded', async () => {
         const accessToken = localStorage.getItem('accessToken');

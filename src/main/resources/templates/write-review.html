@@ -30,24 +30,30 @@
                     <div class="input-group">
                         <label>후기 작성 대상 구장</label>
 
-                        <!-- ✅ 기존 input → select 로 교체 -->
                         <select id="pending-stadium-select"
                                 style="background: #fff; width: 100%; padding: 12px; border: 1px solid #ddd;
                                        border-radius: 10px; font-size: 15px;">
                             <option value="">구장 정보 로딩 중...</option>
                         </select>
 
-                        <!-- ✅ 선택된 stadiumId 저장용 hidden -->
                         <input type="hidden" id="stadium-id" name="stadiumId" th:value="${stadiumId}" value="">
                         <p id="selected-stadium-hint"
                            style="font-size:12px; color:#777; margin-top:6px;"></p>
                     </div>
 
-                    <div class="input-group" style="margin-top: 20px;">
-                        <label for="review-rating">평점 (1~5)</label>
-                        <input type="number" id="review-rating" name="rating" min="1" max="5" required
-                               placeholder="구장 평점을 1점에서 5점까지 입력해주세요."
-                               style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 10px; font-size: 15px; background: #f7f7f7;">
+                    <div class="input-group rating-group" style="margin-top: 20px;">
+                        <label>평점</label>
+
+                        <div id="star-rating" class="star-rating">
+                            <i class="fa fa-star star" data-value="5"></i>
+                            <i class="fa fa-star star" data-value="4"></i>
+                            <i class="fa fa-star star" data-value="3"></i>
+                            <i class="fa fa-star star" data-value="2"></i>
+                            <i class="fa fa-star star" data-value="1"></i>
+                        </div>
+
+                        <!-- 실제 서버로 넘길 값 -->
+                        <input type="hidden" id="review-rating" name="rating" required>
                     </div>
 
                     <div class="input-group" style="margin-top: 30px;">
@@ -108,6 +114,32 @@
             if (typeof updateGlobalBadge === 'function') {
                 try { updateGlobalBadge(); } catch (e) { console.error(e); }
             }
+        }
+
+
+        function initStarRatingForWrite() {
+            const stars = document.querySelectorAll("#star-rating .star");
+            const ratingInput = document.getElementById("review-rating");
+
+            if (!stars.length || !ratingInput) {
+                console.warn("⭐ 별 평점 요소를 찾을 수 없습니다.");
+                return;
+            }
+
+            stars.forEach(star => {
+                star.addEventListener("click", () => {
+                    const value = parseInt(star.dataset.value, 10);
+
+                    // hidden input에 값 저장 (서버로 보낼 값)
+                    ratingInput.value = value;
+
+                    // 클릭된 값 이하의 별들만 selected 유지
+                    stars.forEach(s => {
+                        const v = parseInt(s.dataset.value, 10);
+                        s.classList.toggle("selected", v <= value);
+                    });
+                });
+            });
         }
 
         // =========================
@@ -212,7 +244,7 @@
             const reviewData = {
                 stadiumId: Number(currentStadiumId),
                 userId: Number(currentUserId),
-                rating: Number(rating),
+                rating: Number(rating),   // ⭐ 별 클릭 값
                 content: content
             };
 
@@ -224,17 +256,18 @@
                 });
 
                 if (response.ok) {
-                    successMsg.textContent =
-                        '✅ 후기가 성공적으로 등록되었습니다. 구장 상세 페이지로 이동합니다.';
-                    successMsg.style.display = 'block';
 
                     // ✅ 읽음 처리
                     localStorage.setItem('hasReadReviews', 'true');
 
-                    // ✅ pending 목록 재로딩 → 다음 구장 선택 가능하게
-                    setTimeout(async () => {
-                        await location.reload();
-                    }, 1200);
+                    // ⭐⭐⭐ 팝업창 띄운 후 이동 ⭐⭐⭐
+                    const selectElement = document.getElementById('pending-stadium-select');
+                    const stadiumName = selectElement.options[selectElement.selectedIndex].textContent.split('(')[0].trim();
+
+                    alert(`✅ 후기가 성공적으로 등록되었습니다! ${stadiumName} 후기 페이지로 이동합니다.`);
+
+                    // 구장 상세 페이지로 이동 (alert 닫히면 바로 실행됨)
+                    window.location.href = `/stadium/detail?id=${currentStadiumId}`;
 
                 } else {
                     const errorBody = await response.text();
@@ -251,6 +284,7 @@
                 errorMsg.style.display = 'block';
             }
         });
+        initStarRatingForWrite();
     });
 </script>
 
