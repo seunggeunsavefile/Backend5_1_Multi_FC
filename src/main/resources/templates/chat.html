@@ -4,7 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MULTI FC - 실시간 채팅</title>
+
+    <!-- 기존 공통 스타일 -->
     <link rel="stylesheet" th:href="@{/css/style.css}">
+    <!-- ✅ 분리한 채팅 전용 스타일 -->
+    <link rel="stylesheet" th:href="@{/css/chat.css}">
+
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700;900&family=Noto+Sans+KR:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
@@ -84,7 +89,7 @@
             <!-- ✅ 메시지 표시 영역 -->
             <div id="chat-messages-container" class="chat-messages"></div>
 
-            <!-- ✅ 메시지 입력 영역 (인라인 이벤트 제거) -->
+            <!-- ✅ 메시지 입력 영역 -->
             <div class="chat-input-area">
                 <input type="text" id="message-input" placeholder="메시지를 입력하세요..." maxlength="500">
                 <button onclick="sendMessage()" id="send-message-btn">전송</button>
@@ -103,7 +108,7 @@
     </div>
     <div id="participant-list-container" class="participant-list-container"></div>
     <div style="padding: 15px; border-top: 1px solid #eee;">
-        <button class="chat-btn-create invite-action-btn" style="width: 100%;" onclick="openInviteModal()" id="open-invite-modal-btn">
+        <button class="btn-create invite-action-btn" style="width: 100%;" onclick="openInviteModal()" id="open-invite-modal-btn">
             <i class="fas fa-user-plus"></i> 친구 초대하기
         </button>
     </div>
@@ -123,7 +128,6 @@
         <select id="new-chat-type" onchange="updateNewChatForm(this.value)">
             <option value="one-on-one" selected>1:1 채팅</option>
             <option value="group">그룹 채팅</option>
-            <option value="public">전체 채팅 (전체 공개)</option>
         </select>
 
         <!-- 그룹 인원 수 (그룹일 때 표시) -->
@@ -145,9 +149,9 @@
             </p>
         </div>
 
-        <!-- 액션 버튼: (취소 제거 / 채팅 시작만 오른쪽 정렬) -->
+        <!-- 액션 버튼 -->
         <div class="modal-actions" style="justify-content: flex-end; margin-top: 20px;">
-            <button class="chat-btn-create" onclick="createNewChat()" id="create-new-chat-btn">채팅 시작</button>
+            <button class="btn-create" onclick="createNewChat()" id="create-new-chat-btn">채팅 시작</button>
         </div>
     </div>
 </div>
@@ -155,7 +159,7 @@
 <!-- ✅ 모달: 친구 초대 -->
 <div id="invite-modal" class="chat-modal-overlay">
     <div class="chat-modal-content">
-        <!-- 🔥 X 버튼 (친구 초대 제목 오른쪽) -->
+        <!-- 🔥 X 버튼 -->
         <button type="button" class="modal-close-x" onclick="openInviteModal(false)">&times;</button>
 
         <h2>친구 초대</h2>
@@ -170,8 +174,7 @@
                 <span id="selected-invite-count">0</span>명 선택됨
             </p>
             <div>
-                <!-- 취소 버튼 제거, 초대 버튼만 유지 -->
-                <button class="chat-btn-create" onclick="sendInvite()" id="send-invite-btn">초대하기</button>
+                <button class="btn-create" onclick="sendInvite()" id="send-invite-btn">초대하기</button>
             </div>
         </div>
     </div>
@@ -306,7 +309,7 @@
                 });
             })
 
-                .catch(error => {
+            .catch(error => {
                 console.error('사용자 정보 로드 실패:', error);
                 alert('사용자 정보를 불러올 수 없습니다.');
                 window.location.href = "/login";
@@ -1116,7 +1119,7 @@
         const recipientInput = newChatRecipientInput.value.trim();
         const maxParticipantsInput = document.getElementById('new-chat-max-participants');
         const maxParticipants = parseInt(maxParticipantsInput.value);
-        const createBtn = document.querySelector('.chat-btn-create');
+        const createBtn = document.querySelector('.btn-create');
         createBtn.disabled = true;
 
         if (!title) {

@@ -29,10 +29,18 @@
                 <form id="review-form" style="display: none;">
                     <div class="input-group">
                         <label>후기 작성 대상 구장</label>
-                        <input type="text" id="match-info" value="구장 정보 로딩 중..." disabled
-                               style="background: #eee; cursor: not-allowed; width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 10px; font-size: 15px; ">
 
+                        <!-- ✅ 기존 input → select 로 교체 -->
+                        <select id="pending-stadium-select"
+                                style="background: #fff; width: 100%; padding: 12px; border: 1px solid #ddd;
+                                       border-radius: 10px; font-size: 15px;">
+                            <option value="">구장 정보 로딩 중...</option>
+                        </select>
+
+                        <!-- ✅ 선택된 stadiumId 저장용 hidden -->
                         <input type="hidden" id="stadium-id" name="stadiumId" th:value="${stadiumId}" value="">
+                        <p id="selected-stadium-hint"
+                           style="font-size:12px; color:#777; margin-top:6px;"></p>
                     </div>
 
                     <div class="input-group" style="margin-top: 20px;">
@@ -67,10 +75,12 @@
         const currentUserId = localStorage.getItem('userId');
 
         const urlParams = new URLSearchParams(window.location.search);
-        let stadiumId = urlParams.get('stadiumId') || document.getElementById('stadium-id').value;
+        const preferredStadiumId = urlParams.get('stadiumId')
+            || document.getElementById('stadium-id').value;
 
         const reviewForm = document.getElementById('review-form');
-        const matchInfoInput = document.getElementById('match-info');
+        const selectEl = document.getElementById('pending-stadium-select');
+        const hintEl = document.getElementById('selected-stadium-hint');
         const deniedContainer = document.getElementById('access-denied-container');
 
         const successMsg = document.getElementById('review-success-message');
@@ -88,7 +98,6 @@
             userMenuName.textContent = nickname;
         }
 
-        // 공통 알림 함수가 있는 경우만 호출 → 빨간 배지 갱신
         if (accessToken) {
             if (typeof checkPendingReviews === 'function') {
                 try { await checkPendingReviews(); } catch (e) { console.error(e); }
@@ -111,49 +120,74 @@
         }
 
         // =========================
-        // 3. stadiumId 검증
-        // =========================
-        if (!stadiumId) {
-            reviewForm.style.display = 'none';
-            deniedContainer.innerHTML = `
-                <div class="access-denied-message">
-                    <i class="fas fa-exclamation-triangle"></i>
-                    후기 작성은 <strong>경기를 완료한 후</strong> 메인 페이지의 알림을 통해서만 가능합니다.<br>
-                    직접 URL로 접근할 수 없습니다.
-                    <p style="margin-top: 10px;"><a href="/">메인 페이지로 돌아가기</a></p>
-                </div>
-            `;
-            return;
-        }
-
-        // =========================
-        // 4. 구장 정보 로딩
+        // 3. pending 구장 목록 로딩
         // =========================
         reviewForm.style.display = 'block';
-        document.getElementById('stadium-id').value = stadiumId;
 
         try {
+            // (1) pending stadiumId 목록
+            const pendingRes = await fetch(`/api/reviews/pending-stadiums?userId=${currentUserId}`);
+            if (!pendingRes.ok) throw new Error("pending 구장 조회 실패");
+            const pendingIds = await pendingRes.json(); // [id, id, id...]
+
+            if (!pendingIds || pendingIds.length === 0) {
+                reviewForm.style.display = 'none';
+                deniedContainer.innerHTML = `
+                    <div class="access-denied-message">
+                        <i class="fas fa-check-circle"></i>
+                        작성해야 할 후기가 없습니다! 🎉
+                        <p style="margin-top: 10px;"><a href="/">메인 페이지로 돌아가기</a></p>
+                    </div>
+                `;
+                return;
+            }
+
+            // (2) 구장 전체 목록
             const stadiumRes = await fetch('/api/stadiums');
             if (!stadiumRes.ok) throw new Error('구장 목록 API 호출 실패');
-
             const stadiums = await stadiumRes.json();
-            const stadium = stadiums.find(s => s.stadiumId == stadiumId);
 
-            if (stadium) {
-                const shortAddr = stadium.address && stadium.address.length > 15
-                    ? stadium.address.substring(0, 15) + '...'
-                    : stadium.address;
-                matchInfoInput.value = `${stadium.name} 구장 (${shortAddr})`;
-            } else {
-                matchInfoInput.value = `❌ 오류: 구장 ID ${stadiumId}의 정보를 찾을 수 없습니다.`;
+            // (3) select 옵션 채우기
+            selectEl.innerHTML = '';
+            pendingIds.forEach(id => {
+                const stadium = stadiums.find(s => String(s.stadiumId) === String(id));
+                const opt = document.createElement('option');
+                opt.value = id;
+
+                if (stadium) {
+                    const shortAddr = stadium.address && stadium.address.length > 15
+                        ? stadium.address.substring(0, 15) + '...'
+                        : (stadium.address || '주소 없음');
+                    opt.textContent = `${stadium.name} 구장 (${shortAddr})`;
+                } else {
+                    opt.textContent = `구장 ID: ${id}`;
+                }
+
+                selectEl.appendChild(opt);
+            });
+
+            // (4) 알림/URL로 넘어온 stadiumId가 pending 안에 있으면 기본 선택
+            if (preferredStadiumId && pendingIds.map(String).includes(String(preferredStadiumId))) {
+                selectEl.value = preferredStadiumId;
             }
+
+            // (5) hidden stadium-id 동기화
+            document.getElementById('stadium-id').value = selectEl.value;
+            hintEl.textContent = `선택된 구장 ID: ${selectEl.value}`;
+
         } catch (e) {
-            console.error("구장 정보 로드 오류:", e);
-            matchInfoInput.value = `❌ 구장 정보 로드 중 오류 발생. (서버 API 점검 필요)`;
+            console.error("pending/구장 정보 로드 오류:", e);
+            selectEl.innerHTML = `<option value="">❌ 구장 목록 로딩 실패</option>`;
         }
 
+        // ✅ 선택 변경 시 hidden 값도 변경
+        selectEl.addEventListener('change', () => {
+            document.getElementById('stadium-id').value = selectEl.value;
+            hintEl.textContent = `선택된 구장 ID: ${selectEl.value}`;
+        });
+
         // =========================
-        // 5. 후기 등록 처리
+        // 4. 후기 등록 처리
         // =========================
         reviewForm.addEventListener('submit', async function (e) {
             e.preventDefault();
@@ -194,11 +228,14 @@
                         '✅ 후기가 성공적으로 등록되었습니다. 구장 상세 페이지로 이동합니다.';
                     successMsg.style.display = 'block';
 
+                    // ✅ 읽음 처리
                     localStorage.setItem('hasReadReviews', 'true');
 
-                    setTimeout(() => {
-                        window.location.href = `/stadium/detail?id=${currentStadiumId}`;
-                    }, 2000);
+                    // ✅ pending 목록 재로딩 → 다음 구장 선택 가능하게
+                    setTimeout(async () => {
+                        await location.reload();
+                    }, 1200);
+
                 } else {
                     const errorBody = await response.text();
                     console.error('서버 응답 오류:', errorBody);

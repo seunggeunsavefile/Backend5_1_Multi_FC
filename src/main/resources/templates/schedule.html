@@ -73,7 +73,9 @@
             </button>
         </div>
 
-        <p id="no-results-message" style="color: #666; text-align: center; margin-top: 30px; display: none;">검색 결과가 없습니다.</p>
+        <p id="no-results-message" style="color: #666; text-align: center; margin-top: 30px; display: none;">
+            검색 결과가 없습니다.
+        </p>
     </div>
 </main>
 
@@ -160,9 +162,12 @@
 
                         <p class="status">
                             <i class="fas fa-users"></i>
-                            <span class="status-badge ${statusClass}">${match.status === 'open' ? '모집중' : '모집완료'}</span> ( ${match.current} / ${match.max}명 )
+                            <span class="status-badge ${statusClass}">
+                                ${match.status === 'open' ? '모집중' : '모집완료'}
+                            </span> ( ${match.current} / ${match.max}명 )
                         </p>
-                        <a href="/schedule/detail/${match.id}" class="details-button ${buttonDisabled}" ${buttonDisabled ? 'onclick="return false;"' : ''}>
+                        <a href="/schedule/detail/${match.id}" class="details-button ${buttonDisabled}"
+                           ${buttonDisabled ? 'onclick="return false;"' : ''}>
                             ${match.status === 'closed' ? '마감 (상세보기)' : '상세보기'}
                         </a>
                     </div>
@@ -357,15 +362,21 @@
             userMenuName.textContent = nickname;
         }
 
-        if (typeof checkPendingReviews === 'function') {
-            try { await checkPendingReviews(); } catch (e) { console.error(e); }
+        // ✅✅✅ 여기만 핵심 수정 (배지 갱신 window. 로 통일) ✅✅✅
+        try {
+            if (typeof window.checkPendingReviews === 'function') {
+                await window.checkPendingReviews();
+            }
+            if (typeof window.checkUpcomingSchedules === 'function') {
+                await window.checkUpcomingSchedules();
+            }
+            if (typeof window.updateGlobalBadge === 'function') {
+                window.updateGlobalBadge();
+            }
+        } catch (e) {
+            console.error('알림/일정 배지 업데이트 중 오류:', e);
         }
-        if (typeof checkUpcomingSchedules === 'function') {
-            try { await checkUpcomingSchedules(); } catch (e) { console.error(e); }
-        }
-        if (typeof updateGlobalBadge === 'function') {
-            try { updateGlobalBadge(); } catch (e) { console.error(e); }
-        }
+        // ✅✅✅ 수정 끝 ✅✅✅
 
         const schedules = await fetchMySchedules();
 

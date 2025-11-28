@@ -257,11 +257,14 @@
                 document.getElementById('view-skill-level').textContent = user.level || '정보 없음';
                 document.getElementById('view-position-score').textContent = user.position || '정보 없음';
 
-                // 헤더/다른 페이지에서 쓸 닉네임 저장
+                // ✅ 헤더/다른 페이지에서 쓸 닉네임 저장
                 localStorage.setItem('username', user.nickname || user.username);
-                // 🔥 알림 쿼리에서 쓰는 userId도 여기서 세팅
-                if (user.username) {
-                    localStorage.setItem('userId', user.username);
+                localStorage.setItem('userNickname', user.nickname || user.username);
+
+                // ✅🔥 userId는 절대 username으로 덮어쓰지 말고 숫자 PK로 저장
+                // (schedule.html / chat.html 모두 이 값을 사용)
+                if (user.userId != null) {
+                    localStorage.setItem('userId', String(user.userId));
                 }
 
                 // 프로필 이미지 표시
@@ -269,7 +272,7 @@
                     document.getElementById('profile-preview-view').src = user.profileImage;
                 }
 
-                // 헤더의 사용자 이름도 여기서 갱신 (기본 "사용자님" → "닉네임님")
+                // 헤더의 사용자 이름도 갱신
                 const headerNameSpan = document.getElementById('user-menu-username');
                 if (headerNameSpan) {
                     headerNameSpan.textContent = user.nickname || user.username;
@@ -279,6 +282,7 @@
                 alert('로그인 정보가 유효하지 않습니다. 다시 로그인해주세요.');
                 localStorage.removeItem('accessToken');
                 localStorage.removeItem('username');
+                localStorage.removeItem('userId');
                 window.location.href = '/login';
             } else {
                 console.error('사용자 정보 조회 실패:', response.status);

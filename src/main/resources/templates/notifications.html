@@ -13,6 +13,7 @@
 
 <body>
 
+<!-- ✅ 공통 헤더 사용 -->
 <div th:replace="~{fragments/header :: siteHeader}"></div>
 
 <main class="login-page-main">
@@ -31,16 +32,66 @@
 </main>
 
 <script>
-    async function loadNotifications(){
-        const listContainer = document.getElementById('notification-list-container');
-        const accessToken = localStorage.getItem('accessToken');
+    const listContainer = document.getElementById('notification-list-container');
 
-        if(!accessToken){
-            alert('로그인이 필요한 페이지입니다. 로그인 페이지로 이동합니다.');
-            window.location.href = '/login';
-            return;
+    // 날짜 포맷
+    function formatNotificationTime(createdAt){
+        if (!createdAt) return '방금 전';
+        const notifDate = new Date(createdAt);
+        const now = new Date();
+        const diffMs = now - notifDate;
+        const diffMins = Math.floor(diffMs / 60000);
+        const diffHours = Math.floor(diffMins / 60);
+        const diffDays = Math.floor(diffHours / 24);
+
+        if(diffMins < 1) return '방금 전';
+        if(diffMins < 60) return `${diffMins}분 전`;
+        if (diffHours < 24) return `${diffHours}시간 전`;
+        if (diffDays < 7) return `${diffDays}일 전`;
+
+        return notifDate.toLocaleDateString('ko-KR');
+    }
+
+    // ⭐⭐⭐ [후기 알림 동적 삽입] ⭐⭐⭐
+    async function prependReviewNotification(notifications) {
+        const currentUserId = localStorage.getItem('userId');
+        const accessToken = localStorage.getItem('accessToken');
+        if (!currentUserId || !accessToken) return notifications;
+
+        try {
+            const response = await fetch(`/api/reviews/pending-stadiums?userId=${currentUserId}`);
+            if(response.status === 401) return notifications;
+            if (!response.ok) throw new Error('후기 대상 조회 실패');
+
+            const pendingStadiumIds = await response.json();
+
+            if (pendingStadiumIds && pendingStadiumIds.length > 0) {
+                const count = pendingStadiumIds.length;
+                const targetStadiumId = pendingStadiumIds[0];
+
+                const fakeReviewNotification = {
+                    notificationId: 0,
+                    userId: Number(currentUserId),
+                    type: '후기',
+                    referenceId: targetStadiumId,
+                    content: `작성하지 않은 경기 후기가 ${count}건 있습니다.`,
+                    isRead: false,
+                    createdAt: new Date().toISOString()
+                };
+
+                const filtered = notifications.filter(notif => notif.type !== '후기');
+                filtered.unshift(fakeReviewNotification);
+                return filtered;
+            }
+        } catch (error) {
+            console.error("후기 대상 동적 삽입 중 오류:", error);
         }
 
+        return notifications;
+    }
+
+    async function loadNotifications(){
+        const accessToken = localStorage.getItem('accessToken');
         listContainer.innerHTML =
             '<div style="text-align: center; padding: 50px; color: #999;">알림을 불러오는 중...</div>';
 
@@ -53,20 +104,27 @@
                 },
                 credentials: 'include'
             });
+
+            if(response.status === 401) {
+                alert('세션이 만료되었습니다. 다시 로그인해주세요.');
+                localStorage.removeItem('accessToken');
+                window.location.href = '/login';
+                return;
+            }
             if(!response.ok) throw new Error('알림 목록 조회 실패');
 
-            const notifications = await response.json();
+            let notifications = await response.json();
+            notifications = await prependReviewNotification(notifications);
+
             listContainer.innerHTML = '';
 
             if(!notifications || notifications.length === 0){
                 listContainer.innerHTML =
                     '<p style="text-align: center; color: #999; padding: 50px;">새로운 알림이 없습니다.</p>';
 
-                // ✅ 알림 페이지에 들어왔다는 사실 자체로 "읽음" 처리
+                // ✅ 알림 페이지 진입 = 읽음 처리
                 localStorage.setItem('hasReadReviews', 'true');
                 localStorage.setItem('hasReadSchedules', 'true');
-
-                // 배지 갱신
                 if (window.updateGlobalBadge) window.updateGlobalBadge();
                 return;
             }
@@ -87,7 +145,7 @@
                         }
                     };
 
-                } else if (notif.type === '친구요청'){
+                } else if (notif.type === '친구신청' || notif.type === '친구요청'){
                     iconHtml = '<i class="fas fa-user-friends icon-friend"></i>';
                     actionHtml = `
                         <div class="notification-actions">
@@ -110,27 +168,36 @@
                     };
 
                 } else if (notif.type === '후기') {
-                    iconHtml = '<i class="fas fa-bell icon-review"></i>';
+                    iconHtml = '<i class="fas fa-star icon-review"></i>';
                     item.onclick = () => {
                         if (isClickable) {
                             markAsRead(notif.notificationId, notif.type);
-                            location.href = '/reviews/write';
+                            location.href = `/reviews/write?stadiumId=${notif.referenceId}`;
+                        }
+                    };
+
+                } else if (notif.type === '댓글' || notif.type === '대댓글') {
+                    iconHtml = '<i class="fas fa-comment-dots icon-comment"></i>';
+                    item.onclick = () => {
+                        if (isClickable) {
+                            markAsRead(notif.notificationId, notif.type);
+                            location.href = `/community/detail/${notif.referenceId}`;
                         }
                     };
 
                 } else {
                     iconHtml = '<i class="fas fa-bell"></i>';
                     item.onclick = () => {
-                        if (isClickable) {
-                            markAsRead(notif.notificationId, notif.type);
-                        }
+                        if (isClickable) markAsRead(notif.notificationId, notif.type);
                     };
                 }
 
                 item.className = `notification-item ${unreadClass} ${isClickable ? 'clickable' : ''}`;
                 item.dataset.notificationId = notif.notificationId;
 
-                const timeText = formatNotificationTime(notif.createdAt);
+                const timeText = notif.type === '후기'
+                    ? '지금 바로'
+                    : formatNotificationTime(notif.createdAt);
 
                 item.innerHTML = `
                     ${iconHtml}
@@ -144,10 +211,9 @@
                 listContainer.appendChild(item);
             });
 
-            // ✅ 목록이 떠 있는 순간 = 읽음 처리(배지 끄기 목적)
+            // ✅ 목록 뜨면 읽음 처리 + 배지 끄기
             localStorage.setItem('hasReadReviews', 'true');
             localStorage.setItem('hasReadSchedules', 'true');
-
             if (window.updateGlobalBadge) window.updateGlobalBadge();
 
         } catch (error) {
@@ -158,6 +224,12 @@
     }
 
     async function markAsRead(notificationId, type){
+        // 가짜 알림 ID(0) 처리
+        if (notificationId === 0) {
+            await loadNotifications();
+            return;
+        }
+
         const accessToken = localStorage.getItem('accessToken');
 
         try {
@@ -178,7 +250,7 @@
 
             await loadNotifications();
 
-            // 읽고 나면 배지도 다시 계산
+            // 읽음 처리 후 배지 상태 재갱신
             try {
                 if (typeof window.checkPendingReviews === 'function') {
                     await window.checkPendingReviews();
@@ -192,6 +264,7 @@
             } catch (e) {
                 console.error('배지 업데이트 중 오류:', e);
             }
+
         } catch (error) {
             console.error('알림 읽음 처리 오류 :', error);
         }
@@ -199,7 +272,6 @@
 
     async function handleFriendAction(friendId, action, event) {
         event.stopPropagation();
-
         const accessToken = localStorage.getItem('accessToken');
 
         try {
@@ -216,9 +288,7 @@
                 credentials: 'include'
             });
 
-            if (!response.ok) {
-                throw new Error('친구 요청 처리 실패');
-            }
+            if (!response.ok) throw new Error('친구 요청 처리 실패');
 
             alert(action === 'accept'
                 ? '✅ 친구 요청을 수락했습니다.'
@@ -226,7 +296,7 @@
 
             loadNotifications();
 
-            // 친구요청 처리 후에도 배지 갱신
+            // 처리 후 배지 갱신
             try {
                 if (typeof window.checkPendingReviews === 'function') {
                     await window.checkPendingReviews();
@@ -247,23 +317,6 @@
         }
     }
 
-    function formatNotificationTime(createdAt){
-        if (!createdAt) return '방금 전';
-        const notifDate = new Date(createdAt);
-        const now = new Date();
-        const diffMs = now - notifDate;
-        const diffMins = Math.floor(diffMs / 60000);
-        const diffHours = Math.floor(diffMins / 60);
-        const diffDays = Math.floor(diffHours / 24);
-
-        if(diffMins < 1) return '방금 전';
-        if(diffMins < 60) return `${diffMins}분 전`;
-        if (diffHours < 24) return `${diffHours}시간 전`;
-        if (diffDays < 7) return `${diffDays}일 전`;
-
-        return notifDate.toLocaleDateString('ko-KR');
-    }
-
     document.addEventListener('DOMContentLoaded', async () => {
         const accessToken = localStorage.getItem('accessToken');
         if(!accessToken) {
@@ -272,12 +325,7 @@
             return;
         }
 
-        // 헤더의 "사용자님" → 실제 닉네임으로 변경
-        const nickname = (localStorage.getItem('username') || '').trim();
-        const userSpan = document.getElementById('user-menu-username');
-        if (nickname && userSpan) userSpan.textContent = nickname;
-
-        // 헤더 전역 함수로 배지 상태 갱신
+        // ✅ 공통 헤더 배지 로직 갱신 호출
         try {
             if (typeof window.checkPendingReviews === 'function') {
                 await window.checkPendingReviews();
@@ -292,7 +340,6 @@
             console.error('배지 업데이트 중 오류:', e);
         }
 
-        // 알림 목록 로드
         loadNotifications();
     });
 </script>
