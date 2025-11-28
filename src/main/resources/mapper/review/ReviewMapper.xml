@@ -28,11 +28,12 @@
             r.user_id,
             r.rating,
             r.content,
-            u.nickname,  DATE_FORMAT(r.created_at, '%Y-%m-%d') AS created_at
+            u.nickname,
+            DATE_FORMAT(r.created_at, '%Y-%m-%d') AS created_at
         FROM
             Review r
-                JOIN
-            User u ON r.user_id = u.user_id WHERE
+                JOIN User u ON r.user_id = u.user_id
+        WHERE
             r.stadium_id = #{stadiumId}
         ORDER BY
             r.created_at DESC
@@ -44,6 +45,8 @@
             FROM Match_Room mr
             WHERE mr.stadium_id = #{stadiumId}
               AND mr.status = 'CLOSED'
+              AND mr.status NOT IN ('CANCELED')
+              AND STR_TO_DATE(CONCAT(mr.match_date, ' ', mr.end_time), '%Y-%m-%d %H:%i') &lt; NOW()
               AND (
                 mr.host_id = #{userId}
                     OR mr.room_id IN (
@@ -65,7 +68,11 @@
     <select id="findPendingReviewStadiumIds" resultType="long">
         SELECT DISTINCT mr.stadium_id
         FROM Match_Room mr
-        WHERE mr.status = 'CLOSED'
+        WHERE
+            mr.status = 'CLOSED'
+          AND mr.status NOT IN ('CANCELED')
+          AND
+            STR_TO_DATE(CONCAT(mr.match_date, ' ', mr.end_time), '%Y-%m-%d %H:%i') &lt; NOW()
           AND (
             mr.host_id = #{userId}
                 OR mr.room_id IN (
@@ -73,7 +80,6 @@
                 WHERE mp.user_id = #{userId} AND mp.status = '확정'
             )
             )
-          -- 아직 후기를 작성하지 않은 구장만 포함
           AND mr.stadium_id NOT IN (
             SELECT r.stadium_id FROM Review r WHERE r.user_id = #{userId}
         )
@@ -84,7 +90,8 @@
         SET
             rating = #{rating},
             content = #{content},
-            updated_at = CURRENT_TIMESTAMP  WHERE
+            updated_at = CURRENT_TIMESTAMP
+        WHERE
             review_id = #{reviewId} AND user_id = #{userId}
     </update>
 

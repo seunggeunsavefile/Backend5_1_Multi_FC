@@ -37,4 +37,9 @@ public interface NotificationDao {
     //미읽음 댓글 알림 찾기
     NotificationDto findUnreadCommentNotification(@Param("userId") Long userId,
                                                   @Param("postId") Long postId);
+
+    // ⭐⭐ [추가] 타입과 참조 ID를 기반으로 읽지 않은 알림 조회 (후기 중복 방지용) ⭐⭐
+    NotificationDto findUnreadNotificationByTypeAndReference(@Param("userId") Long userId,
+                                                             @Param("type") String type,
+                                                             @Param("referenceId") Long referenceId);
 }

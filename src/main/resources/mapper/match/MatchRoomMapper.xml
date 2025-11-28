@@ -10,7 +10,7 @@
         <result property="hostId" column="host_id"/>
         <result property="matchDate" column="match_date"/>
         <result property="matchTime" column="match_time"/>
-        <result property="maxPlayers" column="max_players"/>
+        <result property="endTime" column="end_time"/>        <result property="maxPlayers" column="max_players"/>
         <result property="level" column="level"/>
         <result property="status" column="status"/>
         <result property="stadiumName" column="stadium_name"/>
@@ -24,38 +24,38 @@
             keyProperty="roomId">
 
         INSERT INTO Match_Room
-        (stadium_id, host_id, match_date, match_time, max_players, level, status)
-        VALUES
-            (#{stadiumId}, #{hostId}, #{matchDate}, #{matchTime}, #{maxPlayers}, #{level}, '모집중')
+        (stadium_id, host_id, match_date, match_time, end_time, max_players, level, status) VALUES
+            (#{stadiumId}, #{hostId}, #{matchDate}, #{matchTime}, #{endTime}, #{maxPlayers}, #{level}, '모집중')
     </insert>
+
+    <sql id="Base_Column_List">
+        mr.room_id, mr.stadium_id, mr.host_id, mr.match_date, mr.match_time, mr.end_time, mr.max_players, mr.level, mr.status,
+        s.name AS stadium_name,
+        u.nickname AS host_nickname,
+        (SELECT COUNT(*) FROM Match_Participant mp WHERE mp.room_id = mr.room_id) AS current_players
+    </sql>
 
     <select id="findById" resultMap="roomMap">
         SELECT
-            mr.*,
-            s.name AS stadium_name,
-            u.nickname AS host_nickname,
-            (SELECT COUNT(*) FROM Match_Participant mp WHERE mp.room_id = mr.room_id) AS current_players
+        <include refid="Base_Column_List" />
         FROM Match_Room mr
-                 JOIN Stadium s ON mr.stadium_id = s.stadium_id
-                 JOIN User u ON mr.host_id = u.user_id
+        JOIN Stadium s ON mr.stadium_id = s.stadium_id
+        JOIN User u ON mr.host_id = u.user_id
         WHERE mr.room_id = #{roomId}
     </select>
 
     <select id="findByStadium" resultMap="roomMap">
         SELECT
-            mr.*,
-            s.name AS stadium_name,
-            u.nickname AS host_nickname,
-            (SELECT COUNT(*) FROM Match_Participant mp WHERE mp.room_id = mr.room_id) AS current_players
+        <include refid="Base_Column_List" />
         FROM Match_Room mr
-                 JOIN Stadium s ON mr.stadium_id = s.stadium_id
-                 JOIN User u ON mr.host_id = u.user_id
+        JOIN Stadium s ON mr.stadium_id = s.stadium_id
+        JOIN User u ON mr.host_id = u.user_id
         WHERE mr.stadium_id = #{stadiumId}
     </select>
 
     <select id="findByUserId" resultMap="roomMap">
         SELECT DISTINCT
-            mr.room_id, mr.stadium_id, mr.host_id, mr.match_date, mr.match_time,
+            mr.room_id, mr.stadium_id, mr.host_id, mr.match_date, mr.match_time, mr.end_time,
             mr.max_players, mr.level, mr.status,
             s.name AS stadium_name,
             u.nickname AS host_nickname,
@@ -73,5 +73,26 @@
         SET status = #{status}
         WHERE room_id = #{roomId}
     </update>
+
+    <update id="updateStatusToClosedIfExpired">
+        UPDATE Match_Room
+        SET
+            status = 'CLOSED',
+            updated_at = CURRENT_TIMESTAMP
+        WHERE
+            (status = 'RECRUITING' OR status = 'READY')
+          -- match_date와 end_time을 합쳐서 현재 시간과 비교합니다.
+          AND STR_TO_DATE(CONCAT(match_date, ' ', end_time), '%Y-%m-%d %H:%i') &lt; #{currentTime}
+    </update>
+
+    <select id="findExpiredRoomsForReviewNotification" resultType="long">
+        SELECT room_id
+        FROM Match_Room
+        WHERE
+            -- 상태가 'CLOSED'가 아니면서 (아직 알림 전송/마감 처리가 되지 않은)
+            status != 'CLOSED' AND status != 'CANCELED'
+            -- 매치 종료 시간 (match_date + end_time)이 현재 시간보다 이전인 경우
+            AND STR_TO_DATE(CONCAT(match_date, ' ', end_time), '%Y-%m-%d %H:%i') &lt; #{currentTime}
+    </select>
 
 </mapper>

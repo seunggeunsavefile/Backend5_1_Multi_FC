@@ -63,4 +63,14 @@
         SET status = #{status}
         WHERE room_id = #{roomId} AND user_id = #{userId}
     </update>
+
+    <select id="findConfirmedParticipantUserIds" resultType="long">
+        SELECT host_id
+        FROM Match_Room
+        WHERE room_id = #{roomId}
+        UNION
+        SELECT user_id
+        FROM Match_Participant
+        WHERE room_id = #{roomId} AND status = '확정'
+    </select>
 </mapper>

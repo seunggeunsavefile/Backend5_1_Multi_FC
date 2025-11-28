@@ -83,4 +83,9 @@
         WHERE user_id = #{userId}
     </update>
 
+    <!-- 6) 회원 탈퇴 -->
+    <delete id="deleteUserById" parameterType="long">
+        DELETE FROM User
+        WHERE user_id = #{userId}
+    </delete>
 </mapper>

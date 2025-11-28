@@ -182,22 +182,44 @@
             // WebSocket (실시간 목록 갱신)
             const socket = new SockJS('/ws');
             const stompClient = Stomp.over(socket);
-            stompClient.connect({}, () => {
-                stompClient.subscribe(`/topic/matches/${stadiumId}`, (msg) => {
-                    const newMatch = JSON.parse(msg.body);
-                    if (!allMatches.some(m => m.roomId === newMatch.roomId)) {
-                        allMatches.push(newMatch);
-                    } else {
-                        allMatches = allMatches.map(m =>
-                            m.roomId === newMatch.roomId ? newMatch : m
+
+// localStorage에서 토큰 읽기
+            const wsToken = localStorage.getItem('accessToken');
+
+// STOMP CONNECT 헤더 구성
+            const connectHeaders = {};
+            if (wsToken) {
+                // 백엔드 JwtChannelInterceptor 에서 "Authorization"으로 읽는 경우
+                connectHeaders['Authorization'] = 'Bearer ' + wsToken;
+                // 만약 인터셉터에서 "authorization" 소문자로 읽으면 위 줄 대신 ↓ 사용
+                // connectHeaders['authorization'] = 'Bearer ' + wsToken;
+            }
+
+            stompClient.connect(
+                connectHeaders,
+                function onConnect() {
+                    stompClient.subscribe(`/topic/matches/${stadiumId}`, function (msg) {
+                        const newMatch = JSON.parse(msg.body);
+
+                        // 기존 allMatches 업데이트 로직 그대로 유지
+                        if (!allMatches.some(function (m) { return m.roomId === newMatch.roomId; })) {
+                            allMatches.push(newMatch);
+                        } else {
+                            allMatches = allMatches.map(function (m) {
+                                return m.roomId === newMatch.roomId ? newMatch : m;
+                            });
+                        }
+
+                        renderMatches(
+                            allMatches,
+                            document.getElementById('match-date-filter').value
                         );
-                    }
-                    renderMatches(
-                        allMatches,
-                        document.getElementById('match-date-filter').value
-                    );
-                });
-            });
+                    });
+                },
+                function onError(error) {
+                    console.error('STOMP 연결 실패:', error);
+                }
+            );
         }
 
         // ===========================

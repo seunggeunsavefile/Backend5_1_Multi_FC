@@ -135,5 +135,108 @@
         WHERE username = #{username}
     </select>
 
+    <!--게시글 작성자 찾기-->
+    <select id="findWriterIdByPostId" resultType="long">
+        SELECT user_id
+        FROM Post
+        WHERE post_id = #{postId}
+    </select>
+
+    <!--current_comment_id 업데이트-->
+    <update id="updatePostCurrentCommentId">
+        UPDATE Post
+        SET current_comment_id = #{commentId}
+        WHERE post_id = #{postId}
+    </update>
+
+    <!--last_checked_comment_id 조회-->
+    <select id="findLastCheckedCommentId" resultType="long">
+        SELECT last_checked_comment_id
+        FROM Post
+        WHERE post_id = #{postId}
+    </select>
+
+    <!--current_comment_id 조회-->
+    <select id="findCurrentCommentId" resultType="long">
+        SELECT current_comment_id
+        FROM Post
+        WHERE post_id = #{postId}
+    </select>
+
+    <!--last_checked_comment_id 갱신-->
+    <update id="updateLastCheckedCommentId">
+        UPDATE Post
+        SET last_checked_comment_id = #{commentId}
+        WHERE post_id = #{postId}
+    </update>
+
+    <!--검색+페이징-->
+
+    <select id="findPostPageByCategory"
+            resultMap="PostListMap">
+        SELECT
+        p.post_id,
+        p.category,
+        p.title,
+        u.nickname           AS writer_nickname,
+        p.created_at,
+        p.view_count         AS view_count,
+        IFNULL(c.cnt, 0)     AS comment_count
+        FROM Post p
+        JOIN User u ON p.user_id = u.user_id
+        LEFT JOIN (
+        SELECT post_id, COUNT(*) AS cnt
+        FROM Comment
+        GROUP BY post_id
+        ) c ON p.post_id = c.post_id
+        <where>
+            <if test="category != null and category != '' and category != '전체'">
+                AND p.category = #{category}
+            </if>
+
+            <if test="keyword != null and keyword != ''">
+                <choose>
+                    <when test="searchType == 'title'">
+                        AND p.title LIKE CONCAT('%', #{keyword}, '%')
+                    </when>
+                    <when test="searchType == 'writer'">
+                        AND u.nickname LIKE CONCAT('%', #{keyword}, '%')
+                    </when>
+                    <otherwise>
+                        AND (p.title LIKE CONCAT('%', #{keyword}, '%')
+                        OR p.content LIKE CONCAT('%', #{keyword}, '%'))
+                    </otherwise>
+                </choose>
+            </if>
+        </where>
+        ORDER BY p.post_id DESC
+        LIMIT #{limit} OFFSET #{offset}
+    </select>
+
+    <select id="countPostByCategory" resultType="long">
+        SELECT COUNT(*)
+        FROM Post p
+        JOIN User u ON p.user_id = u.user_id
+        <where>
+            <if test="category != null and category != '' and category != '전체'">
+                AND p.category = #{category}
+            </if>
+
+            <if test="keyword != null and keyword != ''">
+                <choose>
+                    <when test="searchType == 'title'">
+                        AND p.title LIKE CONCAT('%', #{keyword}, '%')
+                    </when>
+                    <when test="searchType == 'writer'">
+                        AND u.nickname LIKE CONCAT('%', #{keyword}, '%')
+                    </when>
+                    <otherwise>
+                        AND (p.title LIKE CONCAT('%', #{keyword}, '%')
+                        OR p.content LIKE CONCAT('%', #{keyword}, '%'))
+                    </otherwise>
+                </choose>
+            </if>
+        </where>
+    </select>
 </mapper>
 

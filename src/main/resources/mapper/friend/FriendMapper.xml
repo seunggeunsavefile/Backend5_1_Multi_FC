@@ -110,17 +110,21 @@
 
     <!-- 친구요청 전송 (중복/자가 요청 방지) -->
     <insert id="insertFriendRequest">
-        <![CDATA[
+    <![CDATA[
         INSERT INTO `Friend` (user_id, friend_user_id, status)
         SELECT #{requesterId}, #{targetId}, '대기'
             WHERE #{requesterId} <> #{targetId}
             AND NOT EXISTS (
-            SELECT 1 FROM `Friend` f
-            WHERE (f.user_id = #{requesterId} AND f.friend_user_id = #{targetId})
+            SELECT 1
+            FROM `Friend` f
+            WHERE (
+             (f.user_id = #{requesterId} AND f.friend_user_id = #{targetId})
             OR (f.user_id = #{targetId} AND f.friend_user_id = #{requesterId})
             )
+            AND f.status IN ('대기','승인')
+            )
         ]]>
-    </insert>
+</insert>
 
     <!-- 요청 수락 -->
     <update id="approveFriend">
@@ -144,13 +148,16 @@
         ]]>
     </update>
 
-    <!-- 두 사용자 간 관계 존재 여부 -->
+    <!-- 두 사용자 간 관계 존재 여부 (대기/승인만) -->
     <select id="existsRelationAny" resultType="int">
-        <![CDATA[
+    <![CDATA[
         SELECT COUNT(1)
         FROM `Friend`
-        WHERE (user_id = #{a} AND friend_user_id = #{b})
-           OR (user_id = #{b} AND friend_user_id = #{a})
+        WHERE (
+            (user_id = #{a} AND friend_user_id = #{b})
+                OR (user_id = #{b} AND friend_user_id = #{a})
+            )
+          AND status IN ('대기','승인')
             LIMIT 1
         ]]>
     </select>

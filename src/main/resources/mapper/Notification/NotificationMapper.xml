@@ -57,4 +57,46 @@
         delete from Notification
         where notification_id = #{notificationId}
     </delete>
+
+    <select id="findUnreadChatNotification" resultType="NotificationDto">
+        select  *
+        from Notification
+        where user_id = #{userId} and reference_id = #{referenceId} and type = '채팅' and is_read = false
+        order by created_at desc
+            limit 1
+    </select>
+
+    <!--미읽음 댓글 알림 찾기-->
+    <select id="findUnreadCommentNotification"
+            parameterType="map"
+            resultType="com.multi.backend5_1_multi_fc.notification.dto.NotificationDto">
+        SELECT *
+        FROM Notification
+        WHERE user_id = #{userId}
+          AND type = '댓글'
+          AND reference_id = #{postId}
+          AND is_read = false
+            LIMIT 1
+    </select>
+
+    <!-- 알림 내용 수정 -->
+    <update id="updateContent" parameterType="map">
+        UPDATE Notification
+        SET content = #{content}
+        WHERE notification_id = #{notificationId}
+    </update>
+
+    <!-- 타입 + reference_id 기준으로 미읽음 알림 1건 찾기 -->
+    <select id="findUnreadNotificationByTypeAndReference"
+            parameterType="map"
+            resultType="com.multi.backend5_1_multi_fc.notification.dto.NotificationDto">
+        SELECT *
+        FROM Notification
+        WHERE user_id = #{userId}
+          AND type = #{type}
+          AND reference_id = #{referenceId}
+          AND is_read = false
+        ORDER BY created_at DESC
+            LIMIT 1
+    </select>
 </mapper>

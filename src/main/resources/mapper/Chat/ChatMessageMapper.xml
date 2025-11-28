@@ -30,7 +30,7 @@
             select coalesce(last_read_message_id, 0)
             from Chat_Participant
             where chat_room_id = #{roomId} and user_id = #{userId}
-        )
+        ) and sender_id != #{userId}
     </select>
 
     <select id="getLatestMessageId" resultType="long">

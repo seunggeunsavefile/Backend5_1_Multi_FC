@@ -68,4 +68,16 @@
         WHERE comment_id = #{commentId} AND user_id = #{userId}
     </delete>
 
+    <!--댓글 작성자 찾기 -->
+    <select id="findWriterIdByCommentId" parameterType="long" resultType="long">
+        SELECT user_id
+        FROM Comment
+        WHERE comment_id = #{commentId}
+    </select>
+
+    <!--마지막 생성된 comment_id 가져오기-->
+    <select id="findLastInsertedCommentId" resultType="long">
+        SELECT LAST_INSERT_ID()
+    </select>
+
 </mapper>

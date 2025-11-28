@@ -116,8 +116,7 @@
             FROM Schedule s
             WHERE s.user_id       = mp.user_id
               AND s.schedule_type = '경기'
-              AND s.schedule_date = mr.match_date
-              AND s.schedule_time = mr.match_time
+              AND s.match_room_id = mr.room_id
         )
 
         UNION
@@ -135,8 +134,7 @@
             FROM Schedule s
             WHERE s.user_id       = mr.host_id
               AND s.schedule_type = '경기'
-              AND s.schedule_date = mr.match_date
-              AND s.schedule_time = mr.match_time
+              AND s.match_room_id = mr.room_id
         );
     </insert>
 
